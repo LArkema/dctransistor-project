@@ -1,0 +1,3 @@
+# Ignore all files containing secrets
+.env
+arduino_secrets.h
