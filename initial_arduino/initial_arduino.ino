@@ -1,42 +1,74 @@
 /*
-  ESP8266 Blink by Simon Peter
-  Blink the blue LED on the ESP-01 module
-  This example code is in the public domain
-
-  The blue LED on the ESP-01 module is connected to GPIO1
-  (which is also the TXD pin; so we cannot use Serial.print() at the same time)
-
-  Note that this sketch uses LED_BUILTIN to find the pin with the internal LED
+ * Initial Arduino for WMATA_PCB project
+ * Based on BasicHTTPSClient.ino in ESP8266 example sketches
+ * Main difference is connection to api.wmata.com with api_key header
+ * Logan Arkema, 10/22/2021
 */
 
+
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include "arduino_secrets.h"
 
 char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
+const char* station_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE";
+String wmata_host = "https://api.wmata.com";
+
+ESP8266WiFiMulti WiFiMulti;
 
 void setup() {
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 
-
-  WiFi.begin(ssid, password);
   
-  while (WiFi.status() != WL_CONNECTED){
+  WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP(ssid, password);
+  
+  while (WiFiMulti.run() != WL_CONNECTED){
     delay(1000);
     Serial.println("Connecting to WiFi...");
   }
+
+  Serial.println("Wifi Connected");
   
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  Serial.println("Serial test.");
-  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-  // but actually the LED is on; this is because
-  // it is active low on the ESP-01)
-  delay(1000);                      // Wait for a second
-  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-  delay(2000);                      // Wait for two seconds (to demonstrate the active low LED)
+
+  WiFiClientSecure client;
+
+  client.setFingerprint(station_fingerprint);
+  client.setTimeout(15000);
+
+  HTTPClient https;
+
+  String station_code = "A01";
+  String endpoint = wmata_host + "/StationPrediction.svc/json/GetPrediction/" + station_code;
+
+  Serial.println(endpoint);
+
+  if (https.begin(client, endpoint)) {
+    https.addHeader("api_key", SECRET_WMATA_API_KEY);
+
+    int httpCode = https.GET();
+
+    if (httpCode > 0) {
+      String payload = https.getString();
+      Serial.println(httpCode);
+      Serial.println(payload);
+    }
+    else {
+      Serial.println("GET Request failed");
+      Serial.println(httpCode);
+    }
+  }
+
+  else {
+    Serial.println("HTTPS connection failed");
+  }
+
+  delay(3000);
 }
