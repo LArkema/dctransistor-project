@@ -12,7 +12,7 @@
 #include "arduino_secrets.h"
 
 char* ssid = SECRET_SSID;
-const char* password = SECRET_PASS;
+const char* password = SECRET_PASS; 
 const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE"; //Expires 10/22/2022 
 String wmata_host = "https://api.wmata.com";
 
