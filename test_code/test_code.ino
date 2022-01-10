@@ -1,197 +1,77 @@
-
-#include <Arduino.h>
-
 /*
-Program to "emulate" train status on 10 leds using ESP8266 pinouts
-Maintains a list of stations waiting for a "train" (random value).
-When a "train" arrives, led for station is turned on, and list value is updated
-to next station. 
-
-First station is always waiting for a train. Upon arrival, station 2 is added to 2nd position in waiting list.
+ * Initial Arduino for WMATA_PCB project
+ * Based on BasicHTTPSClient.ino in ESP8266 example sketches
+ * Main difference is connection to api.wmata.com with api_key header
+ * Logan Arkema, 10/22/2021
 */
 
-const uint8_t MAX_NUM_STATIONS = 10; //Max number of stations per line
-const uint8_t STATION_STR_LNGTH = 4; //Number of chars per station identifier string (3+NULL).
 
-class SimpleList {
-  public:
-    uint8_t len;
-    char stations[MAX_NUM_STATIONS][STATION_STR_LNGTH];
-    
-    SimpleList(){
-      len = 0;
-      memset(stations, NULL, (MAX_NUM_STATIONS*STATION_STR_LNGTH));
-    }
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include <ESP8266HTTPClient.h>
+#include <
+#include "arduino_secrets.h"
 
-    int add(char* station){
-      if( strlen(station) < STATION_STR_LNGTH ){
-        if(len == 0 || len == 1){
-          memcpy(stations+len, station, STATION_STR_LNGTH);
-        }
-        else{
-          char buf[STATION_STR_LNGTH*(len-1)] = {NULL};
-          memcpy(buf, stations+1, (STATION_STR_LNGTH*(len-1)));
-          memcpy(stations+1, station, STATION_STR_LNGTH);
-          memcpy(stations+2, buf, (STATION_STR_LNGTH*(len-1)));
-         //memcpy(stations+2, stations+1, (STATION_STR_LNGTH*(len-1))); //right-shift awaiting stations
-         //memcpy(stations+1, station, STATION_STR_LNGTH);
-        }
-        len++;
-        return 0;
-      }
-      else{
-        return - 1; 
-      } 
-    }//end add
+char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS; 
+const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE"; //Expires 10/22/2022 
+String wmata_host = "https://api.wmata.com";
 
-    int remove(char* station){
-      if( strlen(station) < STATION_STR_LNGTH){
-        for(uint8_t i=0; i<len; i++){
-          //Once station in list is found, overwrite it with all seceeding stations, set previous last element to NULL, and decrement length.
-          if(strcmp(station,stations[i]) == 0){
-            memcpy(stations+i, stations+i+1, (STATION_STR_LNGTH*(len-i-1)));
-            memset(stations+len, NULL, STATION_STR_LNGTH);
-            len--;
-            return 0;
-          }
-        }//endfor
-        return -1;
-      }//endif
-      return -1;
-    }//end remove
-
-    void prnt(HardwareSerial* serial){
-      if(len == 0){
-        Serial.println("Empty");
-        return;
-      }
-      for(uint8_t i=0; i<len; i++){
-        Serial.println(stations[i]);
-      }
-    }
-  
-};//END SimpleList
-
-
- int LED_LENGTH = 10;
- int leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10}; //GPIO9 messes up all other pins if used. 1 and 2 used for serial. 
- uint16_t led_state = 0;
- //uint8_t offset = 16 - LED_LENGTH;
-
-//Set LED's output to whatever it's state is in led_state bit array.
-void setLED(int led){
-  uint16_t mask = 1;
-  digitalWrite(leds[led], ((led_state & (mask << led))>0)); //Move mask to led's position in array. bit-AND w/ mask returns 0 if state for led is 0 and > 0 otherwise. Need '>' b/c results > 2^7 overflow
-}
+ESP8266WiFiMulti WiFiMulti;
 
 void setup() {
-  // put your setup code here, to run once:
-  //pinMode(2, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("Serial test");
-  randomSeed(0);
-  for(int i=0; i<LED_LENGTH; i++){
-    pinMode(leds[i], OUTPUT);
+  Serial.begin(9600); //NodeMCU ESP8266 runs on 9600 baud rate
+
+  //Limit WiFi to station mode and connect to network defined in arduino_secrets.h
+  WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP(ssid, password);
+
+  //Connect to WiFi
+  while (WiFiMulti.run() != WL_CONNECTED){
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
   }
-}//END SETUP
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  char stations[10][4] = {"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10"};
-
-  SimpleList awaiting = SimpleList();
-  awaiting.add(stations[0]);
-
-  // /*
-  uint16_t init_mask = 15; // 0b00001111 (first four leds)
-  while (true){
-    //Serial.println("Hello");
-
-    //Serial.println(awaiting.len);
+  Serial.println("Wifi Connected");
   
-    if (awaiting.len == 0){
-      Serial.println("Empty");
-    }
-    else{
-      Serial.println("Waiting Station List:");
-      //Serial.println(awaiting.stations[0]);
-      for(int i=0; i<awaiting.len; i++){
-        //Serial.println("Station: ");
-        Serial.println(awaiting.stations[i]); 
-      }
-    }
+}
 
-    /*
-    awaiting.remove(stations[0]);
+// the loop function runs over and over again forever
+void loop() {
 
-    Serial.println("Station List: ");
-    for (int i=0; i<awaiting.len; i++){
-      Serial.println(awaiting.stations[i]);
+  //Define client responsible for managing secure connection api.wmata.com
+  WiFiClientSecure client;
+  client.setFingerprint(wmata_fingerprint);
+  client.setTimeout(15000);
+
+  HTTPClient https;
+
+  //Define URL for GET request and confirm correctness
+  String station_code = "A01";
+  String endpoint = wmata_host + "/StationPrediction.svc/json/GetPrediction/" + station_code;
+
+  //Connect and confirm HTTPS connection to api.wmata.com
+  if (https.begin(client, endpoint)) {
+    
+    //If successful, add API key and request station data
+    https.addHeader("api_key", SECRET_WMATA_API_KEY);
+    int httpCode = https.GET();
+
+    //Print out HTTP code and, if successful, JSON station data
+    if (httpCode > 0) {
+      String payload = https.getString();
+      Serial.println(httpCode);
+      Serial.println(payload);
     }
-    */
+    else {
+      Serial.println("GET Request failed");
+      Serial.println(httpCode);
+    }//end httpCode
+    
+  }//END https.begin
 
-    uint8_t tmp_len = awaiting.len;
-    for(int i=awaiting.len-1; i>=0; i--){
-      uint8_t r = 3;
-      if(i == awaiting.len-1) { r =2; }
-      if(random(r) == 0){
-        Serial.println("IN RANDOM");
-        char substr[3];
-        strncpy(substr, &awaiting.stations[i][1], 3); //just get digits
-        Serial.println(substr);
-        uint8_t statn_idx = atoi(substr)-1;
+  else {
+    Serial.println("HTTPS connection failed");
+  }
 
-
-        uint8_t nxt_idx = 11;
-        if(i != awaiting.len-1){
-          strncpy(substr, &awaiting.stations[i+1][1], 3);
-          nxt_idx = atoi(substr)-1;
-        }
-        if( nxt_idx != (statn_idx + 1)){
-          Serial.println("Station index: " + String(statn_idx));
-          if(statn_idx == 0){
-            awaiting.add(stations[statn_idx+1]);
-            tmp_len++;
-            digitalWrite(leds[statn_idx], 1);
-          }
-          else if(statn_idx == MAX_NUM_STATIONS-1){
-            awaiting.remove(stations[MAX_NUM_STATIONS-1]);
-            tmp_len--;
-            digitalWrite(leds[statn_idx-1],0);
-            
-          }
-          else{
-            strncpy(awaiting.stations[i], stations[statn_idx+1], STATION_STR_LNGTH);
-            digitalWrite(leds[statn_idx], 1);
-            digitalWrite(leds[statn_idx-1], 0);
-          }//end if block
-        }//end check for current train
-        //break;
-        delay(1000);  
-      }//end random
-    }//end for
-    awaiting.len=tmp_len;
-
-    delay(5000);
-    /*
-    //If the first three LEDs are off, turn the first one on.
-    if (!(init_mask & led_state)){
-      led_state = led_state | 1;
-      setLED(0);
-    }
-    //Serial.println(led_state);
-    led_state <<=1; //Shift state
-    //Serial.println(led_state);
-    delay(2000);
-    uint16_t tmp = led_state;
-    for (short i=0; i<LED_LENGTH; i++){
-      digitalWrite(leds[i], tmp & 1);
-      tmp >>=1;
-    }
-    /*
-    for (short i=0; i<LED_LENGTH; i++){
-      setLED(i);
-    }
-    */
-  } //END while
+  delay(3000);
 }//END LOOP

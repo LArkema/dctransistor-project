@@ -47,7 +47,6 @@ void loop() {
   //Define URL for GET request and confirm correctness
   String station_code = "A01";
   String endpoint = wmata_host + "/StationPrediction.svc/json/GetPrediction/" + station_code;
-  Serial.println(endpoint);
 
   //Connect and confirm HTTPS connection to api.wmata.com
   if (https.begin(client, endpoint)) {
@@ -56,7 +55,7 @@ void loop() {
     https.addHeader("api_key", SECRET_WMATA_API_KEY);
     int httpCode = https.GET();
 
-    //Print out HTTP code and, if succesful, JSON station data
+    //Print out HTTP code and, if successful, JSON station data
     if (httpCode > 0) {
       String payload = https.getString();
       Serial.println(httpCode);
