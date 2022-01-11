@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Change cwd
-        run: sed "s/arduino_secrets/example_arduino_secrets/" /home/runner/work/WMATA_PCB/WMATA_PCB/test_code/test_code.ino
+        run: sed -i "s/arduino_secrets/example_arduino_secrets/" /home/runner/work/WMATA_PCB/WMATA_PCB/test_code/test_code.ino
       # See: https://github.com/arduino/compile-sketches#readme
       - name: Compile sketches
         uses: arduino/compile-sketches@v1
