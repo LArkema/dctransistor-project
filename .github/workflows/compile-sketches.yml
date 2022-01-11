@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Change cwd
-        run: cd /home/runner/work/WMATA_PCB/WMATA_PCB/
+        run: cp /home/runner/work/WMATA_PCB/WMATA_PCB/arduino_secrets.h ./
       # See: https://github.com/arduino/compile-sketches#readme
       - name: Compile sketches
         uses: arduino/compile-sketches@v1
