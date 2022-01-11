@@ -11,8 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      #- name: Change cwd
-      #  run: cp /home/runner/work/WMATA_PCB/WMATA_PCB/arduino_secrets.h ./
+      - name: Change cwd
+        run: sed "s/arduino_secrets/example_arduino_secrets/" /home/runner/work/WMATA_PCB/WMATA_PCB/test_code/test_code.ino
       # See: https://github.com/arduino/compile-sketches#readme
       - name: Compile sketches
         uses: arduino/compile-sketches@v1
