@@ -1,0 +1,22 @@
+name: Compile Sketches
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  compile-sketches:
+    runs-on: ubuntu-latest
+
+    steps:
+      # See: https://github.com/arduino/compile-sketches#readme
+      - name: Compile sketches
+        uses: arduino/compile-sketches@v1
+        with:
+          platforms: |
+            - source-url: https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json,http://arduino.esp8266.com/stable/package_esp8266com_index.json
+              name: esp8266:esp8266:nodemcuv2
+          sketch-paths: |
+            - test_code
+          libraries: |
+            - name: ArduinoJson
