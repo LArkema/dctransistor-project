@@ -24,3 +24,4 @@ jobs:
           libraries: |
             - name: ArduinoJson
             - source-path: test_code
+            - source-path: ./
