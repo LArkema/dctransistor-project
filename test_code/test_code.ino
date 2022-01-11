@@ -10,7 +10,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
-#include "arduino_secrets.h"
+#include "example_arduino_secrets.h"
 
 char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS; 
