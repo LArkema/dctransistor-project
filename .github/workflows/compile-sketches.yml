@@ -23,5 +23,4 @@ jobs:
             - test_code
           libraries: |
             - name: ArduinoJson
-            - source-path: test_code/arduino_secrets
             - source-path: test_code
