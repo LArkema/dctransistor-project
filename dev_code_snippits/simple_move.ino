@@ -20,23 +20,22 @@ class SimpleList {
     
     SimpleList(){
       len = 0;
-      memset(stations, NULL, (MAX_NUM_STATIONS*STATION_STR_LNGTH));
+      memset(stations, 0, (MAX_NUM_STATIONS*STATION_STR_LNGTH));
     }
 
     int add(char* station){
-      char* buf = NULL;
       if( strlen(station) < STATION_STR_LNGTH ){
         if(len == 0 || len == 1){
           memcpy(stations+len, station, STATION_STR_LNGTH);
         }
         else{
-          buf = new char[MAX_NUM_STATIONS*(len-1)];
+          char* buf = new char[MAX_NUM_STATIONS*(len-1)];
           memcpy(buf, stations+1, (STATION_STR_LNGTH*(len-1)));
           memcpy(stations+1, station, STATION_STR_LNGTH);
           memcpy(stations+2, buf, (STATION_STR_LNGTH*(len-1)));
          //memcpy(stations+2, stations+1, (STATION_STR_LNGTH*(len-1))); //right-shift awaiting stations
          //memcpy(stations+1, station, STATION_STR_LNGTH);
-         delete buf;
+         delete[] buf;
         }
         len++;
         return 0;
