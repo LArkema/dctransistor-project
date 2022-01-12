@@ -1,9 +1,10 @@
 name: Compile Sketches
 
+# Run compile at 10:26 every night.
 on:
-  - push
-  - pull_request
-
+  schedule:
+    - cron: '26 22 * * *'
+  
 jobs:
   compile-sketches:
     runs-on: ubuntu-latest
