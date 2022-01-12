@@ -1,0 +1,132 @@
+{
+  "configuration": {
+    "paths": [
+      "test_code"
+    ],
+    "projectType": "sketch",
+    "recursive": false
+  },
+  "projects": [
+    {
+      "path": "test_code",
+      "projectType": "sketch",
+      "configuration": {
+        "compliance": "specification",
+        "libraryManager": "false",
+        "official": false
+      },
+      "rules": [
+        {
+          "category": "structure",
+          "subcategory": "root folder",
+          "ID": "SS001",
+          "brief": "name mismatch",
+          "description": "",
+          "result": "pass",
+          "level": "NOTICE",
+          "message": ""
+        },
+        {
+          "category": "structure",
+          "subcategory": "file name",
+          "ID": "SS002",
+          "brief": "prohibited character in filename",
+          "description": "",
+          "result": "pass",
+          "level": "NOTICE",
+          "message": ""
+        },
+        {
+          "category": "structure",
+          "subcategory": "file name",
+          "ID": "SS003",
+          "brief": "file name too long",
+          "description": "",
+          "result": "pass",
+          "level": "NOTICE",
+          "message": ""
+        },
+        {
+          "category": "structure",
+          "subcategory": "file name",
+          "ID": "SS004",
+          "brief": ".pde extension",
+          "description": "The .pde extension is used by both Processing sketches and Arduino sketches. Processing sketches should either be in the \"data\" subfolder of the sketch or in the \"extras\" folder of the library. Arduino sketches should use the modern .ino extension.",
+          "result": "pass",
+          "level": "NOTICE",
+          "message": ""
+        },
+        {
+          "category": "structure",
+          "subcategory": "miscellaneous",
+          "ID": "SS005",
+          "brief": "src folder case",
+          "description": "",
+          "result": "pass",
+          "level": "NOTICE",
+          "message": ""
+        },
+        {
+          "category": "code",
+          "subcategory": "miscellaneous",
+          "ID": "SC001",
+          "brief": "Arduino.h case",
+          "description": "This causes compilation failure on filename case-sensitive file systems.",
+          "result": "pass",
+          "level": "NOTICE",
+          "message": ""
+        },
+        {
+          "category": "documentation",
+          "subcategory": "miscellaneous",
+          "ID": "SD001",
+          "brief": "no readme",
+          "description": "",
+          "result": "fail",
+          "level": "WARNING",
+          "message": "No readme found. Please document your sketch. See: https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/about-readmes"
+        },
+        {
+          "category": "documentation",
+          "subcategory": "miscellaneous",
+          "ID": "SD002",
+          "brief": "no license file",
+          "description": "",
+          "result": "fail",
+          "level": "WARNING",
+          "message": "No license file found. See: https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/licensing-a-repository#detecting-a-license"
+        },
+        {
+          "category": "sketch.json",
+          "subcategory": "general",
+          "ID": "SM001",
+          "brief": "sketch.json JSON format",
+          "description": "",
+          "result": "skipped",
+          "level": "NOTICE",
+          "message": "No metadata file"
+        },
+        {
+          "category": "sketch.json",
+          "subcategory": "general",
+          "ID": "SM002",
+          "brief": "sketch.json data format",
+          "description": "",
+          "result": "skipped",
+          "level": "NOTICE",
+          "message": "No metadata file"
+        }
+      ],
+      "summary": {
+        "pass": true,
+        "warningCount": 2,
+        "errorCount": 0
+      }
+    }
+  ],
+  "summary": {
+    "pass": true,
+    "warningCount": 2,
+    "errorCount": 0
+  }
+}
