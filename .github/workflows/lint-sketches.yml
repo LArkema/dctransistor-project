@@ -20,6 +20,8 @@ jobs:
           verbose: true
       - name: "Push changes back to repo"
         run: |
+          git config user.email "github_account_bot@github.com"
+          git config user.name "Lint Sketches Action"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
           git add .
           git commit -m "Update lint report"
