@@ -15,7 +15,8 @@ jobs:
         uses: arduino/arduino-lint-action@v1
         with:
           path: test_code
-          library-manager: update
           project-type: sketch
           report-file: lint-report.json
           verbose: true
+      - name: Add Lint Report to Repo
+        run: git add .; git commit -m "Update lint report"; git push origin main
