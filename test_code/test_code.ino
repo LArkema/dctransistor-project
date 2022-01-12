@@ -54,6 +54,7 @@ void loop() {
   const char* min = new char [4];
   */
 
+
   StaticJsonDocument<500> doc;
 
   //Define URL for GET request and confirm correctness
