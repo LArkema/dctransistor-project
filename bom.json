@@ -1,0 +1,69 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.2",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "bom-ref": "wmata-pcb-0.1",
+      "type": "device",
+      "name": "WMATA PCB",
+      "version": "0.1"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:github/esp8266/Arduino@3.0.2",
+      "type": "firmware",
+      "name": "ESP8266 Arduino Core",
+      "version": "3.0.2",
+      "purl": "pkg:github/esp8266/Arduino@3.0.2",
+      "url": "https://github.com/esp8266/Arduino",
+      "license": {
+        "id": "LGPL-2.1-or-later",
+        "url": "https://github.com/esp8266/Arduino/blob/master/LICENSE"
+      },
+      "components": [
+        {
+          "bom-ref": "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f",
+          "type": "library",
+          "name": "BearSSL ESP8266 Port",
+          "commit": "6105635531027f5b298aa656d44be2289b2d434f",
+          "purl": "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f",
+          "url": "https://github.com/earlephilhower/bearssl-esp8266",
+          "license": {
+            "id": "MIT",
+            "url": "https://github.com/earlephilhower/bearssl-esp8266/blob/master/LICENSE.txt"
+          }
+        }
+       ]
+    },
+    {
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.1",
+      "type": "library",
+      "name": "ArduinoJson",
+      "version":  "6.19.1",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.1",
+      "license": {
+        "id": "MIT",
+        "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
+      }
+    }
+    ],
+  "dependencies": [
+    {
+      "ref": "wmata-pcb-0.1",
+      "dependsOn": [
+        "pkg:github/esp8266/Arduino@3.0.2",
+        "pkg:github/bblanchon/ArduinoJson@6.19.1"
+        ]
+    },
+    {
+      "ref": "pkg:github/esp8266/Arduino@3.0.2",
+      "dependsOn": [
+        "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f"
+        ]
+    }
+    ]
+}
+      
+      
