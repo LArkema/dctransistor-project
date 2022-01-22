@@ -1,0 +1,2 @@
+## Arduino library in pip requirements.txt format for simplicity
+git+https://github.com/esp8266/Arduino@releases/tag/3.0.2#egg=esp8266-arduino-core
