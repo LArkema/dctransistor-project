@@ -11,4 +11,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
       - run: go get neilpa.me/yajsv
-      - run: yajsv -s cyclonedx-schema-1_2.json bom.json
+      - run: /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json bom.json
