@@ -8,6 +8,8 @@ When a "train" arrives, led for station is turned on, and list value is updated
 to next station. 
 
 First station is always waiting for a train. Upon arrival, station 2 is added to 2nd position in waiting list.
+
+Initial / original version of SimpleList.h and associated test code.
 */
 
 const uint8_t MAX_NUM_STATIONS = 10; //Max number of stations per line

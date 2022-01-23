@@ -24,7 +24,7 @@ jobs:
       - name: flawfinder_scan
         uses: david-a-wheeler/flawfinder@8e4a779ad59dbfaee5da586aa9210853b701959c
         with:
-          arguments: '--sarif --minlevel 3 ./test_code/test_code.ino initial_arduino/initial_arduino.ino snipits/esp8266_full_blink.ino dev_code_snippits/simple_move.ino ./'
+          arguments: '--sarif --minlevel 3 ./test_code/test_code.ino initial_arduino/initial_arduino.ino snipits/esp8266_full_blink.ino dev_code_snippits/dev_code_snippits.ino ./'
           output: 'flawfinder_results.sarif'
 
       - name: Upload analysis results to GitHub Security tab
