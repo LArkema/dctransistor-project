@@ -2,6 +2,8 @@ name: Compile Sketches
 
 # Run compile at 10:26 every night.
 on:
+  push:
+  pull_request:
   schedule:
     - cron: '26 22 * * *'
   
@@ -24,7 +26,9 @@ jobs:
           fqbn: esp8266:esp8266:nodemcuv2
           sketch-paths: |
             - test_code
+            - dev_code_snippits
           libraries: |
             - name: ArduinoJson
             - source-path: test_code
+            - source-path: dev_code_snippits
             - source-path: ./
