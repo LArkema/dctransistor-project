@@ -27,7 +27,7 @@
           "bom-ref": "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f",
           "type": "library",
           "name": "BearSSL ESP8266 Port",
-          "commit": "6105635531027f5b298aa656d44be2289b2d434f",
+          "version": "6105635531027f5b298aa656d44be2289b2d434f",
           "purl": "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f",
           "url": "https://github.com/earlephilhower/bearssl-esp8266",
           "license": {
@@ -65,5 +65,3 @@
     }
     ]
 }
-      
-      
