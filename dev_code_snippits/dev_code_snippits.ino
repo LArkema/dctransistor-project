@@ -1,11 +1,10 @@
-#include "../inc/SimpleList.h"
+#include "SimpleList.h"
+
 
 /*
 Simple program to demonstrate SimpleList functionality with simulated "trains" arriving as defined by random().
 Designed to not require Arduino features (e.g. LEDs) for EpoxyDuino compilation and desktop unit tests.
 */
-
-
 
 
 void setup() {
