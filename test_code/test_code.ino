@@ -11,6 +11,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include "arduino_secrets.h"
+#include "SimpleList.h" 
 
 char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS; 
@@ -55,7 +56,13 @@ void loop() {
   */
 
 
-  StaticJsonDocument<500> doc;
+  StaticJsonDocument<100> filter;
+
+  JsonObject filter_Trains_0 = filter["Trains"].createNestedObject();
+  filter_Trains_0["Destination"] = true;
+  filter_Trains_0["LocationCode"] = true;
+  filter_Trains_0["Group"] = true;
+  filter_Trains_0["Min"] = true;
 
   //Define URL for GET request and confirm correctness
   String station_code = "A01";
@@ -71,18 +78,18 @@ void loop() {
 
     //Print out HTTP code and, if successful, JSON station data
     if (httpCode > 0) {
-      String payload = https.getString();
+      //String payload = https.getString();
       //Serial.println(payload);
 
-      DeserializationError error = deserializeJson(doc, payload);
+      DynamicJsonDocument doc(800);
+      DeserializationError error = deserializeJson(doc, https.getString(), DeserializationOption::Filter(filter));
 
       //Relevant JSON variables: Group (1 or 2 - direction) ; Destination (short) / DestinationCode (A13) / DestinationName (full) ; Min (positive int, "ARR" or "BRD")
-      yield();
+  
+
+      serializeJsonPretty(doc, Serial);
+
       
-      //train = doc["Trains"][0];
-
-      //Serial.println(train["Destination"]);
-
       const char* direction0 = doc["Trains"][0]["Group"].as<char*>();
       const char* destination0 = doc["Trains"][0]["Destination"].as<char*>();
       const char* min0 = doc["Trains"][0]["Min"].as<char*>();
@@ -91,8 +98,10 @@ void loop() {
       const char* destination1 = doc["Trains"][1]["Destination"].as<char*>();
       const char* min1 = doc["Trains"][1]["Min"].as<char*>();
 
-      Serial.printf("Direction: %s, towards %s in %s minutes\n", direction0, destination0, min0);
-      Serial.printf("Direction: %s, towards %s in %s minutes\n", direction1, destination1, min1);
+      //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction0, destination0, min0);
+      //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction1, destination1, min1);
+      
+
     }
     else {
       Serial.println("GET Request failed");
