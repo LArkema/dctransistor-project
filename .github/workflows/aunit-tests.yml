@@ -5,7 +5,8 @@ on:
   - push
   - pull_request
 
-  jobs: AUnit-tests
+jobs:
+  aunit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,5 +21,5 @@ on:
 
       - name: Run Tests
         run: |
-        make -C tests
-        make -C tests runtests
+          make -C tests
+          make -C tests runtests
