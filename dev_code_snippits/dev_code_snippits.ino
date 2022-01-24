@@ -1,4 +1,4 @@
-#include "SimpleList.h"
+#include "../inc/SimpleList.h"
 
 /*
 Simple program to demonstrate SimpleList functionality with simulated "trains" arriving as defined by random().
