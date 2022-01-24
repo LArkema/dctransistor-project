@@ -1,3 +1,5 @@
+ #include <Arduino.h>
+
  //uint8_t leds[13] = {1, 3, 15, 13, 12, 14, 2, 0, 4, 5, 16, 10, 9};
  int LED_LENGTH = 12;
  int leds[12] = {1, 3, 15, 13, 12, 14, 2, 0, 4, 5, 16, 10}; //GPIO9 messes up all other pins if used.

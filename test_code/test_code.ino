@@ -21,6 +21,8 @@ String station_endpoint = "/StationPrediction.svc/json/GetPrediction/";
 
 ESP8266WiFiMulti WiFiMulti;
 
+const char red_stations[10][4] = {"B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09"}; /* Flawfinder: ignore */
+
 void setup() {
   Serial.begin(9600); //NodeMCU ESP8266 runs on 9600 baud rate
 
@@ -71,7 +73,6 @@ void loop() {
   //Connect and confirm HTTPS connection to api.wmata.com
   if (https.begin(client, endpoint)) {
     //Serial.println("In https connection");
-    yield();
     //If successful, add API key and request station data
     https.addHeader("api_key", SECRET_WMATA_API_KEY);
     int httpCode = https.GET();
