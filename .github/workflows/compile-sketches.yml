@@ -29,7 +29,5 @@ jobs:
             - dev_code_snippits
           libraries: |
             - name: ArduinoJson
-            - source-path: test_code
-            - source-path: dev_code_snippits
             - source-path: inc
             - source-path: ./
