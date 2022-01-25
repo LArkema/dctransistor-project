@@ -21,7 +21,10 @@ String station_endpoint = "/StationPrediction.svc/json/GetPrediction/";
 
 ESP8266WiFiMulti WiFiMulti;
 
-const char red_stations[10][4] = {"B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09"}; /* Flawfinder: ignore */
+const char red_stations[10][4] = {"B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11"}; /* Flawfinder: ignore */
+
+int LED_LENGTH = 10;
+int leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10};
 
 void setup() {
   Serial.begin(9600); //NodeMCU ESP8266 runs on 9600 baud rate
@@ -34,11 +37,14 @@ void setup() {
   while (WiFiMulti.run() != WL_CONNECTED){
     delay(1000);
     Serial.println("Connecting to WiFi...");
-    yield();
   }
   Serial.println("Wifi Connected");
+
+  for(int i=0; i<LED_LENGTH; i++){
+    pinMode(leds[i], OUTPUT);
+  }
   
-}
+}//END SETUP
 
 // the loop function runs over and over again forever
 void loop() {
@@ -49,71 +55,118 @@ void loop() {
   client.setTimeout(15000);
 
   HTTPClient https;
+  https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
-/*
-  //String tmpstring = "";
-  const char* direction = new char[16];
-  const char* destination = new char [2];
-  const char* min = new char [4];
-  */
+  SimpleList redline = SimpleList();
 
+  //redline.arrived(0);
+  //redline.arrived(1);
 
-  StaticJsonDocument<100> filter;
+  //Define filter to apply to WMATA API response - only put relevant values in memory.
+  StaticJsonDocument<100> normal_filter;
 
-  JsonObject filter_Trains_0 = filter["Trains"].createNestedObject();
+  JsonObject filter_Trains_0 = normal_filter["Trains"].createNestedObject();
   filter_Trains_0["Destination"] = true;
   filter_Trains_0["LocationCode"] = true;
   filter_Trains_0["Group"] = true;
   filter_Trains_0["Min"] = true;
 
-  //Define URL for GET request and confirm correctness
-  String station_code = "A01";
-  String endpoint = wmata_host + station_endpoint + station_code;
+  StaticJsonDocument<48> train_pos_fiter;
+  train_pos_fiter["TrainPositions"][0]["CircuitId"] = true;
 
-  //Connect and confirm HTTPS connection to api.wmata.com
-  if (https.begin(client, endpoint)) {
-    //Serial.println("In https connection");
-    //If successful, add API key and request station data
-    https.addHeader("api_key", SECRET_WMATA_API_KEY);
-    int httpCode = https.GET();
+  while (true){
 
-    //Print out HTTP code and, if successful, JSON station data
-    if (httpCode > 0) {
-      //String payload = https.getString();
-      //Serial.println(payload);
+    for(int i=redline.getLen()-1; i>=0; i--){
 
-      DynamicJsonDocument doc(800);
-      DeserializationError error = deserializeJson(doc, https.getString(), DeserializationOption::Filter(filter));
-
-      //Relevant JSON variables: Group (1 or 2 - direction) ; Destination (short) / DestinationCode (A13) / DestinationName (full) ; Min (positive int, "ARR" or "BRD")
-  
-
-      serializeJsonPretty(doc, Serial);
-
-      
-      const char* direction0 = doc["Trains"][0]["Group"].as<char*>();
-      const char* destination0 = doc["Trains"][0]["Destination"].as<char*>();
-      const char* min0 = doc["Trains"][0]["Min"].as<char*>();
-
-      const char* direction1 = doc["Trains"][1]["Group"].as<char*>();
-      const char* destination1 = doc["Trains"][1]["Destination"].as<char*>();
-      const char* min1 = doc["Trains"][1]["Min"].as<char*>();
-
-      //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction0, destination0, min0);
-      //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction1, destination1, min1);
+      Serial.println(redline.getState());
+      uint16_t json_size = 800;
+      StaticJsonDocument<100> filter = normal_filter;
       
 
-    }
-    else {
-      Serial.println("GET Request failed");
-      Serial.println(httpCode);
-    }//end httpCode
-    
-  }//END https.begin
+      //Define URL for GET request and confirm correctness
+      String endpoint = "";
+      if(stations[i] == stations.last_station){
+        endpoint = wmata_host + "/TrainPositions/TrainPositions?contentType=json";
+        json_size = 2048;
+        filter = train_pos_fiter;
+      }
+      //Generate station code based on value of waiting station
+      else{
+        String station_code = "B";
+        if (redline.stations[i]+2 < 10) {station_code += "0";}
+        station_code += String(redline.stations[i]+2);
 
-  else {
-    Serial.println("HTTPS connection failed");
-  }
+        endpoint = wmata_host + station_endpoint + station_code;
+      }
 
-  delay(3000);
+      //Connect and confirm HTTPS connection to api.wmata.com
+      if (https.begin(client, endpoint)) {
+        //Serial.println("In https connection");
+        //If successful, add API key and request station data
+        https.addHeader("api_key", SECRET_WMATA_API_KEY);
+        int httpCode = https.GET();
+
+        //Print out HTTP code and, if successful, JSON station data
+        if (httpCode > 0) {
+          //String payload = https.getString();
+          //Serial.println(payload);
+
+          DynamicJsonDocument doc(json_size);
+          DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(filter));
+
+          //Relevant JSON variables: Group (1 or 2 - direction) ; Destination (short) / DestinationCode (A13) / DestinationName (full) ; Min (positive int, "ARR" or "BRD")
+      
+
+          //serializeJsonPretty(doc, Serial); //print out all outputs from deserialization
+          uint8_t j = 0;
+          char d = ' ';
+          
+          while(d != '1'){
+            const char* dest = doc["Trains"][j]["Group"].as<const char*>();
+            //Serial.println(dest);
+            d = dest[0];
+            if(d != '1'){j++;}
+          };
+
+          
+          const char* location0 = doc["Trains"][j]["LocationCode"].as<char*>();
+          const char* destination0 = doc["Trains"][j]["Destination"].as<char*>();
+          const char* min0 = doc["Trains"][j]["Min"].as<char*>();
+
+          if(strcmp(doc["Trains"][j]["Min"].as<const char*>(), "ARR") == 0 || 
+              strcmp(doc["Trains"][j]["Min"].as<const char*>(), "BRD") == 0){
+            
+            digitalWrite(leds[redline.stations[i]], 1);
+            if(redline.stations[i] != 0){digitalWrite(leds[redline.stations[i]-1], 0);}
+            
+            redline.arrived(i);
+            //Serial.println("Arrived!");
+            Serial.println(redline.getState());
+          }
+
+          /*
+          const char* direction1 = doc["Trains"][1]["Group"].as<char*>();
+          const char* destination1 = doc["Trains"][1]["Destination"].as<char*>();
+          const char* min1 = doc["Trains"][1]["Min"].as<char*>();
+          */
+
+          Serial.printf("At %s, towards %s in %s minutes\n", location0, destination0, min0);
+          //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction1, destination1, min1);
+          
+
+        }
+        else {
+          Serial.println("GET Request failed");
+          Serial.println(httpCode);
+        }//end httpCode
+        
+      }//END https.begin
+
+      else {
+        Serial.println("HTTPS connection failed");
+      }
+
+        }//end for (per station check)
+      delay(3000);
+  }//end while(true) - all waiting stations loop
 }//END LOOP
