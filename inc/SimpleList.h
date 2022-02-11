@@ -54,7 +54,7 @@ class SimpleList {
   public:
     uint8_t stations[MAX_NUM_STATIONS]; //list of integers representing station indexes /*Flawfinder: ignore */
     uint8_t last_station = MAX_NUM_STATIONS-1;
-    uint16_t last_circuit_min = 629//between 629 and 652
+    uint16_t last_circuit_min = 629; //between 629 and 652
     uint16_t last_circuit_max = 652;
 
     //Constructor sets first station as waiting and initializes rest of list to 0.

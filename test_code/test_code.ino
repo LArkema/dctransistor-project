@@ -65,12 +65,14 @@ void loop() {
   //Define filter to apply to WMATA API response - only put relevant values in memory.
   StaticJsonDocument<100> normal_filter;
 
+  //Normal filter filters responses from StationPrediction API to only get relevant data
   JsonObject filter_Trains_0 = normal_filter["Trains"].createNestedObject();
   filter_Trains_0["Destination"] = true;
   filter_Trains_0["LocationCode"] = true;
   filter_Trains_0["Group"] = true;
   filter_Trains_0["Min"] = true;
 
+  //Filters data from TrainPositions API to just get CircuitIds with Train
   StaticJsonDocument<48> train_pos_fiter;
   train_pos_fiter["TrainPositions"][0]["CircuitId"] = true;
 
@@ -85,19 +87,21 @@ void loop() {
 
       //Define URL for GET request and confirm correctness
       String endpoint = "";
+      /*
       if(stations[i] == stations.last_station){
         endpoint = wmata_host + "/TrainPositions/TrainPositions?contentType=json";
         json_size = 2048;
         filter = train_pos_fiter;
       }
+      */
       //Generate station code based on value of waiting station
-      else{
+      //else{
         String station_code = "B";
-        if (redline.stations[i]+2 < 10) {station_code += "0";}
+        if (redline.stations[i]+2 < 10) {station_code += "0";} //list starts at B02, adjust starting point and only pad when needed
         station_code += String(redline.stations[i]+2);
 
         endpoint = wmata_host + station_endpoint + station_code;
-      }
+      //}
 
       //Connect and confirm HTTPS connection to api.wmata.com
       if (https.begin(client, endpoint)) {
@@ -121,6 +125,7 @@ void loop() {
           uint8_t j = 0;
           char d = ' ';
           
+          //Only get predictions for north-bound trains
           while(d != '1'){
             const char* dest = doc["Trains"][j]["Group"].as<const char*>();
             //Serial.println(dest);
@@ -133,6 +138,7 @@ void loop() {
           const char* destination0 = doc["Trains"][j]["Destination"].as<char*>();
           const char* min0 = doc["Trains"][j]["Min"].as<char*>();
 
+          //If a train is arriving or boarding at a station, turn its led on, previous led off, and update state array.
           if(strcmp(doc["Trains"][j]["Min"].as<const char*>(), "ARR") == 0 || 
               strcmp(doc["Trains"][j]["Min"].as<const char*>(), "BRD") == 0){
             
