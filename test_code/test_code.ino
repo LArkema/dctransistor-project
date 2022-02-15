@@ -106,7 +106,7 @@ void loop() {
          
           Serial.println("All trains in test range");
           for(int t=0; t<k; t++){
-            Serial.printf("%d, ",train_positions[t]);
+            Serial.printf("%d, ",train_positions[t]); /*Flawfinder: ignore */
           }
           Serial.println();
 
@@ -118,8 +118,8 @@ void loop() {
           for(int t=0; t<array_size; t++){
             if(train_positions[t] > (station_circuit - 3) && train_positions[t] < (station_circuit + 1) ){
 
-              Serial.printf("Station Circuit: %d\n", station_circuit);
-              Serial.printf("Train Circuit:   %d\n", train_positions[t]);
+              Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore */
+              Serial.printf("Train Circuit:   %d\n", train_positions[t]); /*Flawfinder: ignore */
 
               digitalWrite(leds[redline.stations[i]], 1);
               if(redline.stations[i] != 0){digitalWrite(leds[redline.stations[i]-1], 0);}
