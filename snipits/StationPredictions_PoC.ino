@@ -2,7 +2,10 @@
  * Initial Arduino for WMATA_PCB project
  * Based on BasicHTTPSClient.ino in ESP8266 example sketches
  * Main difference is connection to api.wmata.com with api_key header
- * Logan Arkema, 10/22/2021
+ * 
+ * Updates 10 LEDs based on the state of red-line WMATA trains at 10 stations using
+ * WMATA's StationPrediction API. Does not handle arrivals at last station on a line.
+ * Logan Arkema, 2/10/2022
 */
 
 
@@ -17,11 +20,11 @@ char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS; 
 const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE"; //Expires 10/22/2022 
 String wmata_host = "https://api.wmata.com";
-String station_endpoint = "/TrainPositions/TrainPositions?contentType=json";
+String station_endpoint = "/StationPrediction.svc/json/GetPrediction/";
 
 ESP8266WiFiMulti WiFiMulti;
 
-const uint16_t red_stations[10] = {477, 485, 496, 513, 527, 548, 571, 591, 611, 629}; /* Flawfinder: ignore */
+const char red_stations[10][4] = {"B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11"}; /* Flawfinder: ignore */
 
 int LED_LENGTH = 10;
 int leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10};
@@ -81,12 +84,12 @@ void loop() {
     for(int i=redline.getLen()-1; i>=0; i--){
 
       Serial.println(redline.getState());
-      uint16_t json_size = 2048;
-      StaticJsonDocument<100> filter = train_pos_fiter;
+      uint16_t json_size = 800;
+      StaticJsonDocument<100> filter = normal_filter;
       
 
       //Define URL for GET request and confirm correctness
-      String endpoint = wmata_host + station_endpoint;
+      String endpoint = "";
       /*
       if(stations[i] == stations.last_station){
         endpoint = wmata_host + "/TrainPositions/TrainPositions?contentType=json";
@@ -95,16 +98,14 @@ void loop() {
       }
       */
       //Generate station code based on value of waiting station
-      /*
-      else{
+      //else{
         String station_code = "B";
         if (redline.stations[i]+2 < 10) {station_code += "0";} //list starts at B02, adjust starting point and only pad when needed
         station_code += String(redline.stations[i]+2);
 
         endpoint = wmata_host + station_endpoint + station_code;
-      }
-      */
-      
+      //}
+
       //Connect and confirm HTTPS connection to api.wmata.com
       if (https.begin(client, endpoint)) {
         //Serial.println("In https connection");
@@ -123,11 +124,10 @@ void loop() {
           //Relevant JSON variables: Group (1 or 2 - direction) ; Destination (short) / DestinationCode (A13) / DestinationName (full) ; Min (positive int, "ARR" or "BRD")
       
 
-          serializeJsonPretty(doc, Serial); //print out all outputs from deserialization
-          //uint8_t j = 0;
-          //char d = ' ';
+          //serializeJsonPretty(doc, Serial); //print out all outputs from deserialization
+          uint8_t j = 0;
+          char d = ' ';
           
-          /* CircuitIDs already listed by direction
           //Only get predictions for north-bound trains
           while(d != '1'){
             const char* dest = doc["Trains"][j]["Group"].as<const char*>();
@@ -135,39 +135,13 @@ void loop() {
             d = dest[0];
             if(d != '1'){j++;}
           };
-          */
 
-         //Iterate through all returned train positions, put the ones on target section of redline track into an array.
-         uint16_t array_size = doc["TrainPositions"].size();
-         uint16_t train_positions[20] = {};
-         uint8_t k = 0;
-         uint16_t j = 0;
-         for(j=0; j<array_size; j++){
-           const uint16_t circID = doc["TrainPositions"][j]["CircuitId"].as<unsigned int>();
-           if (circID >= red_stations[0] && circID <= red_stations[9]){
-             train_positions[k] = circID;
-             k++;
-           }
-         }
-
-          /*
+          
           const char* location0 = doc["Trains"][j]["LocationCode"].as<char*>();
           const char* destination0 = doc["Trains"][j]["Destination"].as<char*>();
           const char* min0 = doc["Trains"][j]["Min"].as<char*>();
-          */
-
-
-         for(int t=0; t<k; t++){
-           Serial.printf("%d, ",train_positions[t]);
-         }
-         Serial.println();
-
 
           //If a train is arriving or boarding at a station, turn its led on, previous led off, and update state array.
-          
-          //StationPrediction-based state updating
-
-          /*
           if(strcmp(doc["Trains"][j]["Min"].as<const char*>(), "ARR") == 0 || 
               strcmp(doc["Trains"][j]["Min"].as<const char*>(), "BRD") == 0){
             
@@ -178,7 +152,6 @@ void loop() {
             //Serial.println("Arrived!");
             Serial.println(redline.getState());
           }
-          */
 
           /*
           const char* direction1 = doc["Trains"][1]["Group"].as<char*>();
@@ -186,7 +159,7 @@ void loop() {
           const char* min1 = doc["Trains"][1]["Min"].as<char*>();
           */
 
-          //Serial.printf("At %s, towards %s in %s minutes\n", location0, destination0, min0); /*Flawfinder: ignore */
+          Serial.printf("At %s, towards %s in %s minutes\n", location0, destination0, min0); /*Flawfinder: ignore */
           //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction1, destination1, min1);
           
 
