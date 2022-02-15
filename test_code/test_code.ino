@@ -1,8 +1,6 @@
-/*
- * Initial Arduino for WMATA_PCB project
- * Based on BasicHTTPSClient.ino in ESP8266 example sketches
- * Main difference is connection to api.wmata.com with api_key header
- * Logan Arkema, 10/22/2021
+/* File for working / test code (actively compiled and uploaded to Arduino).
+ * Code from this file occasionally moved to "snipits" folder when substantive feature developed.
+ * Logan Arkema, current date
 */
 
 
@@ -21,6 +19,7 @@ String station_endpoint = "/TrainPositions/TrainPositions?contentType=json";
 
 ESP8266WiFiMulti WiFiMulti;
 
+//List of WMATA CircuitIDs for Judiciary Square - Wheaton (towards Glenmont)
 const uint16_t red_stations[10] = {477, 485, 496, 513, 527, 548, 571, 591, 611, 629}; /* Flawfinder: ignore */
 
 int LED_LENGTH = 10;
@@ -59,18 +58,6 @@ void loop() {
 
   SimpleList redline = SimpleList();
 
-  //redline.arrived(0);
-  //redline.arrived(1);
-
-  //Define filter to apply to WMATA API response - only put relevant values in memory.
-  StaticJsonDocument<100> normal_filter;
-
-  //Normal filter filters responses from StationPrediction API to only get relevant data
-  JsonObject filter_Trains_0 = normal_filter["Trains"].createNestedObject();
-  filter_Trains_0["Destination"] = true;
-  filter_Trains_0["LocationCode"] = true;
-  filter_Trains_0["Group"] = true;
-  filter_Trains_0["Min"] = true;
 
   //Filters data from TrainPositions API to just get CircuitIds with Train
   StaticJsonDocument<48> train_pos_fiter;
@@ -82,112 +69,65 @@ void loop() {
 
       Serial.println(redline.getState());
       uint16_t json_size = 2048;
-      StaticJsonDocument<100> filter = train_pos_fiter;
       
 
       //Define URL for GET request and confirm correctness
       String endpoint = wmata_host + station_endpoint;
-      /*
-      if(stations[i] == stations.last_station){
-        endpoint = wmata_host + "/TrainPositions/TrainPositions?contentType=json";
-        json_size = 2048;
-        filter = train_pos_fiter;
-      }
-      */
-      //Generate station code based on value of waiting station
-      /*
-      else{
-        String station_code = "B";
-        if (redline.stations[i]+2 < 10) {station_code += "0";} //list starts at B02, adjust starting point and only pad when needed
-        station_code += String(redline.stations[i]+2);
-
-        endpoint = wmata_host + station_endpoint + station_code;
-      }
-      */
       
       //Connect and confirm HTTPS connection to api.wmata.com
       if (https.begin(client, endpoint)) {
-        //Serial.println("In https connection");
         //If successful, add API key and request station data
         https.addHeader("api_key", SECRET_WMATA_API_KEY);
         int httpCode = https.GET();
 
-        //Print out HTTP code and, if successful, JSON station data
+        //Print out HTTP code and, if successful, parse data returned from API and update staion state
         if (httpCode > 0) {
           //String payload = https.getString();
           //Serial.println(payload);
 
           DynamicJsonDocument doc(json_size);
-          DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(filter));
+          DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_fiter));
 
-          //Relevant JSON variables: Group (1 or 2 - direction) ; Destination (short) / DestinationCode (A13) / DestinationName (full) ; Min (positive int, "ARR" or "BRD")
-      
-
-          serializeJsonPretty(doc, Serial); //print out all outputs from deserialization
-          //uint8_t j = 0;
-          //char d = ' ';
-          
-          /* CircuitIDs already listed by direction
-          //Only get predictions for north-bound trains
-          while(d != '1'){
-            const char* dest = doc["Trains"][j]["Group"].as<const char*>();
-            //Serial.println(dest);
-            d = dest[0];
-            if(d != '1'){j++;}
-          };
-          */
+          //serializeJsonPretty(doc, Serial); //print out all outputs from deserialization
+        
 
          //Iterate through all returned train positions, put the ones on target section of redline track into an array.
          uint16_t array_size = doc["TrainPositions"].size();
          uint16_t train_positions[20] = {};
          uint8_t k = 0;
          uint16_t j = 0;
-         for(j=0; j<array_size; j++){
+         for(j=0; j<array_size; j++){ //TODO: replace with Iterators - https://arduinojson.org/v6/api/jsonarray/begin_end/
            const uint16_t circID = doc["TrainPositions"][j]["CircuitId"].as<unsigned int>();
            if (circID >= red_stations[0] && circID <= red_stations[9]){
              train_positions[k] = circID;
              k++;
            }
          }
-
-          /*
-          const char* location0 = doc["Trains"][j]["LocationCode"].as<char*>();
-          const char* destination0 = doc["Trains"][j]["Destination"].as<char*>();
-          const char* min0 = doc["Trains"][j]["Min"].as<char*>();
-          */
-
-
-         for(int t=0; t<k; t++){
-           Serial.printf("%d, ",train_positions[t]);
-         }
-         Serial.println();
-
-
-          //If a train is arriving or boarding at a station, turn its led on, previous led off, and update state array.
-          
-          //StationPrediction-based state updating
-
-          /*
-          if(strcmp(doc["Trains"][j]["Min"].as<const char*>(), "ARR") == 0 || 
-              strcmp(doc["Trains"][j]["Min"].as<const char*>(), "BRD") == 0){
-            
-            digitalWrite(leds[redline.stations[i]], 1);
-            if(redline.stations[i] != 0){digitalWrite(leds[redline.stations[i]-1], 0);}
-            
-            redline.arrived(i);
-            //Serial.println("Arrived!");
-            Serial.println(redline.getState());
+         
+          Serial.println("All trains in test range");
+          for(int t=0; t<k; t++){
+            Serial.printf("%d, ",train_positions[t]);
           }
-          */
+          Serial.println();
 
-          /*
-          const char* direction1 = doc["Trains"][1]["Group"].as<char*>();
-          const char* destination1 = doc["Trains"][1]["Destination"].as<char*>();
-          const char* min1 = doc["Trains"][1]["Min"].as<char*>();
-          */
+          //Put target station in local circuit
+          uint16_t station_circuit = red_stations[redline.stations[i]]; //redline stores station indexes.
 
-          //Serial.printf("At %s, towards %s in %s minutes\n", location0, destination0, min0); /*Flawfinder: ignore */
-          //Serial.printf("Direction: %s, towards %s in %s minutes\n", direction1, destination1, min1);
+          //See if any of the current train positions are arriving, at, or just leaving destination station.
+          //If so, update station state.
+          for(int t=0; t<array_size; t++){
+            if(train_positions[t] > (station_circuit - 3) && train_positions[t] < (station_circuit + 1) ){
+
+              Serial.printf("Station Circuit: %d\n", station_circuit);
+              Serial.printf("Train Circuit:   %d\n", train_positions[t]);
+
+              digitalWrite(leds[redline.stations[i]], 1);
+              if(redline.stations[i] != 0){digitalWrite(leds[redline.stations[i]-1], 0);}
+              redline.arrived(i);
+              break;
+            }
+          }
+
           
 
         }
