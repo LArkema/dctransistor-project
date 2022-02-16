@@ -11,6 +11,8 @@
 #include "arduino_secrets.h"
 #include "SimpleList.h" 
 
+
+
 char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS; 
 const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE"; //Expires 10/22/2022 
@@ -24,6 +26,16 @@ const uint16_t red_stations[10] = {477, 485, 496, 513, 527, 548, 571, 591, 611, 
 
 int LED_LENGTH = 10;
 int leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10};
+
+//Function for setting stations state at boot-time
+void SetInitialState(uint16_t* train_positions, SimpleList &line_state){
+
+
+
+}//end SetInitialState
+
+
+
 
 void setup() {
   Serial.begin(9600); //NodeMCU ESP8266 runs on 9600 baud rate
@@ -109,6 +121,10 @@ void loop() {
             Serial.printf("%d, ",train_positions[t]); /*Flawfinder: ignore */
           }
           Serial.println();
+
+          Serial.println("Setting initial state");
+          redline.setInitialState(train_positions, k, red_stations, 10);
+          Serial.println(redline.getState());
 
           //Put target station in local circuit
           uint16_t station_circuit = red_stations[redline.stations[i]]; //redline stores station indexes.
