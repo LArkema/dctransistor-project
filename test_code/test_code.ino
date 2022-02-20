@@ -22,7 +22,8 @@ String station_endpoint = "/TrainPositions/TrainPositions?contentType=json";
 ESP8266WiFiMulti WiFiMulti;
 
 //List of WMATA CircuitIDs for Judiciary Square - Wheaton (towards Glenmont)
-const uint16_t red_stations[10] = {477, 485, 496, 513, 527, 548, 571, 591, 611, 629}; /* Flawfinder: ignore */
+const uint16_t red_stations[10] = {485, 496, 513, 527, 548, 571, 591, 611, 629, 652}; /* Flawfinder: ignore */
+const uint16_t last_track_alt_cirdID = 868;
 
 int LED_LENGTH = 10;
 int leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10};
@@ -110,7 +111,10 @@ void loop() {
          uint16_t j = 0;
          for(j=0; j<array_size; j++){ //TODO: replace with Iterators - https://arduinojson.org/v6/api/jsonarray/begin_end/
            const uint16_t circID = doc["TrainPositions"][j]["CircuitId"].as<unsigned int>();
-           if (circID >= red_stations[0] && circID <= red_stations[9]){
+           //Add
+           if ( (circID >= red_stations[0] && circID <= red_stations[9]) || 
+           (circID >= last_track_alt_cirdID && circID < (last_track_alt_cirdID + 3)) ){
+
              train_positions[k] = circID;
              k++;
            }
@@ -122,24 +126,40 @@ void loop() {
           }
           Serial.println();
 
-          Serial.println("Setting initial state");
-          redline.setInitialState(train_positions, k, red_stations, 10);
-          Serial.println(redline.getState());
+          if (redline.getLen() < 2){
+            Serial.println("Setting initial state");
+            redline.setInitialStations(train_positions, k, red_stations, 10);
+            Serial.println(redline.getState());
+
+            for(int l=1; l<redline.getLen(); l++){
+              digitalWrite(leds[redline.stations[l]-1], 1); //stations tracks stations waiting for trains, so turn lights on for station prior
+            }
+
+          }
 
           //Put target station in local circuit
           uint16_t station_circuit = red_stations[redline.stations[i]]; //redline stores station indexes.
 
           //See if any of the current train positions are arriving, at, or just leaving destination station.
           //If so, update station state.
-          for(int t=0; t<array_size; t++){
-            if(train_positions[t] > (station_circuit - 3) && train_positions[t] < (station_circuit + 1) ){
+          for(int t=0; t<=k; t++){
+            if( (train_positions[t] > (station_circuit - 3) && train_positions[t] < (station_circuit + 1) )
+              || (station_circuit == red_stations[9] && train_positions[t] >= last_track_alt_cirdID) ) {
 
               Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore */
               Serial.printf("Train Circuit:   %d\n", train_positions[t]); /*Flawfinder: ignore */
 
-              digitalWrite(leds[redline.stations[i]], 1);
+              if(redline.stations[i] < LED_LENGTH) {digitalWrite(leds[redline.stations[i]], 1);} //do not try to write for invalid LED
               if(redline.stations[i] != 0){digitalWrite(leds[redline.stations[i]-1], 0);}
               redline.arrived(i);
+
+              //If train "arriving" at last station but removed by arrived() for lingering (last station not max index), turn LED off.
+              //TODO: Update / move to line class. 
+              if(train_positions[t] == red_stations[LED_LENGTH-1] && redline.stations[redline.getLen()-1] != LED_LENGTH-1){
+                digitalWrite(leds[redline.stations[i]], 0);
+              }
+
+
               break;
             }
           }
@@ -158,7 +178,7 @@ void loop() {
         Serial.println("HTTPS connection failed");
       }
 
-        }//end for (per station check)
+    }//end for (per station check)
       delay(3000);
   }//end while(true) - all waiting stations loop
 }//END LOOP
