@@ -21,7 +21,7 @@ jobs:
         uses: arduino/compile-sketches@v1
         with:
           platforms: |
-            - source-url: https://github.com/esp8266/Arduino/releases/download/3.0.2/esp8266-3.0.2.zip
+            - source-url: http://arduino.esp8266.com/stable/package_esp8266com_index.json
               name: esp8266:esp8266
           fqbn: esp8266:esp8266:nodemcuv2
           sketch-paths: |
