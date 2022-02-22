@@ -12,7 +12,6 @@ class TrainLine {
 
   private:
     //variables
-    uint8_t total_num_stations; //number of stations on the line
     uint8_t* waiting_stations; //list of integers representing station indexes /*Flawfinder: ignore */
     uint16_t* station_circuits; //list of track circuits corresponding to each station
     uint8_t len;
@@ -26,6 +25,7 @@ class TrainLine {
     int remove();
   
   public:
+    uint8_t total_num_stations; //number of stations on the line
 
     //Constructors and Destructor
     TrainLine();
@@ -41,7 +41,6 @@ class TrainLine {
     String getState();
     String printVariables();
     uint8_t getLen();
-    uint8_t getTotalNumStations();
     int8_t at(uint8_t index);
     int8_t operator[](uint8_t index);
 
@@ -262,11 +261,6 @@ String TrainLine::getState(){
 //Length getter
 uint8_t TrainLine::getLen(){
   return len;
-}
-
-//total_num_stations getter
-uint8_t TrainLine::getTotalNumStations(){
-  return total_num_stations;
 }
 
 //Return index of station at a given waiting_stations index
