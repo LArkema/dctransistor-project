@@ -17,24 +17,27 @@ class TrainLine {
     uint16_t* station_circuits; //list of track circuits corresponding to each station
     uint8_t len;
     uint8_t cycles_at_end;
+    uint16_t opp_dir_1st_cid;
 
     uint8_t* leds;
 
     //state updating functions
     int add();
     int insert(uint8_t index);
-    int remove();
   
   public:
 
     //Constructors and Destructor
     TrainLine();
-    TrainLine(uint8_t num_stations, uint16_t* circuit_list, uint8_t* leds_list);
+    TrainLine(uint8_t num_stations, uint16_t* circuit_list, uint8_t* leds_list, uint16_t opp_cid);
     ~TrainLine();
 
     //State updating functions
     int arrived(uint8_t index);
     int setInitialStations(uint16_t* train_positions, uint8_t train_len);
+    int remove();
+
+    int incrementCyclesAtEnd(); //returns updated number of cycles.
 
     //Getters
     uint8_t* getStations();
@@ -42,6 +45,9 @@ class TrainLine {
     String printVariables();
     uint8_t getLen();
     uint8_t getTotalNumStations();
+    uint8_t getCyclesAtEnd();
+    uint16_t getOppCID();
+    uint16_t getLastCID();
     int8_t at(uint8_t index);
     int8_t operator[](uint8_t index);
 
@@ -113,7 +119,8 @@ int TrainLine::insert(uint8_t station_num){
 //Returns -1 if last train not at end of line
 int TrainLine::remove(){
   //can only remove if last train is at last station
-  if(waiting_stations[len-1] == total_num_stations-1){
+  if(waiting_stations[len-1] == total_num_stations){
+    digitalWrite(leds[waiting_stations[len-1]], 0);
     waiting_stations[len-1] = 0;
     len--;
     return len;
@@ -126,6 +133,7 @@ int TrainLine::remove(){
 TrainLine::TrainLine(){
   total_num_stations = 10;
   len = 1;
+  opp_dir_1st_cid = 868;
 
   //Set state arrays to number of stations in track.
   waiting_stations = new uint8_t[total_num_stations];
@@ -148,9 +156,10 @@ TrainLine::TrainLine(){
 }
 
 //Overloaded constructor that takes list of track circuitIDs corresponding to each station on line
-TrainLine::TrainLine(uint8_t num_stations, uint16_t* circuit_list, uint8_t* leds_list){
+TrainLine::TrainLine(uint8_t num_stations, uint16_t* circuit_list, uint8_t* leds_list, uint16_t opp_cid){
   total_num_stations = num_stations;
   len = 1;
+  opp_dir_1st_cid = opp_cid;
 
   //Set state arrays to number of stations in track.
   waiting_stations = new uint8_t[total_num_stations];
@@ -178,27 +187,9 @@ TrainLine::TrainLine(uint8_t num_stations, uint16_t* circuit_list, uint8_t* leds
 int TrainLine::arrived(uint8_t index){
   if(index < len){
 
-    //If "arriving" at last station, check if already there. If not, update. If have been for a minute, remove.
-    if(waiting_stations[index] == total_num_stations-1){
-      Serial.printf("Last station. Cycles at end: %d\n", cycles_at_end);
-      if(cycles_at_end == 0){
-        digitalWrite(leds[waiting_stations[index]], 1);
-        digitalWrite(leds[waiting_stations[index]-1], 0);
-        cycles_at_end++;
-      }
-      else if(cycles_at_end >= 4){
-        digitalWrite(leds[waiting_stations[index]], 0);
-        remove();
-        cycles_at_end = 0;
-      }
-      else{
-        cycles_at_end++;
-      }
-    }//end last station check
-
     //Update list of waiting trains and leds.
     //If next station is waiting for train, cannot move forward.
-    else if(waiting_stations[index]+1 != waiting_stations[index+1]){ //TODO: replace with robust circuitID "collision" check.
+    if(waiting_stations[index]+1 != waiting_stations[index+1]){ //TODO: replace with robust circuitID "collision" check.
 
       digitalWrite(leds[waiting_stations[index]], 1); //turn led on to show arrival at station.
 
@@ -244,6 +235,19 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len){
   return 0;
 }//end SetState
 
+//Get cycles train has been at end of line.
+uint8_t TrainLine::getCyclesAtEnd(){
+  return cycles_at_end;
+}
+
+//Increment, and reset if necessary, cycles train has been at end of line.
+int TrainLine::incrementCyclesAtEnd(){
+  cycles_at_end++;
+  if(cycles_at_end >=4){cycles_at_end = 0;}
+
+  return cycles_at_end;
+}
+
 //Return pointer to list of waiting stations
 uint8_t* TrainLine::getStations(){
   return waiting_stations;
@@ -267,6 +271,16 @@ uint8_t TrainLine::getLen(){
 //total_num_stations getter
 uint8_t TrainLine::getTotalNumStations(){
   return total_num_stations;
+}
+
+//return circuitID for the "1st" station in opposite direction (last station in cur direction)
+uint16_t TrainLine::getOppCID(){
+  return opp_dir_1st_cid;
+}
+
+//returns circuitID of last station on track
+uint16_t TrainLine::getLastCID(){
+  return station_circuits[total_num_stations-1];
 }
 
 //Return index of station at a given waiting_stations index
