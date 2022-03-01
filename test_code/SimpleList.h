@@ -105,19 +105,9 @@ class SimpleList {
     */
     int arrived(uint8_t index){
       if(index < len){
-        //If "arriving" at last station, check if already there. If not, update. If have been for a minute, remove.
+        //If "arriving" at last station, remove it from active state
         if(stations[index] == MAX_NUM_STATIONS-1){
-          Serial.printf("Last station. Cycles at end: %d\n", cycles_at_end);
-          if(cycles_at_end == 0){
-            cycles_at_end++;
-          }
-          else if(cycles_at_end >= 4){
-            remove();
-            cycles_at_end = 0;
-          }
-          else{
-            cycles_at_end++;
-          }
+          remove();
         }
         //If next station is waiting for train, cannot move forward
         else if(stations[index]+1 != stations[index+1]){
