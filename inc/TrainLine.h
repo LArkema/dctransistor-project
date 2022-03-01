@@ -83,8 +83,8 @@ int TrainLine::add(){
 //Only called when initially setting line state, when order of inserted stations is unknown
 //Not optimized for insertion sort b/c only run once per startup.
 int TrainLine::insert(uint8_t station_num){
-  Serial.println("In Insert");
-  Serial.printf("Current State: %s\tCurrent Len: %d\n", getState(), len);
+  //Serial.println("In Insert");
+  //Serial.printf("Current State: %s\tCurrent Len: %d\n", getState(), len);
   if(len == 1){
     waiting_stations[1] = station_num;
     len++;
@@ -99,7 +99,7 @@ int TrainLine::insert(uint8_t station_num){
 
   for(int8_t i = 0; i < len; i++){
     if(station_num < waiting_stations[i]){
-      Serial.printf("Station %d is smaller than station %d. Inserting it at index %d\n", station_num, waiting_stations[i], i);
+      //Serial.printf("Station %d is smaller than station %d. Inserting it at index %d\n", station_num, waiting_stations[i], i);
       if(len-i > 0){
         uint8_t* buf = new uint8_t[len-i]; /*Flawfinder: ignore */
         memcpy(buf, waiting_stations+i, (len-i)); /*Flawfinder: ignore */
@@ -120,7 +120,7 @@ int TrainLine::insert(uint8_t station_num){
 int TrainLine::remove(){
   //can only remove if last train is at last station
   if(waiting_stations[len-1] == total_num_stations){
-    digitalWrite(leds[waiting_stations[len-1]], 0);
+    digitalWrite(leds[waiting_stations[len-1]-1], 0);
     waiting_stations[len-1] = 0;
     len--;
     return len;
@@ -224,7 +224,7 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len){
   for(uint8_t i=0; i<train_len; i++){
     for(uint8_t j=0; j<total_num_stations-1; j++){
       if(train_positions[i] >= (station_circuits[j] - 2) && train_positions[i] < (station_circuits[j+1] -2)){
-        Serial.println("Updating State");
+        //Serial.println("Updating State");
         digitalWrite(leds[j], 1); //update LED at current station
         insert(j+1); //Add next station to list of waiting stations
         break;
