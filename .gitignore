@@ -3,3 +3,5 @@
 *arduino_secrets.h
 
 .vscode
+tests/LastTrainTest/LastTrainTest.o
+tests/LastTrainTest/LastTrainTest.out
