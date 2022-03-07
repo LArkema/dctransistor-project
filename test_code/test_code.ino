@@ -53,7 +53,7 @@ void loop() {
 
   TrainLine redline = TrainLine();
 
-  Serial.println(String(redline.getOppCID()));
+  //Serial.println(String(redline.getOppCID(0)));
 
   //Filters data from TrainPositions API to just get CircuitIds with Train
   StaticJsonDocument<48> train_pos_fiter;
@@ -61,7 +61,7 @@ void loop() {
 
   while (true){
 
-    for(int i=redline.getLen()-1; i>=0; i--){
+    for(int i=redline.getLen(0)-1; i>=0; i--){ //TODO: Move station loop within each API call.
 
       Serial.println(redline.getState());
       uint16_t json_size = 2048;
@@ -94,8 +94,8 @@ void loop() {
          for(j=0; j<array_size; j++){ //TODO: replace with Iterators - https://arduinojson.org/v6/api/jsonarray/begin_end/
            const uint16_t circID = doc["TrainPositions"][j]["CircuitId"].as<unsigned int>();
            //Add train in test range to list
-           if ( (circID >= redline.getStationCircuit(0) && circID <= redline.getStationCircuit(9)) || 
-           (circID >= redline.getOppCID() && circID < (redline.getOppCID() + 2)) ){
+           if ( (circID >= redline.getStationCircuit(0,0) && circID <= redline.getStationCircuit(9,0)) || 
+           (circID >= redline.getOppCID(0) && circID < (redline.getOppCID(0) + 2)) ){
 
              train_positions[k] = circID;
              k++;
@@ -108,31 +108,31 @@ void loop() {
           }
           Serial.println();
 
-          if (redline.getLen() < 2){
+          if (redline.getLen(0) < 2){
             Serial.println("Setting initial state");
-            redline.setInitialStations(train_positions, k);
+            redline.setInitialStations(train_positions, k, 0);
             Serial.println(redline.getState());
           }
 
           //Put target station in local circuit
-          uint16_t station_circuit = redline.getWaitingStationCircuit(i); //redline stores station indexes.
+          uint16_t station_circuit = redline.getWaitingStationCircuit(i, 0); //redline stores station indexes.
 
           //See if any of the current train positions are arriving, at, or just leaving destination station.
           //If so, update station state.
           for(int t=0; t<k; t++){
             if(train_positions[t] > (station_circuit - 3) && train_positions[t] < (station_circuit + 1) 
-            && station_circuit != redline.getLastCID() ){
+            && station_circuit != redline.getLastCID(0) ){
 
               Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore */
               Serial.printf("Train Circuit:   %d\n", train_positions[t]); /*Flawfinder: ignore */
 
-              redline.arrived(i);
+              redline.arrived(i, 0);
 
               break;
             }
           }
 
-          checkEndOfLine(redline, train_positions, k);
+          checkEndOfLine(redline, train_positions, k, 0);
           
 
         }

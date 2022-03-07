@@ -15,4 +15,5 @@ for i in {0..11}; do cat misc_files/StandRoutes.json | jq '.StandardRoutes['$i']
 
 for i in {0..11}; do fname=$(head -n 1 misc_files/track_out_$i.txt | cut -d '"' -f 2 | cut -d ' ' -f 1-2 | sed 's/ /_/'); fullname=$(echo -n "$fname"; echo -n "_station_circuits.txt"); cp misc_files/track_out_$i.txt misc_files/$fullname; done
 
-
+#get comma separated list of circuitIDs associated w/ stations, in reverse order for Dirction 2 cirucits
+cat RD_2_station_circuits.txt | tail -n 10 | cut -d ' ' -f 4 | cut -d '"' -f 1 | sort -nr | sed -z 's/\n/, /g'
