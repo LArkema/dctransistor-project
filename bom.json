@@ -38,11 +38,11 @@
        ]
     },
     {
-      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.1",
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.3",
       "type": "library",
       "name": "ArduinoJson",
-      "version":  "6.19.1",
-      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.1",
+      "version":  "6.19.3",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.3",
       "license": {
         "id": "MIT",
         "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
@@ -54,7 +54,7 @@
       "ref": "wmata-pcb-0.1",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.0.2",
-        "pkg:github/bblanchon/ArduinoJson@6.19.1"
+        "pkg:github/bblanchon/ArduinoJson@6.19.3"
         ]
     },
     {

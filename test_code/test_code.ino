@@ -8,7 +8,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
-#include "arduino_secrets.h"
+#include "example_arduino_secrets.h"
 #include "miscFuncs.h" 
 
 
@@ -27,7 +27,7 @@ int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len);
 void setup() {
   Serial.begin(9600); //NodeMCU ESP8266 runs on 9600 baud rate
 
-  //Limit WiFi to station mode and connect to network defined in arduino_secrets.h
+  //Limit WiFi to station mode and connect to network defined in example_arduino_secrets.h
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(ssid, password);
 
