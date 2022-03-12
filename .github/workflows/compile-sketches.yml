@@ -31,17 +31,15 @@ jobs:
             - name: ArduinoJson
             - source-path: inc
             - source-path: ./
+      - name: Check Version Name
+        run: find ~/ -path "*ArduinoJson*" -name "library.properties" -exec cat {} \;
       # After succesful compilation, update the BOM with the latest dependencies installed by Arduino Compiler (from source), and validate the update against BOM schema.
-      - name: Update BOM
-        run: bash ./bom_update.sh
-      - name: Validate BOM - Setup GO
+      - name: Update, Validate, and Push BOM
         uses: actions/setup-go@v2
-      - name: Validate BOM - Get and Run Validator
-        run: |
+        run: | 
+          bash ./bom_update.sh
           go get neilpa.me/yajsv
           /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json bom.json
-      - name: "Push BOM back to repo"
-        run: |
           git config user.email "BOM_Update_Bot@github.com"
           git config user.name "BOM Update / Sketch Compile Action"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
