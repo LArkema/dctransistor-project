@@ -31,10 +31,8 @@ jobs:
             - name: ArduinoJson
             - source-path: inc
             - source-path: ./
-      - name: Check Version Name
-        run: find ~/ -path "*ArduinoJson*" -name "library.properties" -exec cat {} \;
       # After succesful compilation, update the BOM with the latest dependencies installed by Arduino Compiler (from source), and validate the update against BOM schema.
-      - name: Validate BOM - setup GO
+      - name: Validate BOM - Setup GO
         uses: actions/setup-go@v2
       - name: Update, Validate, and Push BOM
         run: | 
@@ -45,7 +43,7 @@ jobs:
           git config user.name "BOM Update / Sketch Compile Action"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
           git add .
-          if ! git status | grep "Your branch is up to date"
+          if ! git status | grep "nothing to commit"
           then
             git commit -m "Update Dependency Versions in BOM"
             git push origin main

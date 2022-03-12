@@ -24,7 +24,7 @@ jobs:
           git config user.name "Lint Sketches Action"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
           git add .
-          if ! git status | grep "Your branch is up to date"
+          if ! git status | grep "nothing to commit"
           then
             git commit -m "Update lint report"
             git push origin main
