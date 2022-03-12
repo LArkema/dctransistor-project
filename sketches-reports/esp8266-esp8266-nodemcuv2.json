@@ -1,0 +1,55 @@
+{
+  "commit_hash": "c62c5b62ee90a62ae1390ff26fb8a4fed52bc2a8",
+  "commit_url": "https://github.com/LArkema/WMATA_PCB/commit/c62c5b62ee90a62ae1390ff26fb8a4fed52bc2a8",
+  "boards": [
+    {
+      "board": "esp8266:esp8266:nodemcuv2",
+      "sketches": [
+        {
+          "name": "test_code",
+          "compilation_success": true,
+          "sizes": [
+            {
+              "name": "flash",
+              "maximum": 1044464,
+              "current": {
+                "absolute": 398165,
+                "relative": 38.12
+              }
+            },
+            {
+              "name": "RAM for global variables",
+              "maximum": 81920,
+              "current": {
+                "absolute": 29392,
+                "relative": 35.88
+              }
+            }
+          ]
+        },
+        {
+          "name": "dev_code_snippits",
+          "compilation_success": true,
+          "sizes": [
+            {
+              "name": "flash",
+              "maximum": 1044464,
+              "current": {
+                "absolute": 267477,
+                "relative": 25.61
+              }
+            },
+            {
+              "name": "RAM for global variables",
+              "maximum": 81920,
+              "current": {
+                "absolute": 28156,
+                "relative": 34.37
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
