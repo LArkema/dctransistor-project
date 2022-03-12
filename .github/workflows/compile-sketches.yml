@@ -34,8 +34,9 @@ jobs:
       - name: Check Version Name
         run: find ~/ -path "*ArduinoJson*" -name "library.properties" -exec cat {} \;
       # After succesful compilation, update the BOM with the latest dependencies installed by Arduino Compiler (from source), and validate the update against BOM schema.
-      - name: Update, Validate, and Push BOM
+      - name: Validate BOM - setup GO
         uses: actions/setup-go@v2
+      - name: Update, Validate, and Push BOM
         run: | 
           bash ./bom_update.sh
           go get neilpa.me/yajsv
