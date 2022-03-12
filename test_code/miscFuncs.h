@@ -7,6 +7,7 @@
 #include "TrainLine.h"
 
 //Check if a train has reached the end of a line and, if so, whether or not to remove.
+//TODO: APPLY OPPOSITE DIRECTION (Negative Circuit traversal) LOGIC
 int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len, bool dir){
 
   //Only enter if waiting for train at last station or train sitting at last station
@@ -28,8 +29,8 @@ int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len, bool
 
     //If train not at end of line, check if is (or isn't)
     for(int i=0; i<train_len; i++){
-      //Only look at trains at or past 2nd to last station
-      if(train_pos[i] >= line.getStationCircuit(line.getTotalNumStations()-2, dir) ){
+      //Only look at trains arriving at or past 2nd to last station
+      if(train_pos[i] >= line.getStationCircuit(line.getTotalNumStations()-2, dir)-2 ){
         
 
         //If a train is between 2nd to last and last station, has not arrived yet. Return.
