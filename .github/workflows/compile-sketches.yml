@@ -1,4 +1,4 @@
-name: Compile Sketches
+name: Compile Sketches and Update BOM
 
 # Run compile at 10:26 every night.
 on:
@@ -31,3 +31,23 @@ jobs:
             - name: ArduinoJson
             - source-path: inc
             - source-path: ./
+      # After succesful compilation, update the BOM with the latest dependencies installed by Arduino Compiler (from source), and validate the update against BOM schema.
+      - name: Update BOM
+        run: bash ./bom_update.sh
+      - name: Validate BOM - Setup GO
+        uses: actions/setup-go@v2
+      - name: Validate BOM - Get and Run Validator
+        run: |
+          go get neilpa.me/yajsv
+          /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json bom.json
+      - name: "Push BOM back to repo"
+        run: |
+          git config user.email "BOM_Update_Bot@github.com"
+          git config user.name "BOM Update / Sketch Compile Action"
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
+          git add .
+          if ! git status | grep "Your branch is up to date"
+          then
+            git commit -m "Update Dependency Versions in BOM"
+            git push origin main
+          fi
