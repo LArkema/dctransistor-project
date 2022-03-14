@@ -45,7 +45,7 @@ jobs:
           git config user.email "BOM_Update_Bot@github.com"
           git config user.name "BOM Update / Sketch Compile Action"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
-          git add .
+          git add bom.json
           if ! git status | grep "nothing to commit"
           then
             git commit -m "Update Dependency Versions in BOM"

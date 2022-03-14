@@ -119,7 +119,7 @@ int TrainLine::insert(uint8_t station_num, bool dir){
   //where i is index of first staion larger than isnerted station.
   for(int8_t i = 0; i < len; i++){
     if(station_num < waiting_stations[dir][i] ){
-      Serial.printf("Station %d is smaller than station %d. Inserting it at index %d\n", station_num, waiting_stations[i], i);
+      //Serial.printf("Station %d is smaller than station %d. Inserting it at index %d\n", station_num, waiting_stations[dir][i], i);
       if(len-i > 0){
         uint8_t* buf = new uint8_t[len-i]; /*Flawfinder: ignore */
         memcpy(buf, waiting_stations[dir]+i, (len-i)); /*Flawfinder: ignore */
@@ -187,7 +187,7 @@ TrainLine::TrainLine(){
   opp_dir_1st_cid[1] = station_circuits_0[0];
 
   cycles_at_end[0] = 0;
-  cycles_at_end[1] = 1;
+  cycles_at_end[1] = 0;
 
   for(uint8_t i=0; i<total_num_stations; i++){
     pinMode(leds[i], OUTPUT);
@@ -228,7 +228,7 @@ TrainLine::TrainLine(uint8_t num_stations, uint16_t* circuit_list_0, uint16_t* c
   opp_dir_1st_cid[1] = station_circuits_0[0];
 
   cycles_at_end[0] = 0;
-  cycles_at_end[1] = 1;
+  cycles_at_end[1] = 0;
 
   for(uint8_t i=0; i<total_num_stations; i++){
     pinMode(leds[i], OUTPUT);
@@ -320,13 +320,16 @@ uint8_t* TrainLine::getStations(bool dir){
 }
 
 //Returns state of waiting stations as comma separated list of station indexes
-//TODO: UPDATE TO SHOW STATE FOR BOTH DIRECTIONS
 String TrainLine::getState(){
   String state = "";
-  uint8_t len = lens[0];
-  for(int i=0; i<len; i++){
-    state += String(waiting_stations[0][i]);
-    if (i != len-1){state += ", ";}
+  for(uint8_t j=0; j<2; j++){
+    uint8_t len = lens[j];
+    state += "Direction " + String(j) + ": ";
+    for(int i=0; i<len; i++){
+      state += String(waiting_stations[j][i]);
+      if (i != len-1){state += ", ";}
+      else {state += "\n";}
+    }
   }
   return state;
 }//end getState
