@@ -48,7 +48,7 @@ void loop() {
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
   TrainLine redline = TrainLine();
-  bool direction = 1;
+  bool direction = 0;
 
   //Serial.println(String(redline.getOppCID(0)));
 
