@@ -56,7 +56,8 @@ int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len, bool
     for(uint8_t i=0; i < possible_trains_len; i++){
       Serial.printf("Possible train at last station for direction %d: %d\n", dir, possible_trains[i]);
 
-      //Arrived if train between 3 circuits before last station and last station, or at 1st station of other direction.
+      //Arrived if train between 3 circuits before last station and last station (1st two lines),
+      // or at 1st station of other direction (last line).
       if( ( (possible_trains[i]*coefficient >= (line.getLastCID(dir)*coefficient)-3) 
        && (possible_trains[i]*coefficient <= line.getLastCID(dir)*coefficient) ) ||
        possible_trains[i] == line.getOppCID(dir) ){
