@@ -20,7 +20,7 @@ String endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentTy
 
 
 TrainLine redline = TrainLine();
-const bool direction = 0;
+const bool direction = 1;
 
 //Define client responsible for managing secure connection api.wmata.com
 WiFiClientSecure client;
@@ -141,6 +141,7 @@ void loop() {
       }//end station iteration loop
 
       checkEndOfLine(redline, train_positions, k, direction);
+      redline.updateLEDS();
 
       // ** END DIRECTION LOOP. ADD LED UPDATER (AFTER CHANGING EACH DIRECTION TO NOT HAVE CONTROL OVER LEDS) //
 
