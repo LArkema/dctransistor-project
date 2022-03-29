@@ -23,7 +23,7 @@ test(set_train_state){
     TrainLine line = TrainLine();
     uint16_t train_positions[3] = {520, 596, 629};
     line.setInitialStations(train_positions, 3, 0);
-    assertEqual(line.getState(), "0, 3, 7, 9");
+    assertEqual(line.getState(0), "0, 3, 7, 9");
 }
 
 test(arrive_last_only_train){
@@ -33,7 +33,7 @@ test(arrive_last_only_train){
     uint16_t arrival[1] = {652};
     checkEndOfLine(line, arrival, 1, 0);
     assertEqual(line.getCyclesAtEnd(0), 1);
-    assertEqual(line.getState(), "0, 3, 7, 10");
+    assertEqual(line.getState(0), "0, 3, 7, 10");
     
     //2nd check
     checkEndOfLine(line, arrival, 1, 0);
@@ -46,32 +46,34 @@ test(arrive_last_only_train){
     //4th (removed)
     checkEndOfLine(line, arrival, 1, 0);
     assertEqual(line.getCyclesAtEnd(0), 0);
-    assertEqual(line.getState(), "0, 3, 7");
+    assertEqual(line.getState(0), "0, 3, 7");
 }
-
+//Train approaches end of line
+//AT LEAST ONE TEST WITH OPPOSITE DIRECTION HANDLING
 test(approach_last_only_train){
     TrainLine line = TrainLine();
-    uint16_t train_positions[3] = {520, 596, 629};
-    line.setInitialStations(train_positions, 3, 0);
-    uint16_t arrival[1] = {650};
-    checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getCyclesAtEnd(0), 1);
-    assertEqual(line.getState(), "0, 3, 7, 10");
+    bool direction = 1;
+    uint16_t train_positions[3] = {815, 763, 693};
+    line.setInitialStations(train_positions, 3, direction);
+    uint16_t arrival[1] = {688};
+    checkEndOfLine(line, arrival, 1, direction);
+    assertEqual(line.getCyclesAtEnd(direction), 1);
+    assertEqual(line.getState(direction), "0, 3, 5, 10");
 
     //2nd check
-    arrival[0] = 651;
-    checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getCyclesAtEnd(0), 2);
+    arrival[0] = 687;
+    checkEndOfLine(line, arrival, 1, direction);
+    assertEqual(line.getCyclesAtEnd(direction), 2);
 
     //3rd
     arrival[0] = 652;
-    checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getCyclesAtEnd(0), 3);
+    checkEndOfLine(line, arrival, 1, direction);
+    assertEqual(line.getCyclesAtEnd(direction), 3);
 
     //4th (removed)
-    checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getCyclesAtEnd(0), 0);
-    assertEqual(line.getState(), "0, 3, 7");
+    checkEndOfLine(line, arrival, 1, direction);
+    assertEqual(line.getCyclesAtEnd(direction), 0);
+    assertEqual(line.getState(direction), "0, 3, 5");
 }
 
 //When train arrives at first station on opposite platform
@@ -82,7 +84,7 @@ test(arrive_opp_only_train){
     uint16_t arrival[1] = {868};
     checkEndOfLine(line, arrival, 1, 0);
     assertEqual(line.getCyclesAtEnd(0), 1);
-    assertEqual(line.getState(), "0, 3, 7, 10");
+    assertEqual(line.getState(0), "0, 3, 7, 10");
 
     //2nd check
     checkEndOfLine(line, arrival, 1, 0);
@@ -96,7 +98,7 @@ test(arrive_opp_only_train){
     //4th (removed)
     checkEndOfLine(line, arrival, 1, 0);
     assertEqual(line.getCyclesAtEnd(0), 0);
-    assertEqual(line.getState(), "0, 3, 7");
+    assertEqual(line.getState(0), "0, 3, 7");
 }
 
 /*
@@ -111,7 +113,7 @@ test(arrive_last_many_trains){
     uint16_t arrival[3] = {520, 569, 652};
     checkEndOfLine(line, arrival, 3, 0);
     assertEqual(line.getCyclesAtEnd(0), 1);
-    assertEqual(line.getState(), "0, 3, 7, 10"); 
+    assertEqual(line.getState(0), "0, 3, 7, 10"); 
 
     //2nd check
     checkEndOfLine(line, arrival, 3, 0);
@@ -124,7 +126,7 @@ test(arrive_last_many_trains){
     //4th (removed)
     checkEndOfLine(line, arrival, 3, 0);
     assertEqual(line.getCyclesAtEnd(0), 0);
-    assertEqual(line.getState(), "0, 3, 7");   
+    assertEqual(line.getState(0), "0, 3, 7");   
 }
 
 //When train arrives by approaching last circuit
@@ -135,7 +137,7 @@ test(approach_last_many_trains){
     uint16_t arrival[3] = {520, 569, 650};
     checkEndOfLine(line, arrival, 3, 0);
     assertEqual(line.getCyclesAtEnd(0), 1);
-    assertEqual(line.getState(), "0, 3, 7, 10");
+    assertEqual(line.getState(0), "0, 3, 7, 10");
 
     //2nd check
     arrival[2] = 651;
@@ -150,7 +152,7 @@ test(approach_last_many_trains){
     //4th (removed)
     checkEndOfLine(line, arrival, 3, 0);
     assertEqual(line.getCyclesAtEnd(0), 0);
-    assertEqual(line.getState(), "0, 3, 7");    
+    assertEqual(line.getState(0), "0, 3, 7");    
 }
 
 test(arrive_opp_many_trains){
@@ -160,7 +162,7 @@ test(arrive_opp_many_trains){
     uint16_t arrival[1] = {868};
     checkEndOfLine(line, arrival, 3, 0);
     assertEqual(line.getCyclesAtEnd(0), 1);
-    assertEqual(line.getState(), "0, 3, 7, 10");
+    assertEqual(line.getState(0), "0, 3, 7, 10");
 
     //2nd check
     checkEndOfLine(line, arrival, 3, 0);
@@ -174,7 +176,7 @@ test(arrive_opp_many_trains){
     //4th (removed)
     checkEndOfLine(line, arrival, 3, 0);
     assertEqual(line.getCyclesAtEnd(0), 0);
-    assertEqual(line.getState(), "0, 3, 7");
+    assertEqual(line.getState(0), "0, 3, 7");
 }
 
 /*
@@ -186,28 +188,28 @@ test(false_opp_train){
     TrainLine line = TrainLine();
     uint16_t train_positions[4] = {520, 868, 596, 625}; //train sitting at opp, one coming to 
     line.setInitialStations(train_positions, 4, 0);
-    assertEqual(line.getState(), "0, 3, 7, 8");
+    assertEqual(line.getState(0), "0, 3, 7, 8");
 
     uint16_t arrival[1] = {628};
     line.arrived(3, 0);
     checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getState(), "0, 3, 7, 9");
+    assertEqual(line.getState(0), "0, 3, 7, 9");
 
     arrival[0] = 629;
     checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getState(), "0, 3, 7, 9");
+    assertEqual(line.getState(0), "0, 3, 7, 9");
 
     arrival[0] = 634;
     checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getState(),"0, 3, 7, 9");
+    assertEqual(line.getState(0),"0, 3, 7, 9");
 
     arrival[0] = 647;
     checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getState(), "0, 3, 7, 9");
+    assertEqual(line.getState(0), "0, 3, 7, 9");
 
     //Only indicate arrival when train actually arrives
     arrival[0] = 652;
     checkEndOfLine(line, arrival, 1, 0);
-    assertEqual(line.getState(), "0, 3, 7, 10");
+    assertEqual(line.getState(), "Direction 0: 0, 3, 7, 10\nDirection 1: 0\n"); //One check with full string comparison
     assertEqual(line.getCyclesAtEnd(0), 1);
 }

@@ -55,6 +55,7 @@ class TrainLine {
     //Getters
     uint8_t* getStations(bool dir);
     String getState();
+    String getState(bool dir);
     String printVariables();
     uint8_t getLen(bool dir);
     uint8_t getTotalNumStations();
@@ -290,7 +291,7 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
       int16_t tmp_nxt_station = coefficient * station_circuits[dir][j+1];
 
       if(tmp_train_pos >= (tmp_station_circuit - 2) && tmp_train_pos < (tmp_nxt_station -2)){
-        Serial.println("Updating State");
+        //Serial.println("Updating State");
         digitalWrite(leds[j], 1); //update LED at current station  //URGENT: UPDATE LED HANDLING
         insert(j+1, dir); //Add next station to list of waiting stations
         break;
@@ -333,6 +334,15 @@ String TrainLine::getState(){
   }
   return state;
 }//end getState
+
+String TrainLine::getState(bool dir){
+  String state = "";
+  for(int i=0; i<lens[dir]; i++){
+    state += String(waiting_stations[dir][i]);
+    if (i != lens[dir]-1){state += ", ";}
+  }
+  return state;  
+}
 
 //Length getter
 uint8_t TrainLine::getLen(bool dir){
