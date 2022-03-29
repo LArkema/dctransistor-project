@@ -28,8 +28,8 @@ HTTPClient https;
 
 
 //Filters data from TrainPositions API to just get CircuitIds with Train
-StaticJsonDocument<48> train_pos_fiter;
-const uint16_t json_size = 2048;
+StaticJsonDocument<48> train_pos_fiter; 
+const uint16_t json_size = 2048; //change to 3072 if add DirectionNum
 
 //SETUP WIFI CONNECTION
 void setup() {
@@ -51,7 +51,7 @@ void setup() {
 
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
-  train_pos_fiter["TrainPositions"][0]["CircuitId"] = true;
+  train_pos_fiter["TrainPositions"][0]["CircuitId"] = true; //Possible TODO: Add "DirectionNum" to filter.
   
 }//END SETUP
 
@@ -85,6 +85,8 @@ void loop() {
 
       for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
       
+        // ** ADD LOOP THROUGH DIRECTIONS HERE ** (... and eventually different train lines)//
+
         int8_t coefficient = (direction * -2) + 1; //turns 0 to 1 and 1 to -1
         const int16_t circID = train["CircuitId"].as<unsigned int>() * coefficient;
 
@@ -93,7 +95,8 @@ void loop() {
 
         //Serial.printf("Circuit %d must be greater than %d and less than %d\n", circID, start_circuit, end_circuit);
 
-        //Add train in test range to list
+        //Add train that's in given line's circuit range, or opp direction's 1st circuit, to a list to inspect.
+        //Optional TODO: Add "DirectionNum" to filter and logic here. If so, add to filter and change size.
         if ( (circID >= start_circuit && circID <= end_circuit) || 
         (circID >= redline.getOppCID(direction) * coefficient && circID < (redline.getOppCID(direction) + 2)*coefficient) ){
 
@@ -102,6 +105,8 @@ void loop() {
         }
       }//end loop through active trains
       
+      //* ADD DIRECTION LOOP *//
+
       Serial.println("All trains in test range");
       for(int t=0; t<k; t++){
         Serial.printf("%d, ",train_positions[t]); /*Flawfinder: ignore */
@@ -136,6 +141,8 @@ void loop() {
       }//end station iteration loop
 
       checkEndOfLine(redline, train_positions, k, direction);
+
+      // ** END DIRECTION LOOP. ADD LED UPDATER (AFTER CHANGING EACH DIRECTION TO NOT HAVE CONTROL OVER LEDS) //
 
     }//END HTTPCODE
   

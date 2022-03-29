@@ -23,3 +23,4 @@ jobs:
         run: |
           make -C tests
           make -C tests runtests
+          make -C tests clean
