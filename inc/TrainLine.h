@@ -52,6 +52,8 @@ class TrainLine {
 
     int incrementCyclesAtEnd(bool dir); //returns updated number of cycles.
 
+    void updateLEDS();
+
     //Getters
     uint8_t* getStations(bool dir);
     String getState();
@@ -251,7 +253,7 @@ int TrainLine::arrived(uint8_t index, bool dir){
     //If next station is waiting for train, cannot move forward.
     if(waiting_stations[dir][index]+1 != waiting_stations[dir][index+1]){ //TODO: replace with robust circuitID "collision" check.
 
-      digitalWrite(leds[waiting_stations[dir][index]], 1); //turn led on to show arrival at station. //URGENT: UPDATE LED HANDLING
+      //digitalWrite(leds[waiting_stations[dir][index]], 1); //turn led on to show arrival at station. //URGENT: UPDATE LED HANDLING
 
       //If train arrives at first station, add train to list of waiting trains.
       if(index == 0){
@@ -259,7 +261,7 @@ int TrainLine::arrived(uint8_t index, bool dir){
       }
       //Otherwise, increment train's "position" (station waiting for it) and turn previous LED off.
       else {
-        digitalWrite(leds[waiting_stations[dir][index]-1], 0); //URGENT: UPDATE LED HANDLING
+        //digitalWrite(leds[waiting_stations[dir][index]-1], 0); //URGENT: UPDATE LED HANDLING
         waiting_stations[dir][index]++;
       }
       return waiting_stations[dir][index];
@@ -292,7 +294,7 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
 
       if(tmp_train_pos >= (tmp_station_circuit - 2) && tmp_train_pos < (tmp_nxt_station -2)){
         //Serial.println("Updating State");
-        digitalWrite(leds[j], 1); //update LED at current station  //URGENT: UPDATE LED HANDLING
+        //digitalWrite(leds[j], 1); //update LED at current station  //URGENT: UPDATE LED HANDLING
         insert(j+1, dir); //Add next station to list of waiting stations
         break;
       }
@@ -301,6 +303,44 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
 
   return 0;
 }//end SetState
+
+//Update LED display based on current state
+void TrainLine::updateLEDS(){
+  uint16_t state = 0;
+  
+  //For each waiting station, train is "at" station before it. Set bit in state to reflect current station's index.
+  for(int8_t i=1; i<lens[0]; i++){
+    int8_t station = waiting_stations_0[i] - 1; //e.g. if waiting station is 3, current station is 2. 1 << 2 == 0x0100 (representing stations 3, 2, 1, and 0). 
+    state = state | (1 << station); //add station to state using OR operator
+  }
+
+  //Put trains moving in opposite direction into state based on distance from end
+  for(int8_t i=1; i<lens[1]; i++){
+    int8_t station = (total_num_stations - waiting_stations_1[i]); //e.g. if waiting station(real) is 3(6), current station is 2(7). 1 << 7 0x0010000000 (stations 0(9), 1(8), 2(7), ...)
+    state = state | (1 << station);
+  }
+
+  Serial.println(String(state));
+
+
+  //If a train is at the end of either direction, set direction's last bit on
+  if(cycles_at_end[0] > 0){
+    uint16_t tmp = 1 << (total_num_stations - 1);
+    state = state | tmp;
+  }
+
+  if(cycles_at_end[1] > 0){
+    state = state | 1;
+  }
+
+  //Go through every station on line, turning LED on if train there and off if not
+  for(uint16_t i=0; i<total_num_stations; i++){
+    //Serial.printf("Station %d train state: %d\n", i, (state & 1));
+    digitalWrite(leds[i], (state & 1) );
+    state = state >> 1;
+  }
+
+}//end updateLEDs
 
 //Get cycles train has been at end of line.
 uint8_t TrainLine::getCyclesAtEnd(bool dir){
