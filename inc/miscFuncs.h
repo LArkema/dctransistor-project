@@ -19,7 +19,7 @@ int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len, bool
 
     //If train has reached end of line, cycles_at_end is non-zero.
     if(line.getCyclesAtEnd(dir) > 0){
-      Serial.println("Incrementing cycle");
+      //Serial.println("Incrementing cycle");
       if(line.incrementCyclesAtEnd(dir) == 0){ //increment rolls over to 0 when max reached
         line.remove(dir);
       }
@@ -39,7 +39,7 @@ int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len, bool
 
         //If a train is between 2nd to last and last station, has not arrived yet. Return.
         if(train_pos[i]*coefficient < (line.getLastCID(dir)*coefficient)-2){
-          Serial.printf("Train %d en route to last. Not arrived yet.\n", train_pos[i]);
+          //Serial.printf("Train %d en route to last. Not arrived yet.\n", train_pos[i]);
 
           delete[] possible_trains;
           return -1;
@@ -54,7 +54,7 @@ int checkEndOfLine(TrainLine &line, uint16_t* train_pos, uint8_t train_len, bool
 
     //Loop through all possible trains, check if it has arrived at last station circuit yet.
     for(uint8_t i=0; i < possible_trains_len; i++){
-      Serial.printf("Possible train at last station for direction %d: %d\n", dir, possible_trains[i]);
+      //Serial.printf("Possible train at last station for direction %d: %d\n", dir, possible_trains[i]);
 
       //Arrived if train between 3 circuits before last station and last station (1st two code lines),
       // or at 1st station of other direction (last code line).

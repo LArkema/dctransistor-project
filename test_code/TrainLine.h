@@ -304,7 +304,7 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
   return 0;
 }//end SetState
 
-//Update LED display based on current state
+//Update LED display based on bi-directional current state
 void TrainLine::updateLEDS(){
   uint16_t state = 0;
   
@@ -316,7 +316,7 @@ void TrainLine::updateLEDS(){
 
   //Put trains moving in opposite direction into state based on distance from end
   for(int8_t i=1; i<lens[1]; i++){
-    int8_t station = (total_num_stations - waiting_stations_1[i]); //e.g. if waiting station (backwards) is 3()
+    int8_t station = (total_num_stations - waiting_stations_1[i]); //e.g. if waiting station(real) is 3(6), current station is 2(7). 1 << 7 0x0010000000 (stations 0(9), 1(8), 2(7), ...)
     state = state | (1 << station);
   }
 
@@ -335,7 +335,7 @@ void TrainLine::updateLEDS(){
 
   //Go through every station on line, turning LED on if train there and off if not
   for(uint16_t i=0; i<total_num_stations; i++){
-    Serial.printf("Station %d train state: %d\n", i, (state & 1));
+    //Serial.printf("Station %d train state: %d\n", i, (state & 1));
     digitalWrite(leds[i], (state & 1) );
     state = state >> 1;
   }
