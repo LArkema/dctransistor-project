@@ -20,7 +20,7 @@ String endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentTy
 
 
 TrainLine redline = TrainLine();
-const bool direction = 1;
+//const bool direction = 1;
 
 //Define client responsible for managing secure connection api.wmata.com
 WiFiClientSecure client;
@@ -76,8 +76,8 @@ void loop() {
     
 
       //Iterate through all returned train positions, put the ones on target section of redline track into an array.
-      uint16_t train_positions[10] = {};
-      uint8_t k = 0;
+      uint16_t train_positions[2][10] = {};
+      uint8_t train_len[2] = {0,0};
       //uint16_t array_size = doc["TrainPositions"].size();
       //uint16_t j = 0;
 
@@ -85,66 +85,75 @@ void loop() {
 
       for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
       
-        // ** ADD LOOP THROUGH DIRECTIONS HERE ** (... and eventually different train lines)//
+        // Eventually loop through train lines
+        for(uint8_t dir=0; dir<2; dir++){
 
-        int8_t coefficient = (direction * -2) + 1; //turns 0 to 1 and 1 to -1
-        const int16_t circID = train["CircuitId"].as<unsigned int>() * coefficient;
+        
+          int8_t cf = (dir * -2) + 1; //turns 0 to 1 and 1 to -1 - allows for same comparison logic when train moves negatively
+          const int16_t circID = train["CircuitId"].as<unsigned int>() * cf;
 
-        int16_t start_circuit = redline.getStationCircuit(0, direction) * coefficient;
-        int16_t end_circuit = redline.getStationCircuit(redline.getTotalNumStations()-1, direction) * coefficient;
+          //uint16_t start_circuit = 0; //redline.getStationCircuit(0, direction) * coefficient;
+          //uint16_t end_circuit = 0; //redline.getStationCircuit(redline.getTotalNumStations()-1, direction) * coefficient;
 
-        //Serial.printf("Circuit %d must be greater than %d and less than %d\n", circID, start_circuit, end_circuit);
 
-        //Add train that's in given line's circuit range, or opp direction's 1st circuit, to a list to inspect.
-        //Optional TODO: Add "DirectionNum" to filter and logic here. If so, add to filter and change size.
-        if ( (circID >= start_circuit && circID <= end_circuit) || 
-        (circID >= redline.getOppCID(direction) * coefficient && circID < (redline.getOppCID(direction) + 2)*coefficient) ){
+          //Serial.printf("Circuit %d must be greater than %d and less than %d\n", circID, start_circuit, end_circuit);
 
-          train_positions[k] = circID * coefficient;
-          k++;
-        }
-      }//end loop through active trains
-      
-      //* ADD DIRECTION LOOP *//
+          //Add train that's in given line's circuit range, or opp direction's 1st circuit, to a list to inspect.
+          //Optional TODO: Add "DirectionNum" to filter and logic here. If so, add to filter and change size.
+          if ( (circID >= (redline.getStationCircuit(0, dir)*cf) && circID <= (redline.getLastCID(dir)*cf) ) || 
+          (circID == redline.getOppCID(dir))  ){
 
-      Serial.println("All trains in test range");
-      for(int t=0; t<k; t++){
-        Serial.printf("%d, ",train_positions[t]); /*Flawfinder: ignore */
-      }
-      Serial.println();
-
-      if (redline.getLen(direction) < 2){
-        Serial.println("Setting initial state");
-        redline.setInitialStations(train_positions, k, direction);
-        Serial.println(redline.getState());
-      }
-
-      for(int8_t i=redline.getLen(direction)-1; i >= 0; i--){
-
-        //Put target station in local circuit
-        uint16_t station_circuit = redline.getWaitingStationCircuit(i, direction); //redline stores station indexes.
-
-        //See if any of the current train positions are arriving, at, or just leaving destination station.
-        //If so, update station state.
-        for(int t=0; t<k; t++){
-          if(train_positions[t] > (station_circuit - 3) && train_positions[t] < (station_circuit + 3) 
-          && station_circuit != redline.getLastCID(direction) ){
-
-            Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore */
-            Serial.printf("Train Circuit:   %d\n", train_positions[t]); /*Flawfinder: ignore */
-
-            redline.arrived(i, direction);
-
+            train_positions[dir][train_len[dir]] = circID * cf; //reverts negative numbers back to positive
+            train_len[dir]++;
             break;
           }
+
+        }//end direction loop
+      }//end loop through active trains
+      
+
+      for(uint8_t direction=0; direction<2; direction++){
+
+        Serial.printf("All trains in test range for dir %d\n", direction);
+        for(int t=0; t<train_len[direction]; t++){
+          Serial.printf("%d, ",train_positions[direction][t]); /*Flawfinder: ignore */
         }
-      }//end station iteration loop
+        Serial.println();
 
-      checkEndOfLine(redline, train_positions, k, direction);
+        if (redline.getLen(direction) < 2){
+          Serial.printf("Setting initial state for dir %d\n", direction);
+          redline.setInitialStations(train_positions[direction], train_len[direction], direction);
+          Serial.println(redline.getState());
+        }
+
+        //Loop through stations waiting in a given direction, and see if one of the active trains has reached them yet.
+        for(int8_t i=redline.getLen(direction)-1; i >= 0; i--){
+
+          //Put target station in local circuit
+          uint16_t station_circuit = redline.getWaitingStationCircuit(i, direction); //redline stores station indexes.
+
+          //See if any of the current train positions are arriving, at, or just leaving destination station.
+          //If so, update station state.
+          for(int t=0; t<train_len[direction]; t++){
+
+            if(train_positions[direction][t] > (station_circuit - 5) && train_positions[direction][t] < (station_circuit + 5) 
+            && station_circuit != redline.getLastCID(direction) ){
+
+              Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore */
+              Serial.printf("Train Circuit:   %d\n", train_positions[direction][t]); /*Flawfinder: ignore */
+
+              redline.arrived(i, direction);
+
+              break;
+            }
+          }
+        }//end station iteration loop
+
+        checkEndOfLine(redline, train_positions[direction], train_len[direction], direction);
+
+      }//end direction loop
+      //update LEDs
       redline.updateLEDS();
-
-      // ** END DIRECTION LOOP. ADD LED UPDATER (AFTER CHANGING EACH DIRECTION TO NOT HAVE CONTROL OVER LEDS) //
-
     }//END HTTPCODE
   
     else {

@@ -144,7 +144,7 @@ int TrainLine::remove(bool dir){
   //can only remove if last train is at last station
   uint8_t len = lens[dir];
   if(waiting_stations[dir][len-1] == total_num_stations){
-    digitalWrite(leds[waiting_stations[dir][len-1]-1], 0); //URGENT: UPDATE LED HANDLING
+    //digitalWrite(leds[waiting_stations[dir][len-1]-1], 0); //URGENT: UPDATE LED HANDLING
     waiting_stations[dir][len-1] = 0;
     lens[dir]--;
     return lens[dir];
@@ -304,7 +304,7 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
   return 0;
 }//end SetState
 
-//Update LED display based on current state
+//Update LED display based on bi-directional current state
 void TrainLine::updateLEDS(){
   uint16_t state = 0;
   
