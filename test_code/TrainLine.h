@@ -27,10 +27,13 @@ class TrainLine {
     uint16_t* station_circuits_0; //dynamically allocated list for station circuitIDs, trains move positively along circuits
     uint16_t* station_circuits_1; //stores station circuits for other directions, trains move negatively along circuits
 
+    int32_t state;
+
 
     uint8_t lens[2]; //array to hold length of active train array for both directions.
     uint8_t cycles_at_end[2]; //hold how many cycles a train has been at respective dir's last station
     uint16_t opp_dir_1st_cid[2]; //hold opposive of a given dir's 1st CircuitID. 
+    bool last_station_waiting[2];
 
     uint8_t* leds; //One list of LEDs represents trains going both directions
 
@@ -51,8 +54,10 @@ class TrainLine {
     int remove(bool dir);
 
     int incrementCyclesAtEnd(bool dir); //returns updated number of cycles.
+    int setTrainState(uint16_t circuitID);
 
-    void updateLEDS();
+    void updateLEDS();  //For fully stateful (use lists of waiting station indexes for each direction)
+    void updateLEDS2(); //Based on minimully stateful version (bit array reset every check with server)
 
     //Getters
     uint8_t* getStations(bool dir);
@@ -144,7 +149,7 @@ int TrainLine::remove(bool dir){
   //can only remove if last train is at last station
   uint8_t len = lens[dir];
   if(waiting_stations[dir][len-1] == total_num_stations){
-    digitalWrite(leds[waiting_stations[dir][len-1]-1], 0); //URGENT: UPDATE LED HANDLING
+    //digitalWrite(leds[waiting_stations[dir][len-1]-1], 0); //URGENT: UPDATE LED HANDLING
     waiting_stations[dir][len-1] = 0;
     lens[dir]--;
     return lens[dir];
@@ -191,6 +196,10 @@ TrainLine::TrainLine(){
 
   cycles_at_end[0] = 0;
   cycles_at_end[1] = 0;
+  state = 0;
+
+  last_station_waiting[0] = false;
+  last_station_waiting[1] = false;
 
   for(uint8_t i=0; i<total_num_stations; i++){
     pinMode(leds[i], OUTPUT);
@@ -232,6 +241,11 @@ TrainLine::TrainLine(uint8_t num_stations, uint16_t* circuit_list_0, uint16_t* c
 
   cycles_at_end[0] = 0;
   cycles_at_end[1] = 0;
+
+  state = 0;
+
+  last_station_waiting[0] = 0;
+  last_station_waiting[1] = 0;
 
   for(uint8_t i=0; i<total_num_stations; i++){
     pinMode(leds[i], OUTPUT);
@@ -303,6 +317,113 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
 
   return 0;
 }//end SetState
+
+//Given a circuit, use it to update line's state.
+int TrainLine::setTrainState(uint16_t circID){
+
+  if(circID > station_circuits_0[0] && circID <= station_circuits_0[total_num_stations-1]){
+
+    for(int8_t j=0; j<total_num_stations-1; j++){
+      if(circID >= (station_circuits_0[j]-2) && circID < (station_circuits_0[j+1]-2)){
+        Serial.printf("CircuitID %d setting station %d\n", circID, j);
+        //Serial.printf("State before setting: %d\n", state);
+        state = state | (1 << j);
+        //Serial.printf("State after setting: %d\n", state);
+        //If "at" 2nd to last station, set last station waiting to true.
+        if(j == total_num_stations-2){
+          Serial.println("Setting last station waiting");
+          last_station_waiting[0] = true;
+        }
+        return j;
+      }
+    }
+
+    //If arriving at last station, update state and note arrival to keep LED on momentarily
+    if( (circID >= (station_circuits_0[total_num_stations-1]-2)) && (last_station_waiting[0] == true)) {
+      Serial.printf("CircuitID %d setting station %d\n", circID, total_num_stations-1);
+      state = state | (1 << total_num_stations-1);
+      cycles_at_end[0]++;
+      last_station_waiting[0] = false;
+      return total_num_stations-1;
+    }
+
+  }//end positive direction check and update
+
+  //If train not in range, check if train at start of opposite direction IF expecting train at end of line
+  if( (circID == getOppCID(0)) && (last_station_waiting[0] == true) ){
+    Serial.printf("CircuitID %d setting station %d\n", circID, total_num_stations-1);
+    state = state | (1 << total_num_stations-1);
+    cycles_at_end[0]++;
+    last_station_waiting[0] = false;
+    return total_num_stations-1;
+  }
+
+  /*** CHECKS FOR TRAINS IN "OPPOSITE" (TRAIN PROGRESSES NEGATIVELY DOWN CIRCUIT IDS) DIRECTION ***/
+
+  //If train in range of direction's circuitIDs, check what staion it is "at"
+  if(circID < station_circuits_1[0] && circID >= station_circuits_1[total_num_stations-1]){
+
+    for(int8_t j=0; j<total_num_stations-1; j++){
+
+      if(circID <= (station_circuits_1[j]+2) && circID > (station_circuits_1[j+1]+2)){
+        uint8_t dist_from_end = (total_num_stations-j)-1; //shift bit to set 1 at station based on distance from "end" of line
+        Serial.printf("CircuitID %d setting (absolute) station %d\n", circID, dist_from_end);
+        state = state | (1 << dist_from_end);
+        //If "at" 2nd to last station, set last station waiting to true.
+        if(j == total_num_stations-2){
+          last_station_waiting[1] = true;
+        }
+        return j;
+      }
+    }
+
+    //If arriving at last station, update state and note arrival to keep LED on momentarily
+    if(circID <= (station_circuits_1[total_num_stations-1]+2) && last_station_waiting[1]){
+      state = state | 1; //last station in opp direction is "1st" station
+      cycles_at_end[1]++;
+      last_station_waiting[1] = false;
+      return total_num_stations-1;
+    }
+  }//end negative direction check and update
+
+  //If not in range but expecting a train at end of line, check if at opposite direction's circuit for station.
+  if(circID == getOppCID(1) && last_station_waiting[1]){
+    state = state | 1; //last station in opp direction is "1st" station
+    cycles_at_end[1]++;
+    last_station_waiting[1] = false;
+    return total_num_stations-1;
+  }
+
+  return -1; //If train at circuit 
+}//END setTrainState
+
+
+void TrainLine::updateLEDS2(){
+
+  Serial.printf("State at start of LED update: %d\n", state);
+  
+  //If train was at end of line, increment through 3 cycles then turn LED off
+  for(int8_t dir=0; dir<2; dir++){
+
+    if(cycles_at_end[dir] > 0){
+      if(dir == 0){state = state | (1 << total_num_stations-1);}
+      else if (dir ==1){state = state | 1;}
+      cycles_at_end[dir]++;
+      if(cycles_at_end[dir] == 4){cycles_at_end[dir] = 0;} //After three cycles, reset to 0 so LED turns off in all future cycles.
+    }
+  }
+
+  //Go through every station on line, turning LED on if train there and off if not
+  for(uint16_t i=0; i<total_num_stations; i++){
+    //Serial.printf("Station %d train state: %d\n", i, (state & 1));
+    digitalWrite(leds[i], (state & 1) );
+    state = state >> 1;
+  }
+
+  state = 0;
+
+  
+}
 
 //Update LED display based on bi-directional current state
 void TrainLine::updateLEDS(){

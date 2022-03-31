@@ -58,7 +58,8 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
 
-  Serial.println(redline.getState());
+  Serial.println("---- NEW LOOP ----");
+  //Serial.println(redline.getState());
 
   //Connect and confirm HTTPS connection to api.wmata.com
   if (https.begin(client, endpoint)) {
@@ -90,7 +91,11 @@ void loop() {
 
         
           int8_t cf = (dir * -2) + 1; //turns 0 to 1 and 1 to -1 - allows for same comparison logic when train moves negatively
-          const int16_t circID = train["CircuitId"].as<unsigned int>() * cf;
+          const int16_t circID = train["CircuitId"].as<unsigned int>()* cf;
+
+          if( redline.setTrainState(circID) != -1){
+            Serial.printf("CircuitID %d updated state\n", circID);
+          }
 
           //uint16_t start_circuit = 0; //redline.getStationCircuit(0, direction) * coefficient;
           //uint16_t end_circuit = 0; //redline.getStationCircuit(redline.getTotalNumStations()-1, direction) * coefficient;
@@ -100,6 +105,7 @@ void loop() {
 
           //Add train that's in given line's circuit range, or opp direction's 1st circuit, to a list to inspect.
           //Optional TODO: Add "DirectionNum" to filter and logic here. If so, add to filter and change size.
+          
           if ( (circID >= (redline.getStationCircuit(0, dir)*cf) && circID <= (redline.getLastCID(dir)*cf) ) || 
           (circID == redline.getOppCID(dir))  ){
 
@@ -107,6 +113,7 @@ void loop() {
             train_len[dir]++;
             break;
           }
+      
 
         }//end direction loop
       }//end loop through active trains
@@ -114,11 +121,16 @@ void loop() {
 
       for(uint8_t direction=0; direction<2; direction++){
 
-        Serial.printf("All trains in test range for dir %d\n", direction);
+        Serial.printf("All trains in test range for dir %d: ", direction);
         for(int t=0; t<train_len[direction]; t++){
           Serial.printf("%d, ",train_positions[direction][t]); /*Flawfinder: ignore */
         }
         Serial.println();
+      } //REMOVE TO GO BACK TO STATEFUL VERSION
+
+      redline.updateLEDS2();
+
+        /* BIG CHANGE
 
         if (redline.getLen(direction) < 2){
           Serial.printf("Setting initial state for dir %d\n", direction);
@@ -139,8 +151,8 @@ void loop() {
             if(train_positions[direction][t] > (station_circuit - 5) && train_positions[direction][t] < (station_circuit + 5) 
             && station_circuit != redline.getLastCID(direction) ){
 
-              Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore */
-              Serial.printf("Train Circuit:   %d\n", train_positions[direction][t]); /*Flawfinder: ignore */
+              Serial.printf("Station Circuit: %d\n", station_circuit); /*Flawfinder: ignore 
+              Serial.printf("Train Circuit:   %d\n", train_positions[direction][t]); /*Flawfinder: ignore 
 
               redline.arrived(i, direction);
 
@@ -151,9 +163,12 @@ void loop() {
 
         checkEndOfLine(redline, train_positions[direction], train_len[direction], direction);
 
+  
+
       }//end direction loop
       //update LEDs
-      redline.updateLEDS();
+      //redline.updateLEDS();
+      */
     }//END HTTPCODE
   
     else {
