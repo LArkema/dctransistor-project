@@ -19,8 +19,11 @@ const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13
 String endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
 
 
-TrainLine redline = TrainLine();
-//const bool direction = 1;
+//TrainLine redline = TrainLine();
+TrainLine* redline;
+
+Adafruit_LEDBackpack matrix = Adafruit_LEDBackpack();
+const uint8_t addr = 0x70;
 
 //Define client responsible for managing secure connection api.wmata.com
 WiFiClientSecure client;
@@ -49,10 +52,23 @@ void setup() {
   client.setFingerprint(wmata_fingerprint);
   client.setTimeout(15000);
 
+  //Set LED matrix settings, including i2c address
+  matrix.begin(addr);
+  matrix.setBrightness(4);
+  matrix.writeDisplay();
+
+  const uint16_t rstations_0[27] = {7, 32, 53, 62, 80, 95, 109, 126, 133, 142, 154, 164, 179, 190, 203, 467, 477, 485, 496, 513, 527, 548, 571, 591, 611, 629, 652};
+  const uint16_t rstations_1[27] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686, 677, 667, 661, 389, 378, 363, 356, 346, 336, 326, 309, 294, 278, 260, 251, 232, 210};
+  const uint16_t rclusters_0[4] = {7, 203, 467, 652};
+  const uint16_t rclusters_1[4] = {868, 661, 389, 210};
+
+  redline = new TrainLine(27, 2, rclusters_0, rclusters_1, rstations_0, rstations_1, 2, 28);
+
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
   train_pos_fiter["TrainPositions"][0]["CircuitId"] = true; //Possible TODO: Add "DirectionNum" to filter.
   
+  Serial.println("Leaving setup");
 }//END SETUP
 
 // the loop function runs over and over again forever
@@ -93,21 +109,20 @@ void loop() {
           int8_t cf = (dir * -2) + 1; //turns 0 to 1 and 1 to -1 - allows for same comparison logic when train moves negatively
           const int16_t circID = train["CircuitId"].as<unsigned int>()* cf;
 
+          redline->setTrainState(circID);
+          /*
           if( redline.setTrainState(circID) != -1){
             Serial.printf("CircuitID %d updated state\n", circID);
           }
-
-          //uint16_t start_circuit = 0; //redline.getStationCircuit(0, direction) * coefficient;
-          //uint16_t end_circuit = 0; //redline.getStationCircuit(redline.getTotalNumStations()-1, direction) * coefficient;
+          */
 
 
           //Serial.printf("Circuit %d must be greater than %d and less than %d\n", circID, start_circuit, end_circuit);
 
           //Add train that's in given line's circuit range, or opp direction's 1st circuit, to a list to inspect.
           //Optional TODO: Add "DirectionNum" to filter and logic here. If so, add to filter and change size.
-          
-          if ( (circID >= (redline.getStationCircuit(0, dir)*cf) && circID <= (redline.getLastCID(dir)*cf) ) || 
-          (circID == redline.getOppCID(dir))  ){
+          if ( (circID >= (redline->getStationCircuit(0, dir)*cf) && circID <= (redline->getLastCID(dir)*cf) ) || 
+          (circID == redline->getOppCID(dir))  ){
 
             train_positions[dir][train_len[dir]] = circID * cf; //reverts negative numbers back to positive
             train_len[dir]++;
@@ -128,7 +143,13 @@ void loop() {
         Serial.println();
       } //REMOVE TO GO BACK TO STATEFUL VERSION
 
-      redline.updateLEDS2();
+      redline->updateLEDS2(matrix);
+
+      matrix.writeDisplay();
+      for(uint k=0; k<8; k++){
+        matrix.displaybuffer[k] = 0;
+      }
+
 
         /* BIG CHANGE
 
