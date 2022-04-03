@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include "Adafruit_LEDBackpack.h"
 /*
     Defines TrainLine class - an evolution of SimpleList. 
     Data structure optimized to store which stations on a line are waiting for a train to arrive.
@@ -29,12 +28,6 @@ class TrainLine {
     uint16_t* station_circuits_1; //stores station circuits for other directions, trains move negatively along circuits
 
     int32_t state;
-    uint8_t first_led;
-    uint8_t last_led;
-
-    uint8_t num_clusters;
-    uint16_t* cluster_edges_0;
-    uint16_t* cluster_edges_1;
 
 
     uint8_t lens[2]; //array to hold length of active train array for both directions.
@@ -42,7 +35,7 @@ class TrainLine {
     uint16_t opp_dir_1st_cid[2]; //hold opposive of a given dir's 1st CircuitID. 
     bool last_station_waiting[2];
 
-    //uint8_t* leds; //One list of LEDs represents trains going both directions
+    uint8_t* leds; //One list of LEDs represents trains going both directions
 
     //state updating functions
     int add(bool dir);
@@ -52,7 +45,7 @@ class TrainLine {
 
     //Constructors and Destructor
     TrainLine();
-    TrainLine(uint8_t num_stations, uint8_t num_clusters, const uint16_t* cluster_list_0, const uint16_t* cluster_list_1, const uint16_t* circuit_list_0, const uint16_t* circuit_list_1, uint8_t start_led, uint8_t last_led);
+    TrainLine(uint8_t num_stations, uint16_t* circuit_list_0, uint16_t* circuit_list_1, uint8_t* leds_list);
     ~TrainLine();
 
     //State updating functions
@@ -64,7 +57,7 @@ class TrainLine {
     int setTrainState(uint16_t circuitID);
 
     void updateLEDS();  //For fully stateful (use lists of waiting station indexes for each direction)
-    void updateLEDS2(Adafruit_LEDBackpack &matrix); //Based on minimully stateful version (bit array reset every check with server)
+    void updateLEDS2(); //Based on minimully stateful version (bit array reset every check with server)
 
     //Getters
     uint8_t* getStations(bool dir);
@@ -176,7 +169,7 @@ TrainLine::TrainLine(){
   waiting_stations_1 = new uint8_t[total_num_stations];
   station_circuits_0 = new uint16_t[total_num_stations];
   station_circuits_1 = new uint16_t[total_num_stations];
-  //leds = new uint8_t[total_num_stations];
+  leds = new uint8_t[total_num_stations];
 
   waiting_stations[0] = waiting_stations_0;
   waiting_stations[1] = waiting_stations_1;
@@ -191,24 +184,12 @@ TrainLine::TrainLine(){
 
   uint16_t tmp_station_circuits_0[10] = {485, 496, 513, 527, 548, 571, 591, 611, 629, 652};
   uint16_t tmp_station_circuits_1[10] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686};
-
-  num_clusters = 1;
-  cluster_edges_0 = new uint16_t[2];
-  cluster_edges_1 = new uint16_t[2];
-
-  cluster_edges_0[0] = 485;
-  cluster_edges_0[1] = 652;
-  cluster_edges_1[0] = 868;
-  cluster_edges_1[1] = 686;
-  //uint8_t tmp_leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10};
-
-  first_led = 0;
-  last_led = 9;
+  uint8_t tmp_leds[10] = {15, 13, 12, 14, 2, 0, 4, 5, 16, 10};
 
   memcpy(station_circuits_0, tmp_station_circuits_0, sizeof(uint16_t) * total_num_stations); /*FlawFinder: Ignore */
   memcpy(station_circuits_1, tmp_station_circuits_1, sizeof(uint16_t) * total_num_stations); /*FlawFinder: Ignore */
 
-  //memcpy(leds, tmp_leds, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
+  memcpy(leds, tmp_leds, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
 
   opp_dir_1st_cid[0] = station_circuits_1[0];
   opp_dir_1st_cid[1] = station_circuits_0[0];
@@ -220,31 +201,24 @@ TrainLine::TrainLine(){
   last_station_waiting[0] = false;
   last_station_waiting[1] = false;
 
-  /*
   for(uint8_t i=0; i<total_num_stations; i++){
     pinMode(leds[i], OUTPUT);
   }
-  */
 
 }
 
 //Overloaded constructor that takes list of track circuitIDs corresponding to each station on line
-TrainLine::TrainLine(uint8_t num_stations, uint8_t CID_clusters_num, const uint16_t* edges_0, const uint16_t* edges_1, const uint16_t* circuit_list_0, const uint16_t* circuit_list_1, uint8_t start_led, uint8_t end_led){
-  Serial.println("In constructor");
-  delay(500);
+TrainLine::TrainLine(uint8_t num_stations, uint16_t* circuit_list_0, uint16_t* circuit_list_1, uint8_t* leds_list){
   total_num_stations = num_stations;
-  num_clusters = CID_clusters_num;
   lens[0] = 1;
   lens[1] = 1;
 
   //Set state arrays to number of stations in track.
-  waiting_stations_0 = nullptr; //new uint8_t[total_num_stations];
-  waiting_stations_1 = nullptr; //new uint8_t[total_num_stations];
+  waiting_stations_0 = new uint8_t[total_num_stations];
+  waiting_stations_1 = new uint8_t[total_num_stations];
   station_circuits_0 = new uint16_t[total_num_stations];
   station_circuits_1 = new uint16_t[total_num_stations];
-  cluster_edges_0 = new uint16_t[CID_clusters_num*2];
-  cluster_edges_1 = new uint16_t[CID_clusters_num*2];
-  //leds = new uint8_t[total_num_stations];
+  leds = new uint8_t[total_num_stations];
 
   //Point directional arrays to each list
   waiting_stations[0] = waiting_stations_0;
@@ -253,36 +227,14 @@ TrainLine::TrainLine(uint8_t num_stations, uint8_t CID_clusters_num, const uint1
   station_circuits[1] = station_circuits_1;
 
   //Set both waiting stations list to 0s
-  //memset(waiting_stations_0, 0, sizeof(uint8_t) * total_num_stations);
-  //memset(waiting_stations_1, 0, sizeof(uint8_t) * total_num_stations);
-
-  Serial.println("About to memcpy stations");
-  delay(500);
+  memset(waiting_stations_0, 0, sizeof(uint8_t) * total_num_stations);
+  memset(waiting_stations_1, 0, sizeof(uint8_t) * total_num_stations);
 
   //Set list of station circuitIDs to lists passed in as arguments
   memcpy(station_circuits_0, circuit_list_0, sizeof(uint16_t) * total_num_stations); /* FlawFinder: Ignore */
   memcpy(station_circuits_1, circuit_list_1, sizeof(uint16_t) * total_num_stations); /* FlawFinder: Ignore */
 
-  Serial.println("About to memcpy clusters");
-  delay(500);
-
-  //Set list of circuitIDs that determine start / end of "clusters"
-  memcpy(cluster_edges_0, edges_0, sizeof(uint16_t) * num_clusters * 2); /* FlawFinder: Ignore */
-  memcpy(cluster_edges_1, edges_1, sizeof(uint16_t) * num_clusters * 2); /* FlawFinder: Ignore */
-
-  Serial.println("Done memcpy");
-  delay(500);
-
-  if( (end_led-start_led)+1 != num_stations){
-    Serial.println("Error! LEDs != number of stations");
-    //return
-  } 
-
-  first_led = start_led;
-  last_led = end_led;
-
-
-  //memcpy(leds, leds_list, sizeof(uint8_t) * total_num_stations); /* FlawFinder: Ignore */
+  memcpy(leds, leds_list, sizeof(uint8_t) * total_num_stations); /* FlawFinder: Ignore */
 
   opp_dir_1st_cid[0] = station_circuits_1[0];
   opp_dir_1st_cid[1] = station_circuits_0[0];
@@ -292,14 +244,12 @@ TrainLine::TrainLine(uint8_t num_stations, uint8_t CID_clusters_num, const uint1
 
   state = 0;
 
-  last_station_waiting[0] = false;
-  last_station_waiting[1] = false;
+  last_station_waiting[0] = 0;
+  last_station_waiting[1] = 0;
 
-  /*
   for(uint8_t i=0; i<total_num_stations; i++){
     pinMode(leds[i], OUTPUT);
   }
-  */
 
 }
 
@@ -371,40 +321,38 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
 //Given a circuit, use it to update line's state.
 int TrainLine::setTrainState(uint16_t circID){
 
-  //If train in one of the line's positive direction cluster's, update state
-  for(uint8_t cluster=0; cluster<num_clusters; cluster++){
-    if(circID >= cluster_edges_0[cluster*2]-5 && circID <= cluster_edges_0[(cluster*2)+1]){
+  if(circID > station_circuits_0[0] && circID <= station_circuits_0[total_num_stations-1]){
 
-      for(int8_t j=0; j<total_num_stations-1; j++){
-        if(circID >= (station_circuits_0[j]-2) && circID < (station_circuits_0[j+1]-2)){
-          Serial.printf("CircuitID %d setting station %d (+)\n", circID, j);
-          //Serial.printf("State before setting: %d\n", state);
-          state |= (1 << j);
-          //Serial.printf("State after setting: %d\n", state);
-          //If "at" 2nd to last station, set last station waiting to true.
-          if(j == total_num_stations-2){
-            Serial.println("Setting last station waiting");
-            last_station_waiting[0] = true;
-          }
-          return j;
+    for(int8_t j=0; j<total_num_stations-1; j++){
+      if(circID >= (station_circuits_0[j]-2) && circID < (station_circuits_0[j+1]-2)){
+        Serial.printf("CircuitID %d setting station %d\n", circID, j);
+        //Serial.printf("State before setting: %d\n", state);
+        state = state | (1 << j);
+        //Serial.printf("State after setting: %d\n", state);
+        //If "at" 2nd to last station, set last station waiting to true.
+        if(j == total_num_stations-2){
+          Serial.println("Setting last station waiting");
+          last_station_waiting[0] = true;
         }
-      }//end station loop
-
-      //If arriving at last station, update state and note arrival to keep LED on momentarily
-      if( (circID >= (station_circuits_0[total_num_stations-1]-2)) && (last_station_waiting[0] == true)) {
-        Serial.printf("CircuitID %d setting station %d (+)\n", circID, total_num_stations-1);
-        state |= (1 << total_num_stations-1);
-        cycles_at_end[0]++;
-        last_station_waiting[0] = false;
-        return total_num_stations-1;
+        return j;
       }
-    }//end if circuit in cluster
-  }//end cluster loop
+    }
+
+    //If arriving at last station, update state and note arrival to keep LED on momentarily
+    if( (circID >= (station_circuits_0[total_num_stations-1]-2)) && (last_station_waiting[0] == true)) {
+      Serial.printf("CircuitID %d setting station %d\n", circID, total_num_stations-1);
+      state = state | (1 << total_num_stations-1);
+      cycles_at_end[0]++;
+      last_station_waiting[0] = false;
+      return total_num_stations-1;
+    }
+
+  }//end positive direction check and update
 
   //If train not in range, check if train at start of opposite direction IF expecting train at end of line
   if( (circID == getOppCID(0)) && (last_station_waiting[0] == true) ){
-    Serial.printf("CircuitID %d setting station %d (+)\n", circID, total_num_stations-1);
-    state |= (1 << total_num_stations-1);
+    Serial.printf("CircuitID %d setting station %d\n", circID, total_num_stations-1);
+    state = state | (1 << total_num_stations-1);
     cycles_at_end[0]++;
     last_station_waiting[0] = false;
     return total_num_stations-1;
@@ -413,42 +361,36 @@ int TrainLine::setTrainState(uint16_t circID){
   /*** CHECKS FOR TRAINS IN "OPPOSITE" (TRAIN PROGRESSES NEGATIVELY DOWN CIRCUIT IDS) DIRECTION ***/
 
   //If train in range of direction's circuitIDs, check what staion it is "at"
-  //If train in one of the line's positive direction cluster's, update state
-  for(uint8_t cluster=0; cluster<num_clusters; cluster++){
-    if(circID <= cluster_edges_1[cluster*2]+11 && circID >= cluster_edges_1[(cluster*2)+1]){
+  if(circID < station_circuits_1[0] && circID >= station_circuits_1[total_num_stations-1]){
 
-      for(int8_t j=0; j<total_num_stations-1; j++){
+    for(int8_t j=0; j<total_num_stations-1; j++){
 
-        if(circID <= (station_circuits_1[j]+2) && circID > (station_circuits_1[j+1]+2)){
-          uint8_t dist_from_end = (total_num_stations-j)-1; //shift bit to set 1 at station based on distance from "end" of line
-          Serial.printf("CircuitID %d setting station %d(-)\n", circID, dist_from_end);
-          state |= (1 << dist_from_end);
-          //If "at" 2nd to last station, set last station waiting to true.
-          if(j == total_num_stations-2){
-            Serial.println("Setting negative last staiton wait");
-            last_station_waiting[1] = true;
-          }
-          return j;
+      if(circID <= (station_circuits_1[j]+2) && circID > (station_circuits_1[j+1]+2)){
+        uint8_t dist_from_end = (total_num_stations-j)-1; //shift bit to set 1 at station based on distance from "end" of line
+        Serial.printf("CircuitID %d setting station %d\n", circID, dist_from_end);
+        state = state | (1 << dist_from_end);
+        //If "at" 2nd to last station, set last station waiting to true.
+        if(j == total_num_stations-2){
+          last_station_waiting[1] = true;
         }
-      }//end station loop
-
-      //If arriving at last station, update state and note arrival to keep LED on momentarily
-      if( (circID <= (station_circuits_1[total_num_stations-1]+2)) && (last_station_waiting[1] == true)){
-        Serial.printf("CircuitID %d setting station %d(-)\n", circID, 0);
-        state |= 1; //last station in opp direction is "1st" station
-        cycles_at_end[1]++;
-        last_station_waiting[1] = false;
-        return total_num_stations-1;
+        return j;
       }
-    }//end check if train in cluster range
-  }//end cluster loop
+    }
 
-  //end negative direction check and update
+    //If arriving at last station, update state and note arrival to keep LED on momentarily
+    if( (circID <= (station_circuits_1[total_num_stations-1]+2)) && (last_station_waiting[1] == true)){
+      Serial.printf("CircuitID %d setting station %d\n", circID, 1);
+      state = state | 1; //last station in opp direction is "1st" station
+      cycles_at_end[1]++;
+      last_station_waiting[1] = false;
+      return total_num_stations-1;
+    }
+  }//end negative direction check and update
 
   //If not in range but expecting a train at end of line, check if at opposite direction's circuit for station.
   if(circID == getOppCID(1) && (last_station_waiting[1] == true)){
-    Serial.printf("CircuitID %d setting station %d(-)\n", circID, 0);
-    state |= 1; //last station in opp direction is "1st" station
+    Serial.printf("CircuitID %d setting station %d\n", circID, 1);
+    state = state | 1; //last station in opp direction is "1st" station
     cycles_at_end[1]++;
     last_station_waiting[1] = false;
     return total_num_stations-1;
@@ -458,7 +400,7 @@ int TrainLine::setTrainState(uint16_t circID){
 }//END setTrainState
 
 
-void TrainLine::updateLEDS2(Adafruit_LEDBackpack &matrix){
+void TrainLine::updateLEDS2(){
 
   Serial.printf("State at start of LED update: %d\n", state);
   
@@ -475,18 +417,15 @@ void TrainLine::updateLEDS2(Adafruit_LEDBackpack &matrix){
 
   //Go through every station on line, turning LED on if train there and off if not
   for(uint16_t i=0; i<total_num_stations; i++){
-    uint8_t led_position = i + first_led;
-    uint8_t arr = floor(led_position/16);
-    matrix.displaybuffer[arr] |= ((state & 1) << (led_position % 16)); // move bit representing station's state to it's appropriate LED position.
     //Serial.printf("Station %d train state: %d\n", i, (state & 1));
-    //digitalWrite(leds[i], (state & 1) );
-    state >>= 1;
+    digitalWrite(leds[i], (state & 1) );
+    state = state >> 1;
   }
 
   state = 0;
 
   
-}//end updateLEDs (stateless)
+}
 
 //Update LED display based on bi-directional current state
 void TrainLine::updateLEDS(){
@@ -520,7 +459,7 @@ void TrainLine::updateLEDS(){
   //Go through every station on line, turning LED on if train there and off if not
   for(uint16_t i=0; i<total_num_stations; i++){
     //Serial.printf("Station %d train state: %d\n", i, (state & 1));
-    //digitalWrite(leds[i], (state & 1) );
+    digitalWrite(leds[i], (state & 1) );
     state = state >> 1;
   }
 
@@ -625,14 +564,14 @@ return -1;
 //TODO: Update to print direction 1 station circuits
 String TrainLine::printVariables(){
   String circuits = "";
-  //String led_string = "";
+  String led_string = "";
   for (uint8_t i=0; i < total_num_stations; i++){
     circuits += String(station_circuits[0][i]) += ", ";
-    //led_string += String(leds[i]) += ", ";
+    led_string += String(leds[i]) += ", ";
   }
   circuits += "\n";
-  //led_string += "\n";
-  return circuits; //+ led_string;
+  led_string += "\n";
+  return circuits + led_string;
 }
 
 //Deconstructor to free dynamically allocated arrays
@@ -641,8 +580,7 @@ TrainLine::~TrainLine(){
   delete[] waiting_stations_1;
   delete[] station_circuits_0;
   delete[] station_circuits_1;
-  delete[] cluster_edges_0;
-  delete[] cluster_edges_1;
+  delete[] leds;
 }
 
 // END FUNCTION IMPLEMENTATION
