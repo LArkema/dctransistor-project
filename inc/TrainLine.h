@@ -61,7 +61,7 @@ class TrainLine {
     int remove(bool dir);
 
     int incrementCyclesAtEnd(bool dir); //returns updated number of cycles.
-    int setTrainState(uint16_t circuitID);
+    int setTrainState(uint16_t circuitID, uint8_t train_dir);
 
     void updateLEDS();  //For fully stateful (use lists of waiting station indexes for each direction)
     void updateLEDS2(Adafruit_LEDBackpack &matrix); //Based on minimully stateful version (bit array reset every check with server)
@@ -369,9 +369,101 @@ int TrainLine::setInitialStations(uint16_t *train_positions, uint8_t train_len, 
 }//end SetState
 
 //Given a circuit, use it to update line's state.
-int TrainLine::setTrainState(uint16_t circID){
+int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
 
   //If train in one of the line's positive direction cluster's, update state
+
+  //If waiting for last station and train shows up at opposite direction's 1st station (but going in current direction)
+  if(circID == getOppCID(train_dir) && (last_station_waiting[train_dir] == true) ){
+
+    uint16_t last_station_idx;
+    if(train_dir == 0) { last_station_idx = total_num_stations-1;}
+    else{last_station_idx = 0;}
+
+    Serial.printf("CircuitID %d setting station %d\n", circID, last_station_idx);
+    state |= (1 << last_station_idx);
+    cycles_at_end[train_dir]++;
+    last_station_waiting[train_dir] = false;
+    return last_station_idx;
+  }
+
+  int8_t cf = (train_dir * -2) + 1; //turns 0 to 1 and 1 to -1 - allows for same comparison logic when train moves negatively
+
+  //Otherwise, if not within direction's range, exit and return -1
+  if(circID*cf < station_circuits[train_dir][0]*cf || circID*cf > station_circuits[train_dir][total_num_stations-1]*cf){
+    return -1;
+  }
+
+  //If arriving at last station, update state and note arrival to keep LED on momentarily
+  if( (circID*cf >= (station_circuits[train_dir][total_num_stations-1]*cf)-2) && (last_station_waiting[train_dir] == true)) {
+    uint16_t last_station_idx;
+    if(train_dir == 0) { last_station_idx = total_num_stations-1;}
+    else{last_station_idx = 0;}
+
+    Serial.printf("CircuitID %d setting station %d\n", circID, last_station_idx);
+    state |= (1 << last_station_idx);
+    cycles_at_end[train_dir]++;
+    last_station_waiting[train_dir] = false;
+    return last_station_idx;
+  }
+
+  //Otherwise, loop through all station positions for direction and set state if in between two of them.
+  for(uint8_t i=0; i<total_num_stations-1; i++){
+    if( circID*cf >= ((station_circuits[train_dir][i]*cf)-2) && circID*cf < ((station_circuits[train_dir][i+1]*cf)-2) ){
+
+      uint8_t station_idx;
+      if(train_dir == 0){station_idx = i;}
+      else if(train_dir == 1){station_idx = (total_num_stations-i)-1;} //e.g. for 10-station line, "2nd" station in reverse has i == 1, need to shift bit 8 times to reach.
+      
+      state |= 1 << (station_idx);
+
+      //If "at" 2nd to last station, set last station waiting to true.
+      if(i == total_num_stations-2){
+        Serial.println("Setting last station waiting");
+        last_station_waiting[train_dir] = true;
+      }
+
+      return station_idx;
+    }//end check if train between stations
+  }//end loop through direction's stations
+
+  return -1;
+  /*
+
+  if(train_dir == 0){
+
+    //If arriving at last station, update state and note arrival to keep LED on momentarily
+    if( (circID*cf >= (station_circuits[train_dir][total_num_stations-1]*cf)-2) && (last_station_waiting[train_dir] == true)) {
+      Serial.printf("CircuitID %d setting station %d (+)\n", circID, total_num_stations-1);
+      state |= (1 << total_num_stations-1);
+      cycles_at_end[0]++;
+      last_station_waiting[0] = false;
+      return total_num_stations-1;
+    }
+
+    for(int8_t j=0; j<total_num_stations-1; j++){
+      if(circID >= (station_circuits_0[j]-2) && circID < (station_circuits_0[j+1]-2)){
+        Serial.printf("CircuitID %d setting station %d (+)\n", circID, j);
+        //Serial.printf("State before setting: %d\n", state);
+        state |= (1 << j);
+        //Serial.printf("State after setting: %d\n", state);
+        //If "at" 2nd to last station, set last station waiting to true.
+        if(j == total_num_stations-2){
+          Serial.println("Setting last station waiting");
+          last_station_waiting[0] = true;
+        }
+        return j;
+      }
+    }//end station loop
+
+  }
+
+  else if(train_dir == 1){
+
+  }
+  */
+
+  /*
   for(uint8_t cluster=0; cluster<num_clusters; cluster++){
     if(circID >= cluster_edges_0[cluster*2]-5 && circID <= cluster_edges_0[(cluster*2)+1]){
 
@@ -409,8 +501,11 @@ int TrainLine::setTrainState(uint16_t circID){
     last_station_waiting[0] = false;
     return total_num_stations-1;
   }
+  */
 
   /*** CHECKS FOR TRAINS IN "OPPOSITE" (TRAIN PROGRESSES NEGATIVELY DOWN CIRCUIT IDS) DIRECTION ***/
+
+  /*
 
   //If train in range of direction's circuitIDs, check what staion it is "at"
   //If train in one of the line's positive direction cluster's, update state
@@ -443,9 +538,12 @@ int TrainLine::setTrainState(uint16_t circID){
     }//end check if train in cluster range
   }//end cluster loop
 
+  */
+
   //end negative direction check and update
 
   //If not in range but expecting a train at end of line, check if at opposite direction's circuit for station.
+  /*
   if(circID == getOppCID(1) && (last_station_waiting[1] == true)){
     Serial.printf("CircuitID %d setting station %d(-)\n", circID, 0);
     state |= 1; //last station in opp direction is "1st" station
@@ -453,6 +551,7 @@ int TrainLine::setTrainState(uint16_t circID){
     last_station_waiting[1] = false;
     return total_num_stations-1;
   }
+  */
 
   return -1; //If train at circuit 
 }//END setTrainState

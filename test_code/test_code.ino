@@ -31,8 +31,8 @@ HTTPClient https;
 
 
 //Filters data from TrainPositions API to just get CircuitIds with Train
-StaticJsonDocument<48> train_pos_fiter; 
-const uint16_t json_size = 2048; //change to 3072 if add DirectionNum
+StaticJsonDocument<64> train_pos_filter; 
+const uint16_t json_size = 3072; //change to 3072 if add DirectionNum, 2048 for just CircuitIDs
 
 //SETUP WIFI CONNECTION
 void setup() {
@@ -66,7 +66,10 @@ void setup() {
 
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
-  train_pos_fiter["TrainPositions"][0]["CircuitId"] = true; //Possible TODO: Add "DirectionNum" to filter.
+  JsonObject tmp_filter = train_pos_filter["TrainPositions"].createNestedObject();
+  tmp_filter["CircuitId"] = true;
+  tmp_filter["DirectionNum"] = true;
+  //train_pos_fiter["TrainPositions"][0]["CircuitId"] = true; //Possible TODO: Add "DirectionNum" to filter.
   
   Serial.println("Leaving setup");
 }//END SETUP
@@ -87,7 +90,7 @@ void loop() {
     if (httpCode > 0) {
 
       DynamicJsonDocument doc(json_size);
-      DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_fiter));
+      DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_filter));
 
       //serializeJsonPretty(doc, Serial); //print out all outputs from deserialization
     
@@ -102,12 +105,22 @@ void loop() {
 
       for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
       
+        const uint16_t circID = train["CircuitId"].as<unsigned int>();
+        const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
+
+        redline->setTrainState(circID, train_dir-1);
+
+        //Serial.printf("Direction of above train: %d\n", train_dir);
+
+        /*
+
         // Eventually loop through train lines
         for(uint8_t dir=0; dir<2; dir++){
 
         
           int8_t cf = (dir * -2) + 1; //turns 0 to 1 and 1 to -1 - allows for same comparison logic when train moves negatively
           const int16_t circID = train["CircuitId"].as<unsigned int>()* cf;
+          const uint8_t train_dir
 
           redline->setTrainState(circID);
           /*
@@ -121,6 +134,8 @@ void loop() {
 
           //Add train that's in given line's circuit range, or opp direction's 1st circuit, to a list to inspect.
           //Optional TODO: Add "DirectionNum" to filter and logic here. If so, add to filter and change size.
+
+          /*
           if ( (circID >= (redline->getStationCircuit(0, dir)*cf) && circID <= (redline->getLastCID(dir)*cf) ) || 
           (circID == redline->getOppCID(dir))  ){
 
@@ -128,20 +143,24 @@ void loop() {
             train_len[dir]++;
             break;
           }
+          
       
 
         }//end direction loop
+
+        */
       }//end loop through active trains
       
-
+      
+      /*
       for(uint8_t direction=0; direction<2; direction++){
-
         Serial.printf("All trains in test range for dir %d: ", direction);
         for(int t=0; t<train_len[direction]; t++){
-          Serial.printf("%d, ",train_positions[direction][t]); /*Flawfinder: ignore */
+          Serial.printf("%d, ",train_positions[direction][t]); /*Flawfinder: ignore 
         }
         Serial.println();
       } //REMOVE TO GO BACK TO STATEFUL VERSION
+      */
 
       redline->updateLEDS2(matrix);
 
