@@ -38,11 +38,11 @@
        ]
     },
     {
-      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.3",
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.4",
       "type": "library",
       "name": "ArduinoJson",
-      "version":  "6.19.3",
-      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.3",
+      "version":  "6.19.4",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.4",
       "license": {
         "id": "MIT",
         "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
@@ -65,7 +65,7 @@
       "ref": "wmata-pcb-0.1",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.0.2",
-        "pkg:github/bblanchon/ArduinoJson@6.19.3",
+        "pkg:github/bblanchon/ArduinoJson@6.19.4",
         "pkg:github/adafruit/Adafruit_LED_Backpack@1.3.2"
         ]
     },
