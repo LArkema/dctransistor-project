@@ -39,7 +39,7 @@ jobs:
         run: bash ./bom_update.sh
       - name: Validate BOM
         run: |
-          go get neilpa.me/yajsv
+          go get github.com/neilpa/yajsv
           /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json bom.json
       - name: Push BOM to Repo
         run: |
