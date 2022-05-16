@@ -413,12 +413,18 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
   int8_t cf = (train_dir * -2) + 1; //turns 0 to 1 and 1 to -1 - allows for same comparison logic when train moves negatively
 
   //Otherwise, if not within direction's range, exit and return -1
+
+  /*
   if(circID*cf < station_circuits[train_dir][0]*cf || circID*cf > station_circuits[train_dir][total_num_stations-1]*cf){
     return -1;
   }
+  */
 
   //If arriving at last station, update state and note arrival to keep LED on momentarily
-  if( (circID*cf >= (station_circuits[train_dir][total_num_stations-1]*cf)-2) && (last_station_waiting[train_dir] == true)) {
+  if( (circID*cf >= (getLastCID(train_dir)*cf)-2) &&
+   (circID*cf < (getLastCID(train_dir)*cf)+4) &&
+   (last_station_waiting[train_dir] == true)) {
+
     uint16_t last_station_idx;
     if(train_dir == 0) { last_station_idx = total_num_stations-1;}
     else{last_station_idx = 0;}
@@ -430,33 +436,128 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
     return last_station_idx;
   }
 
+  //Yellow line bridge from pentagon to L'enfont has very weird circuitIDs, Checking for circuits in-between
+  //excludes bridge IDs and includes IDs of stations later in line. Check here and set appropriate station.
+  if( (circID >= 1050 && circID <= 1054) || (circID >= 3105 && circID <= 3123) || (circID == 2229) ) {
+    state |= 1 << 7;
+    return 7;
+  }
+
+  if( (circID <= 2366 && circID >= 2362) || (circID <= 3145 && circID >= 3124)){
+    state |= 1 << 8;
+    return 8;
+  }
+
   //Otherwise, loop through all station positions for direction and set state if in between two of them.
   for(uint8_t i=0; i<total_num_stations-1; i++){
+
     if( circID*cf >= ((station_circuits[train_dir][i]*cf)-2) && circID*cf < ((station_circuits[train_dir][i+1]*cf)-2) ){
 
-      uint8_t station_idx;
-      if(train_dir == 0){station_idx = i;}
-      else if(train_dir == 1){station_idx = (total_num_stations-i)-1;} //e.g. for 10-station line, "2nd" station in reverse has i == 1, need to shift bit 8 times to reach.
-      
-      state |= 1 << (station_idx);
+      //Do not check in between yellow line bridge stations. Gets false positives and negatives.
+      if( !(station_circuits[train_dir][i] == 1052 || station_circuits[train_dir][i] == 2364)){
 
-      
-      Serial.printf("CircuitID: %d, Station index: %d, LED number %d\n", circID, station_idx, station_leds[station_idx]);
+        uint8_t station_idx;
+        if(train_dir == 0){station_idx = i;}
+        else if(train_dir == 1){station_idx = (total_num_stations-i)-1;} //e.g. for 10-station line, "2nd" station in reverse has i == 1, need to shift bit 8 times to reach.
+        
+        state |= 1 << station_idx;
 
-      //If "at" 2nd to last station, set last station waiting to true.
-      if(i == total_num_stations-2){
-        Serial.println("Setting last station waiting");
-        last_station_waiting[train_dir] = true;
+
+        Serial.printf("CircuitID: %d, Station index: %d, LED number %d\n", circID, station_idx, station_leds[station_idx]);
+
+        //If "at" 2nd to last station, set last station waiting to true.
+        if(i == total_num_stations-2){
+          Serial.println("Setting last station waiting");
+          last_station_waiting[train_dir] = true;
+        }
+
+        return station_idx;
       }
-
-      return station_idx;
     }//end check if train between stations
+
+    //Occasionally, lines are broken into different circuitID segments, with higher ID numbers before lower numbers.
+    //Check if moving to a new segment. If so, check if train's circuit is 
+    if(station_circuits[train_dir][i]*cf > station_circuits[train_dir][i+1]*cf){
+
+      /* Specific stations affected and where circuitIDs jump
+
+      N01(3238)->K05(2844) : 3280->2830 (SV->SV/OR)
+      K05(3001)->N01(3377) : 2988->3419 (SV/OR->SV)
+
+      K01(2911)->C05(1092) : 2927->1090 (SV/OR->SV/OR/BL)
+      C05(1285)->K01(3061) : 1283->3076 (SV/OR.BL -> SV/OR)
+
+      J02(2634)->C13(969)  : 2673->966  (BL->BL/YL)
+      C13(1162)->J02(2709) : 1159->2752 (BL/YL->BL)
+
+      F01(2246)->E01(1753) : 2246->1744 (Gallery Place->Mt. Vernon; GR/YL)
+      F01(1899)->F02(2376) : 1899->2380
+
+      */
+      uint16_t N_to_K_0_circuits[4] = {3236, 3280, 2830, 2842};
+      uint16_t K_to_C_0_circuits[4] = {2909, 2927, 1090, 1090};
+      uint16_t J_to_C_0_circuits[4] = {2632, 2673, 966, 967};
+      uint16_t F_to_E_0_circuits[4] = {2244, 2246, 1744, 1751};
+
+      uint16_t K_to_N_1_circuits[4] = {3003, 2988, 3419, 3379};
+      uint16_t C_to_K_1_circuits[4] = {1287, 1283, 3076, 3063};
+      uint16_t C_to_J_1_circuits[4] = {1164, 1159, 2752, 2711};
+      uint16_t E_to_F_1_circuits[4] = {1901, 1899, 2380, 2378};
+
+      uint16_t* dir_0_jumps[4] = {N_to_K_0_circuits, K_to_C_0_circuits, J_to_C_0_circuits, F_to_E_0_circuits};
+      uint16_t* dir_1_jumps[4] = {K_to_N_1_circuits, C_to_K_1_circuits, C_to_J_1_circuits, E_to_F_1_circuits};
+
+
+      if(train_dir==0){
+        for(uint8_t j =0; j<4; j++){
+          //Find which jump is for current station
+          if(station_circuits[train_dir][i] == dir_0_jumps[j][0]+2){
+
+            //If circuit is on either of the two segments between CircuitID jumps,
+            //return as current station
+            if( (circID >= dir_0_jumps[j][0] && circID <= dir_0_jumps[j][1]) ||
+            circID >= dir_0_jumps[j][2] && circID < dir_0_jumps[j][3]){
+
+              state |= 1 << i; //set state to station's index
+              return i;
+
+            }//end if for successful check
+
+          }//end for current station check
+        }//end loop through all four jump stations
+      }//end direction 0 check
+
+
+      else if(train_dir==1){
+        for(uint8_t j=0; j<4; j++){
+          //Find which jump is for current station
+          if(station_circuits[train_dir][i] == dir_1_jumps[j][0]-2){
+
+            //If circuit is on either of the two segments between CircuitID jumps,
+            //return as current station
+            if( (circID <= dir_1_jumps[j][0] && circID >= dir_1_jumps[j][1]) ||
+            circID <= dir_1_jumps[j][2] && circID > dir_1_jumps[j][3]){
+
+              uint8_t station_idx = (total_num_stations-i)-1;
+              state |= 1 << station_idx; //set state to station's index
+              return station_idx;
+
+            }//end if for train between stations check
+
+
+          }//end current station check
+        }//end loop through four jump stations
+      }//end direction 1 check
+
+
+    }//end check for train's switching segments
+
   }//end loop through direction's stations
 
   //Old code for no given direction deleted, in matrix_led_TrainLine
   
 
-  return -1; //If train at circuit 
+  return -1; //If train not on line's valid stations
 }//END setTrainState
 
 //If a train is at a station represented by the given led, return true.
