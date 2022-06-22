@@ -1,6 +1,5 @@
 /*
-* File for miscellaneous functions to test separate from main Arduino code
-* Also useful for keeping bulky functions out of main file.
+* When 
 *
 */
 
