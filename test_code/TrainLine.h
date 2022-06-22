@@ -403,7 +403,7 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
     if(train_dir == 0) { last_station_idx = total_num_stations-1;}
     else{last_station_idx = 0;}
 
-    Serial.printf("CircuitID %d setting station %d\n", circID, last_station_idx);
+    //Serial.printf("CircuitID %d setting station %d\n", circID, last_station_idx);
     state |= (1 << last_station_idx);
     cycles_at_end[train_dir]++;
     last_station_waiting[train_dir] = false;
@@ -476,7 +476,7 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
     }//end check if train between stations
 
     //Occasionally, lines are broken into different circuitID segments, with higher ID numbers before lower numbers.
-    //Check if moving to a new segment. If so, check if train's circuit is 
+    //Check if moving to a new segment. If so, check if train's circuit is in one of edge cases 
     if(station_circuits[train_dir][i]*cf > station_circuits[train_dir][i+1]*cf){
 
       /* Specific stations affected and where circuitIDs jump
@@ -494,6 +494,7 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
       F01(1899)->F02(2376) : 1899->2380
 
       */
+     //Arrays of {<2 circuits before departing station>, <last circuit before jump>, <first circuit after jump>, <2 circuits before arriving station>}
       uint16_t N_to_K_0_circuits[4] = {3236, 3280, 2830, 2842};
       uint16_t K_to_C_0_circuits[4] = {2909, 2927, 1090, 1090};
       uint16_t J_to_C_0_circuits[4] = {2632, 2673, 966, 967};
@@ -510,7 +511,7 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
 
       if(train_dir==0){
         for(uint8_t j =0; j<4; j++){
-          //Find which jump is for current station
+          //Find which jump is for current station by 
           if(station_circuits[train_dir][i] == dir_0_jumps[j][0]+2){
 
             //If circuit is on either of the two segments between CircuitID jumps,
@@ -550,7 +551,7 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
       }//end direction 1 check
 
 
-    }//end check for train's switching segments
+    }//end check for train switching segments
 
   }//end loop through direction's stations
 
