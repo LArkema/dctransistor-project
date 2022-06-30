@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Change secret file's name
-        run: sed -i "s/arduino_secrets/example_arduino_secrets/" /home/runner/work/WMATA_PCB/WMATA_PCB/test_code/test_code.ino
+        run: sed -i "s/arduino_secrets/example_arduino_secrets/" /home/runner/work/dctransistor-project/dctransistor-project/test_code/test_code.ino
       # See: https://github.com/arduino/compile-sketches#readme
       - name: Compile sketches
         uses: arduino/compile-sketches@v1
@@ -46,7 +46,7 @@ jobs:
         run: |
           git config user.email "BOM_Update_Bot@github.com"
           git config user.name "BOM Update / Sketch Compile Action"
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/WMATA_PCB.git
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/dctransistor-project.git
           if git status | grep "bom.json"
           then
             git add bom.json
