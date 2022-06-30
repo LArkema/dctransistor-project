@@ -1,5 +1,14 @@
 #include <Arduino.h>
 /*
+    Early version of TrainLine, but data structure based on holding which stations were waiting for a train to arrive
+    and updating the list based on checking whether or not a train was arriving at each individual station.
+
+    File has not been cleaned up beyond the comments left during development.
+
+  - L., 6/21/22
+*/
+
+/*
     Defines SimpleList class. Data structure optimized to store which stations are waiting for a train to arrive
     and updates accordingly. Represents stations using index (position of station on given line) for simplicity.
 

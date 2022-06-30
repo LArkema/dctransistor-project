@@ -1,7 +1,11 @@
 /*
-* File for miscellaneous functions to test separate from main Arduino code
-* Also useful for keeping bulky functions out of main file.
+* File was used to hold the checkEndOfLine() function for when TrainLine held the state of every active train on a line
+* and when not using the Direction value given from WMATA API. Tried to increase computational complexity to save on 
+* memory / storage requirements, but not at all worth it.
 *
+* File has not been cleaned up beyond the comments left during development.
+*
+* - L., 6/21/22
 */
 
 #include "TrainLine.h"
