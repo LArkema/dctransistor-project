@@ -1,7 +1,8 @@
 /*
  * Initial Arduino for WMATA_PCB project
  * Based on BasicHTTPSClient.ino in ESP8266 example sketches
- * Main difference is connection to api.wmata.com with api_key header
+ * Main difference is connection to api.wmata.com with api_key header,
+ * and getting WMATA API data for a single station
  * Logan Arkema, 10/22/2021
 */
 
