@@ -493,24 +493,29 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
       F01(2246)->E01(1753) : 2246->1744 (Gallery Place->Mt. Vernon; GR/YL)
       F01(1899)->F02(2376) : 1899->2380
 
+      N07(3627)->N06(3155) : 3630->3146 (Silver Line extension)
+      N06(3290)->N07(3741) : 3281->3744
+
       */
      //Arrays of {<2 circuits before departing station>, <last circuit before jump>, <first circuit after jump>, <2 circuits before arriving station>}
       uint16_t N_to_K_0_circuits[4] = {3236, 3280, 2830, 2842};
       uint16_t K_to_C_0_circuits[4] = {2909, 2927, 1090, 1090};
       uint16_t J_to_C_0_circuits[4] = {2632, 2673, 966, 967};
       uint16_t F_to_E_0_circuits[4] = {2244, 2246, 1744, 1751};
+      uint16_t N_to_N_0_circuits[4] = {3625, 3630, 3146, 3153};
 
       uint16_t K_to_N_1_circuits[4] = {3003, 2988, 3419, 3379};
       uint16_t C_to_K_1_circuits[4] = {1287, 1283, 3076, 3063};
       uint16_t C_to_J_1_circuits[4] = {1164, 1159, 2752, 2711};
       uint16_t E_to_F_1_circuits[4] = {1901, 1899, 2380, 2378};
+      uint16_t N_to_N_1_circuits[4] = {3292, 3281, 3744, 3743};
 
-      uint16_t* dir_0_jumps[4] = {N_to_K_0_circuits, K_to_C_0_circuits, J_to_C_0_circuits, F_to_E_0_circuits};
-      uint16_t* dir_1_jumps[4] = {K_to_N_1_circuits, C_to_K_1_circuits, C_to_J_1_circuits, E_to_F_1_circuits};
+      uint16_t* dir_0_jumps[5] = {N_to_K_0_circuits, K_to_C_0_circuits, J_to_C_0_circuits, F_to_E_0_circuits, N_to_N_0_circuits};
+      uint16_t* dir_1_jumps[5] = {K_to_N_1_circuits, C_to_K_1_circuits, C_to_J_1_circuits, E_to_F_1_circuits, N_to_N_1_circuits};
 
 
       if(train_dir==0){
-        for(uint8_t j =0; j<4; j++){
+        for(uint8_t j =0; j<5; j++){
           //Find which jump is for current station by 
           if(station_circuits[train_dir][i] == dir_0_jumps[j][0]+2){
 
@@ -530,7 +535,7 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
 
 
       else if(train_dir==1){
-        for(uint8_t j=0; j<4; j++){
+        for(uint8_t j=0; j<5; j++){
           //Find which jump is for current station
           if(station_circuits[train_dir][i] == dir_1_jumps[j][0]-2){
 

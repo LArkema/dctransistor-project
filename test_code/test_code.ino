@@ -31,7 +31,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); //object to c
 //WIFI CONFIGURATIONS
 String ssid = SECRET_SSID; //ssid and password defined in arduino_secrets.h
 String password = SECRET_PASS; 
-const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE"; //Expires 10/22/2022 
+const char* wmata_fingerprint = "C5 14 29 8E E1 04 75 0C A3 B3 1C 9D BB 43 BA 13 A0 CA A0 F7"; //
 String endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
 
 //CONNECTION CONFIGURATIONS
@@ -42,7 +42,7 @@ HTTPClient https;
 
 //Define JSON Deserialization objects to initialize in setup and use in every loop
 StaticJsonDocument<80> train_pos_filter; 
-const uint16_t json_size = 6144; //space to allocate for data FROM WMATA API. Change to 3072 without Line Code, 2048 for just CircuitIDs
+const uint16_t json_size = 8096; //space to allocate for data FROM WMATA API. Change to 3072 without Line Code, 2048 for just CircuitIDs
 
 
 /***** TRAIN LINE CONFIGURATIONS *****/
@@ -78,10 +78,10 @@ const uint16_t ostations_0[NUM_OR_STATIONS] = {2774, 2796, 2817, 2844, 2870, 288
 const uint16_t ostations_1[NUM_OR_STATIONS] = {1711, 1692, 1670, 1657, 1643, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 2976, 2954, 2933};
 
 //Silver Line
-#define NUM_SV_STATIONS 28
+#define NUM_SV_STATIONS 34
 #define SV_HEX_COLOR 0x00808080
-const uint16_t sstations_0[NUM_SV_STATIONS] = {3155, 3214, 3221, 3232, 3238, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
-const uint16_t sstations_1[NUM_SV_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 3377, 3370, 3359, 3352, 3290};
+const uint16_t sstations_0[NUM_SV_STATIONS] = {3523, 3544, 3577, 3594, 3612, 3627, 3155, 3214, 3221, 3232, 3238, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
+const uint16_t sstations_1[NUM_SV_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 3377, 3370, 3359, 3352, 3290, 3741, 3724, 3706, 3689, 3657, 3637};
 
 //Yellow Line
 #define NUM_YL_STATIONS 21
@@ -100,7 +100,7 @@ const uint16_t gstations_1[NUM_GN_STATIONS] = {2055, 2030, 2009, 1992, 1971, 195
 const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
 const uint8_t bl_led_array[NUM_BL_STATIONS] = {101, 100, 97, 96, 94, 93, 92, 91, 90, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
 const uint8_t or_led_array[NUM_OR_STATIONS] = {87, 88, 89, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53};
-const uint8_t sv_led_array[NUM_SV_STATIONS] = {80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
+const uint8_t sv_led_array[NUM_SV_STATIONS] = {86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
 const uint8_t yl_led_array[NUM_YL_STATIONS] = {99, 98, 97, 96, 94, 93, 92, 91, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27};
 const uint8_t gn_led_array[NUM_GN_STATIONS] = {47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27};
 
