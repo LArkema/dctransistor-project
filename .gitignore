@@ -1,6 +1,6 @@
 # Ignore all files containing secrets
 .env
-*arduino_secrets.h
+#*arduino_secrets.h
 
 
 .vscode
