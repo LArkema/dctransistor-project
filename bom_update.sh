@@ -24,9 +24,6 @@ sed -i "s/$OldVer/$NewVer/" bom.json
 OldVer=$(cat bom.json | jq '.components[] | select(.name == "ESP8266 Arduino Core") | .version' | cut -d'"' -f 2)
 NewVer=$(find ~/ -path "*esp8266*" -name "package.json" | grep -E "esp8266\/[0-9]+.[0-9]+.[0-9]*" -o | cut -d '/' -f 2 | cut -d ' ' -f 1) #Version is in path name after "esp8266/" and is a series of 2-3 numbers separated by digits (e.g. 3.0.2)
 
-echo $OldVer
-echo $NewVer
-
 sed -i "s/$OldVer/$NewVer/" bom.json
 
-echo "past Esp8266 version"
+echo "Print to become successful"
