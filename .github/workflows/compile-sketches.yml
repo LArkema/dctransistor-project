@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Change secret file's name
-        run: sed -i "s/arduino_secrets/example_arduino_secrets/" /home/runner/work/dctransistor-project/dctransistor-project/test_code/test_code.ino
       # See: https://github.com/arduino/compile-sketches#readme
       - name: Compile sketches
         uses: arduino/compile-sketches@v1
@@ -40,7 +38,7 @@ jobs:
         run: bash ./bom_update.sh
       - name: Validate BOM
         run: |
-          go get github.com/neilpa/yajsv
+          go install github.com/neilpa/yajsv
           /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json bom.json
       - name: Push BOM to Repo
         run: |
