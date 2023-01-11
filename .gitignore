@@ -1,6 +1,8 @@
 # Ignore all files containing secrets
 .env
 *arduino_secrets.h
+test_code/arduino_secrets.h
+
 
 .vscode
 tests/LastTrainTest/LastTrainTest.o
