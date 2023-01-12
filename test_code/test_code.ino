@@ -3,7 +3,7 @@
  * Logan Arkema, current date
 */
 
-
+#include <WiFiManager.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
@@ -29,8 +29,7 @@
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); //object to control colors of all LEDs (i.e. a "strip" of WS2812Bs)
 
 //WIFI CONFIGURATIONS
-String ssid = SECRET_SSID; //ssid and password defined in arduino_secrets.h
-String password = SECRET_PASS; 
+WiFiManager wifi_manager;
 const char* wmata_fingerprint = "C5 14 29 8E E1 04 75 0C A3 B3 1C 9D BB 43 BA 13 A0 CA A0 F7"; //
 String endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
 
@@ -131,18 +130,26 @@ void setup() {
   strip.show();
 
   //Connect to network defined in example_arduino_secrets.h
-  WiFi.begin(ssid, password);
+  strip.setPixelColor(WIFI_LED, YL_HEX_COLOR);
+  strip.show();
+  Serial.println("Connecting to WiFi");
+  
+  bool wifi_conn;
+  wifi_conn = wifi_manager.autoConnect("DCTransistor");
 
-  //Wait for WiFi connection to establish, turn LED green once done
+  /*Wait for WiFi connection to establish, turn LED green once done
   while (WiFi.status() != WL_CONNECTED){
     delay(1000);
     strip.setPixelColor(WIFI_LED, YL_HEX_COLOR);
     strip.show();
     Serial.println("Connecting to WiFi...");
   }
-  Serial.println("Wifi Connected");
-  strip.setPixelColor(WIFI_LED, GN_HEX_COLOR);
-  strip.show();
+  */
+  if(wifi_conn){
+    Serial.println("Wifi Connected");
+    strip.setPixelColor(WIFI_LED, GN_HEX_COLOR);
+    strip.show();
+  }
 
   //Set HTTPS connection settings to WMATA API
   client.setFingerprint(wmata_fingerprint);
@@ -279,8 +286,7 @@ void loop() {
           strip.setPixelColor(k, 0); //turn LED off
         }
 
-
-      }//end loop through each LEd
+      }//end loop through each LED
 
       //Update the board with new state of the system
       strip.show();

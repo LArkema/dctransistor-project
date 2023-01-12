@@ -4,19 +4,19 @@
   "version": 1,
   "metadata": {
     "component": {
-      "bom-ref": "wmata-pcb-0.1",
+      "bom-ref": "wmata-pcb-0.2",
       "type": "device",
       "name": "WMATA PCB",
-      "version": "0.1"
+      "version": "0.2"
     }
   },
   "components": [
     {
-      "bom-ref": "pkg:github/esp8266/Arduino@3.0.2",
+      "bom-ref": "pkg:github/esp8266/Arduino@3.1.0",
       "type": "firmware",
       "name": "ESP8266 Arduino Core",
-      "version": "3.0.2",
-      "purl": "pkg:github/esp8266/Arduino@3.0.2",
+      "version": "3.1.0",
+      "purl": "pkg:github/esp8266/Arduino@3.1.9",
       "url": "https://github.com/esp8266/Arduino",
       "license": {
         "id": "LGPL-2.1-or-later",
@@ -38,33 +38,33 @@
        ]
     },
     {
-      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.4",
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.20.0",
       "type": "library",
       "name": "ArduinoJson",
-      "version":  "6.19.4",
-      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.4",
+      "version":  "6.20.0",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.20.0",
       "license": {
         "id": "MIT",
         "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
       }
     },
     {
-      "bom-ref": "pkg:github/adafruit/Adafruit_LED_Backpack@1.3.2",
+      "bom-ref": "pkg:github/tzapu/WiFiManager@2.0.15-rc.1",
       "type": "library",
-      "name": "Adafruit LED Backpack",
-      "version":  "1.3.2",
-      "url": "https://github.com/adafruit/Adafruit_LED_Backpack/releases/tag/1.3.2",
+      "name": "WifiManager",
+      "version":  "2.0.15-rc.1",
+      "url": "https://github.com/tzapu/WiFiManager/releases/tag/0.16.0",
       "license": {
         "id": "MIT",
-        "url": "https://github.com/adafruit/Adafruit_LED_Backpack/blob/master/license.txt"
+        "url": "https://github.com/tzapu/WiFiManager/blob/master/LICENSE"
       }
     },
     {
-      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.3.2",
+      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.10.7",
       "type": "library",
       "name": "Adafruit NeoPixel",
-      "version":  "1.3.2",
-      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.3.2",
+      "version":  "1.10.7",
+      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.10.7",
       "license": {
         "id": "LGPL-3.0",
         "url": "https://github.com/adafruit/Adafruit_NeoPixel/blob/master/COPYING"
@@ -73,16 +73,16 @@
     ],
   "dependencies": [
     {
-      "ref": "wmata-pcb-0.1",
+      "ref": "wmata-pcb-0.2",
       "dependsOn": [
-        "pkg:github/esp8266/Arduino@3.0.2",
-        "pkg:github/bblanchon/ArduinoJson@6.19.4",
-        "pkg:github/adafruit/Adafruit_LED_Backpack@1.3.2",
-        "pkg:github/adafruit/Adafruit_NeoPixel@1.3.2"
+        "pkg:github/esp8266/Arduino@3.1.0",
+        "pkg:github/bblanchon/ArduinoJson@6.20.0",
+        "pkg:github/adafruit/Adafruit_NeoPixel@1.10.7",
+        "pkg:github/tzapu/WifiManager@2.0.15-rc.1"
         ]
     },
     {
-      "ref": "pkg:github/esp8266/Arduino@3.0.2",
+      "ref": "pkg:github/esp8266/Arduino@3.1.0",
       "dependsOn": [
         "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f"
         ]

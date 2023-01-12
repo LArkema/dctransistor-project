@@ -29,6 +29,7 @@ jobs:
             - name: ArduinoJson
             - name: Adafruit LED Backpack Library
             - name: Adafruit NeoPixel
+            - name: WiFiManager
             - source-path: inc
             - source-path: ./
       # After succesful compilation, update the BOM with the latest dependencies installed by Arduino Compiler (from source), and validate the update against BOM schema.
