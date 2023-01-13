@@ -24,7 +24,6 @@ jobs:
           fqbn: esp8266:esp8266:nodemcuv2
           sketch-paths: |
             - test_code
-            - dev_code_snippits
           libraries: |
             - name: ArduinoJson
             - name: Adafruit LED Backpack Library

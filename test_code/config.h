@@ -96,7 +96,6 @@ const String wmata_endpoint = "https://api.wmata.com/TrainPositions/TrainPositio
 #define WIFI_LED 103 //indoex of "WiFi" (2nd to last)
 #define WEB_LED 102 //index of "Web" (3rd to last)
 
-
 // ----- TRAIN LINE CONFIGURATIONS -----
 
 /*
@@ -110,6 +109,8 @@ so the first station circuit in one direction represents the same station as the
 
 See misc_commands.sh for how each array was created from WMATA's information
 */
+
+#define TOTAL_SYSTEM_STATIONS 104 //Includes 2 stations for intersectionS (not in LED count) and future stations.
 
 #define NUM_LINES 6
 

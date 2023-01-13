@@ -10,8 +10,6 @@
     Designed to compile on Desktop (using EpoxyDuino) and Arduino for easy and integrated unit testing.
 */
 
-#define TOTAL_SYSTEM_STATIONS 104 //Includes 2 stations for intersection and future stations.
-
 //Define TrainLine member variables and functions.
 class TrainLine {
 

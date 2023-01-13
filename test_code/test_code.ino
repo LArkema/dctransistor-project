@@ -98,7 +98,7 @@ void loop() {
     Serial.println("---- NEW LOOP ----");
   #endif
 
-  //Connect and confirm HTTPS connection to api.wmata.com
+  //Connect and confirm HTTPS connection to api.wmata.com. If not, set LED red.
   if(!https.begin(client, wmata_endpoint)){
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
@@ -111,9 +111,6 @@ void loop() {
   https.addHeader("api_key", SECRET_WMATA_API_KEY);
 
   //Request train data from server. If unsuccessful, set LED red. If successful, deserialize the JSON data returned by the API
-  //int httpCode = https.GET();
-
-  //If HTTP GET returns -1, print error and turn wEB LED red.
   if (https.GET() <= 0) {
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
@@ -124,125 +121,123 @@ void loop() {
     #endif
   }
 
-  //if (httpCode > 0) {
+  //Filter to only relevant data (set in setup function)
+  DynamicJsonDocument doc(json_size);
+  DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_filter));
 
-    //Filter to only relevant data (set in setup function)
-    DynamicJsonDocument doc(json_size);
-    DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_filter));
-
-    //Check that JSON Deserialization didn't fail. If so, print errors and return.
-    if (error) {
-      strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
-      strip.show();
-
-      #ifdef PRINT
-        Serial.println("JSON Deserialization Failed:");
-        Serial.println(error.f_str());
-      #endif
-
-      return;
-    }
-
-    //If no error, set Web pixel to green and begin iterating through each train
-    strip.setPixelColor(WEB_LED, GN_HEX_COLOR);
+  //Check that JSON Deserialization didn't fail. If so, print errors and return.
+  if (error) {
+    strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
     #ifdef PRINT
-    Serial.println("Begin loop through trains");
+      Serial.println("JSON Deserialization Failed:");
+      Serial.println(error.f_str());
     #endif
 
-    //For each train, determine if it is on a line (WMATA returns some that are not active), determine which line it is on,
-    //then pass it to that line to determine what station the train is at or in-between
-    for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
-    
-      //Only work on trains that are on a line. JsonObject removes key if value is null.
-      if(train["LineCode"]){
+    return;
+  }
 
-        //Isolate variables from JsonObject returned by API
-        const uint16_t circID = train["CircuitId"].as<unsigned int>();
-        const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
-        const char* train_line = train["LineCode"];
+  //If no error, set Web pixel to green and begin iterating through each train
+  strip.setPixelColor(WEB_LED, GN_HEX_COLOR);
+  strip.show();
 
-        const char line_char = train_line[0]; //get first character of line, as switch statements work on chars but not strings.
+  #ifdef PRINT
+  Serial.println("Begin loop through trains");
+  #endif
 
-        int res = 0; //store result of setting each train
+  //For each train, determine if it is on a line (WMATA returns some that are not active), determine which line it is on,
+  //then pass it to that line to determine what station the train is at or in-between
+  for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
+  
+    //Only work on trains that are on a line. JsonObject removes key if value is null.
+    if(train["LineCode"]){
 
-        #ifdef PRINT
-          Serial.printf("Line: %s, Direction: %d, Circuit: %d, ", train_line, train_dir, circID); //continued after station determined
-        #endif
+      //Isolate variables from JsonObject returned by API
+      const uint16_t circID = train["CircuitId"].as<unsigned int>();
+      const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
+      const char* train_line = train["LineCode"];
 
-        //Update state for whichever line train is on.
-        switch (line_char)
-        {
-          case 'R':
-            res = redline->setTrainState(circID, train_dir-1);
-            break;
-          case 'B':
-            res = blueline->setTrainState(circID, train_dir-1);
-            break;
-          case 'O':
-            res = orangeline->setTrainState(circID, train_dir-1);
-            break;
-          case 'S':
-            res = silverline->setTrainState(circID, train_dir-1);
-            break;
-          case 'Y':
-            res = yellowline->setTrainState(circID, train_dir-1);
-            break;
-          case 'G':
-            res = greenline->setTrainState(circID, train_dir-1);
-            break;
-          default:
-            res = -1;
-            break;
-        }//end switch statement
+      const char line_char = train_line[0]; //get first character of line, as switch statements work on chars but not strings.
 
-        #ifdef PRINT
-          Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
-        #endif
+      int res = 0; //store result of setting each train
 
-      }//end if train is on a line
-    } //end loop through active trains
+      #ifdef PRINT
+        Serial.printf("Line: %s, Direction: %d, Circuit: %d, ", train_line, train_dir, circID); //continued after station determined
+      #endif
 
-    //Trains at the end of each line are handled differently (to avoid lingering LEDs).
-    //Check each line's last station and set the LED as appropriate.
-    for(uint8_t l=0; l < NUM_LINES; l++){
-      all_lines[l]->setEndLED();
-    }
-    
-    //For each LED, check if there is a train at the station represented by that LED.
-    //If so, turn the station's LED that line's color. If no trains, turn the LED off.
-
-    //"Collisions" with trains on different lines "at" the same station are determined by
-    //the order lines are put into the all_lines array in the configuration section of this file.
-    for(uint8_t k=0; k<strip.numPixels()-3; k++){ //do not turn off board status LEDs at end of "strip."
-      bool ledOn = false;
-
-      for(uint8_t l=0; l<NUM_LINES; l++){
-        if(all_lines[l]->trainAtLED(k)){
-          ledOn = true;
-          strip.setPixelColor(k, all_lines[l]->getLEDColor());
+      //Update state for whichever line train is on.
+      switch (line_char)
+      {
+        case 'R':
+          res = redline->setTrainState(circID, train_dir-1);
           break;
-        }
-      }//end check for every line on a single LED
+        case 'B':
+          res = blueline->setTrainState(circID, train_dir-1);
+          break;
+        case 'O':
+          res = orangeline->setTrainState(circID, train_dir-1);
+          break;
+        case 'S':
+          res = silverline->setTrainState(circID, train_dir-1);
+          break;
+        case 'Y':
+          res = yellowline->setTrainState(circID, train_dir-1);
+          break;
+        case 'G':
+          res = greenline->setTrainState(circID, train_dir-1);
+          break;
+        default:
+          res = -1;
+          break;
+      }//end switch statement
 
-      //If no trains at station, turn LED off
-      if(!ledOn){
-        strip.setPixelColor(k, 0); //turn LED off
+      #ifdef PRINT
+        Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
+      #endif
+
+    }//end if train is on a line
+  } //end loop through active trains
+
+  //Trains at the end of each line are handled differently (to avoid lingering LEDs).
+  //Check each line's last station and set the LED as appropriate.
+  for(uint8_t l=0; l < NUM_LINES; l++){
+    all_lines[l]->setEndLED();
+  }
+  
+  //For each LED, check if there is a train at the station represented by that LED.
+  //If so, turn the station's LED that line's color. If no trains, turn the LED off.
+
+  //"Collisions" with trains on different lines "at" the same station are determined by
+  //the order lines are put into the all_lines array in the configuration section of this file.
+  
+  for(uint8_t k=0; k<strip.numPixels()-3; k++){ //do not turn off board status LEDs at end of "strip."
+    bool ledOn = false;
+
+    for(uint8_t l=0; l<NUM_LINES; l++){
+      if(all_lines[l]->trainAtLED(k)){
+        ledOn = true;
+        strip.setPixelColor(k, all_lines[l]->getLEDColor());
+        break;
       }
+    }//end check for every line on a single LED
 
-    }//end loop through each LED
-
-    //Update the board with new state of the system
-    strip.show();
-
-    //Clear each line's internal state. Reset to reflect the data in a single API call.
-    for(uint8_t l=0; l < NUM_LINES; l++){
-      all_lines[l]->clearState();
+    //If no trains at station, turn LED off
+    if(!ledOn){
+      strip.setPixelColor(k, 0); //turn LED off
     }
-    
-  //}//END HTTPCODE
-      
 
-  delay(WAIT_SEC * 1000); //wait set number of seconds until next loop and API call.
+  }//end loop through each LED
+
+  //Update the board with new state of the system
+  strip.show();
+
+  //Clear each line's internal state. Reset to reflect the data in a single API call.
+  for(uint8_t l=0; l < NUM_LINES; l++){
+    all_lines[l]->clearState();
+  }
+    
+  //wait set number of seconds (default 20) until next loop and API call.
+  delay(WAIT_SEC * 1000);
+
 }//END LOOP()
