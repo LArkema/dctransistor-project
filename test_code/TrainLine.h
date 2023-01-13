@@ -1,5 +1,4 @@
-#include <Arduino.h>
-#include "Adafruit_LEDBackpack.h"
+#include "auto_update.h"
 
 /*
     Defines TrainLine class - an evolution of SimpleList. 
@@ -429,7 +428,9 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
     if(train_dir == 0) { last_station_idx = total_num_stations-1;}
     else{last_station_idx = 0;}
 
-    Serial.printf("CircuitID %d setting station %d\n", circID, last_station_idx);
+    #ifdef PRINT
+      Serial.printf("CircuitID %d setting station %d\n", circID, last_station_idx);
+    #endif
     state |= (1 << last_station_idx);
     cycles_at_end[train_dir]++;
     last_station_waiting[train_dir] = false;
@@ -456,18 +457,21 @@ int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
       //Do not check in between yellow line bridge stations. Gets false positives and negatives.
       if( !(station_circuits[train_dir][i] == 1052 || station_circuits[train_dir][i] == 2364)){
 
-        uint8_t station_idx;
+        uint8_t station_idx = 0;
         if(train_dir == 0){station_idx = i;}
         else if(train_dir == 1){station_idx = (total_num_stations-i)-1;} //e.g. for 10-station line, "2nd" station in reverse has i == 1, need to shift bit 8 times to reach.
         
         state |= 1 << station_idx;
 
-
+        #ifdef PRINT
         Serial.printf("CircuitID: %d, Station index: %d, LED number %d\n", circID, station_idx, station_leds[station_idx]);
+        #endif
 
         //If "at" 2nd to last station, set last station waiting to true.
         if(i == total_num_stations-2){
+          #ifdef PRINT
           Serial.println("Setting last station waiting");
+          #endif
           last_station_waiting[train_dir] = true;
         }
 
@@ -703,7 +707,9 @@ void TrainLine::updateLEDS(){
     state = state | (1 << station);
   }
 
+  #ifdef PRINT
   Serial.println(String(state));
+  #endif
 
 
   //If a train is at the end of either direction, set direction's last bit on

@@ -89,10 +89,10 @@ void loop() {
       
 
       //Define URL for GET request and confirm correctness
-      String endpoint = "";
+      String wmata_endpoint = "";
       /*
       if(stations[i] == stations.last_station){
-        endpoint = wmata_host + "/TrainPositions/TrainPositions?contentType=json";
+        wmata_endpoint = wmata_host + "/TrainPositions/TrainPositions?contentType=json";
         json_size = 2048;
         filter = train_pos_fiter;
       }
@@ -103,11 +103,11 @@ void loop() {
         if (redline.stations[i]+2 < 10) {station_code += "0";} //list starts at B02, adjust starting point and only pad when needed
         station_code += String(redline.stations[i]+2);
 
-        endpoint = wmata_host + station_endpoint + station_code;
+        wmata_endpoint = wmata_host + station_endpoint + station_code;
       //}
 
       //Connect and confirm HTTPS connection to api.wmata.com
-      if (https.begin(client, endpoint)) {
+      if (https.begin(client, wmata_endpoint)) {
         //Serial.println("In https connection");
         //If successful, add API key and request station data
         https.addHeader("api_key", SECRET_WMATA_API_KEY);

@@ -21,7 +21,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 String ssid = SECRET_SSID;
 String password = SECRET_PASS; 
 const char* wmata_fingerprint = "D2 1C A6 D1 BE 10 18 B3 74 8D A2 F5 A2 DE AB 13 7D 07 63 BE"; //Expires 10/22/2022 
-String endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
+String wmata_endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
 
 
 //TrainLine redline = TrainLine();
@@ -95,7 +95,7 @@ void loop() {
   //Serial.println(redline.getState());
 
   //Connect and confirm HTTPS connection to api.wmata.com
-  if (https.begin(client, endpoint)) {
+  if (https.begin(client, wmata_endpoint)) {
     //If successful, add API key and request station data
     https.addHeader("api_key", SECRET_WMATA_API_KEY);
     int httpCode = https.GET();

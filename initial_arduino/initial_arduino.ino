@@ -47,10 +47,10 @@ void loop() {
 
   //Define URL for GET request and confirm correctness
   String station_code = "A01";
-  String endpoint = wmata_host + "/StationPrediction.svc/json/GetPrediction/" + station_code;
+  String wmata_endpoint = wmata_host + "/StationPrediction.svc/json/GetPrediction/" + station_code;
 
   //Connect and confirm HTTPS connection to api.wmata.com
-  if (https.begin(client, endpoint)) {
+  if (https.begin(client, wmata_endpoint)) {
     
     //If successful, add API key and request station data
     https.addHeader("api_key", SECRET_WMATA_API_KEY);
