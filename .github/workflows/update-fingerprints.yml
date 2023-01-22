@@ -40,12 +40,8 @@ jobs:
           sed -i -e "s/${conf_string}/${new_conf_string}/" $CONFIG_FILE
         done
         
-        git config user.email "SSL_Update_Bot@github.com"
+        git config user.email "<>"
         git config user.name "SSL Update Action"
-        git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/dctransistor-project.git
-        if git status | grep "$CONFIG_FILE"
-        then
-          git add $CONFIG_FILE
-          git commit -m "Update Dependency Versions in BOM"
-          git push origin main
-        fi
+        git add $CONFIG_FILE
+        git commit -m "Update SSL fingerprint"
+        git push origin main
