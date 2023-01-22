@@ -1,0 +1,51 @@
+name: Update SSL Fingerprints
+
+# Run compile at 10:26 every night.
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '26 01 * * *'
+  
+jobs:
+  update-fingerprint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.3.0
+    - name: Instal openssl
+      run: sudo apt-get install -y openssl
+    - name: Update Fingerprints
+      run: |
+        function get_current_fingerprint {
+        echo | openssl s_client -showcerts -servername api.wmata.com -connect $1:443 2>/dev/null | openssl x509 -inform pem -fingerprint -sha1 | head -n 1 | cut -d '=' -f 2 | sed "s/:/ /g";
+        }
+        
+        CONFIG_FILE="./DCTransistor/config.h"
+        WMATA_SERVER=$(grep WMATA_ENDPOINT $CONFIG_FILE | cut -d '/' -f 3)
+        UPDATE_SERVER=$(grep UPDATE_HOST $CONFIG_FILE | cut -d '"' -f 2)
+        GITHUB_SERVER=$(grep LATEST_VERSION_URL $CONFIG_FILE | cut -d '/' -f 3)
+        
+        server_array=($WMATA_SERVER $UPDATE_SERVER $GITHUB_SERVER)
+        
+        for server in ${server_array[@]}; do
+          fingerprint_var=$(echo ${server}_fingerprint | sed 's/\./_/g' )
+          fingerprint_var=${fingerprint_var^^}
+          conf_string=$(grep $fingerprint_var $CONFIG_FILE | cut -d '#' -f 2)
+          
+          cur_fingerprint=$(get_current_fingerprint $server)
+          new_conf_string=$(echo -n "define ${fingerprint_var} \""${cur_fingerprint}"\"")
+          
+          sed -i -e "s/${conf_string}/${new_conf_string}/" $CONFIG_FILE
+        done
+        
+        git config user.email "SSL_Update_Bot@github.com"
+        git config user.name "SSL Update Action"
+        git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/dctransistor-project.git
+        if git status | grep "$CONFIG_FILE"
+        then
+          git add $CONFIG_FILE
+          git commit -m "Update Dependency Versions in BOM"
+          git push origin main
+        fi
