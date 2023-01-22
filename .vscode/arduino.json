@@ -1,0 +1,5 @@
+{
+    "board": "esp8266:esp8266:nodemcuv2",
+    "sketch": "DCTransistor/DCTransistor.ino",
+    "port": "/dev/ttyUSB0"
+}
