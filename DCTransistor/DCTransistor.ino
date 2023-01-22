@@ -1,9 +1,18 @@
-/* File for working / test code (actively compiled and uploaded to Arduino).
+/* Main file for running DCTransistor program. 
+
+ * Configuration values defined in config.h
+ * Class for representing state of each WMATA line defined in TrainLine.h
+ * Functions to auto-update software in auto_update.h
+ * 
+ * This file sets up WiFi and access to WMATA API, 
+ * then loops through calls to WMATA API for current train positions,
+ * uses returned values to convert positions into nearest station LED,
+ * then updates LEDs with new position / state data.
+ * 
  * Code from this file occasionally moved to "snipits" folder when substantive feature developed.
- * Logan Arkema, 1/12/2023
+ * (c) Logan Arkema, 1/12/2023
 */
 
-//#include "arduino_secrets.h"
 #include "TrainLine.h"
 
 //Global object variables
@@ -51,8 +60,9 @@ void setup() {
   #ifdef PRINT
     Serial.println("Connecting to WiFi");
   #endif
+
   bool wifi_conn;
-  wifi_conn = wifi_manager.autoConnect("DCTransistor");
+  wifi_conn = wifi_manager.autoConnect(WIFI_NAME, WIFI_PASSWORD);
 
   if(wifi_conn){
     #ifdef PRINT
@@ -68,7 +78,7 @@ void setup() {
   }
 
   //Set HTTPS connection settings to WMATA API
-  client.setFingerprint(wmata_fingerprint);
+  client.setFingerprint(WMATA_FINGERPRINT);
   client.setTimeout(15000); //recommended default
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
@@ -99,7 +109,7 @@ void loop() {
   #endif
 
   //Connect and confirm HTTPS connection to api.wmata.com. If not, set LED red.
-  if(!https.begin(client, wmata_endpoint)){
+  if(!https.begin(client, WMATA_ENDPOINT)){
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
@@ -111,7 +121,8 @@ void loop() {
   https.addHeader("api_key", SECRET_WMATA_API_KEY);
 
   //Request train data from server. If unsuccessful, set LED red. If successful, deserialize the JSON data returned by the API
-  if (https.GET() <= 0) {
+  int httpCode = https.GET();
+  if (httpCode <= 0) {
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
@@ -146,6 +157,15 @@ void loop() {
   Serial.println("Begin loop through trains");
   #endif
 
+  //counts for trains on different lines
+  uint8_t countr=0;
+  uint8_t countb=0;
+  uint8_t counto=0;
+  uint8_t county=0;
+  uint8_t counts=0;
+  uint8_t countg=0;
+  uint8_t countfail=0;
+
   //For each train, determine if it is on a line (WMATA returns some that are not active), determine which line it is on,
   //then pass it to that line to determine what station the train is at or in-between
   for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
@@ -171,21 +191,27 @@ void loop() {
       {
         case 'R':
           res = redline->setTrainState(circID, train_dir-1);
+          countr++;
           break;
         case 'B':
           res = blueline->setTrainState(circID, train_dir-1);
+          countb++;
           break;
         case 'O':
           res = orangeline->setTrainState(circID, train_dir-1);
+          counto++;
           break;
         case 'S':
           res = silverline->setTrainState(circID, train_dir-1);
+          counts++;
           break;
         case 'Y':
           res = yellowline->setTrainState(circID, train_dir-1);
+          county++;
           break;
         case 'G':
           res = greenline->setTrainState(circID, train_dir-1);
+          countg++;
           break;
         default:
           res = -1;
@@ -196,8 +222,20 @@ void loop() {
         Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
       #endif
 
+      if (res == -1){countfail++;}
+
     }//end if train is on a line
   } //end loop through active trains
+
+  #ifdef PRINT
+    Serial.printf("Red Count: %d\n", countr);
+    Serial.printf("Blue Count: %d\n", countb);
+    Serial.printf("Orange Count: %d\n", counto);
+    Serial.printf("Silver Count: %d\n", counts);
+    Serial.printf("Green Count: %d\n", countg);
+    Serial.printf("Yellow Count: %d\n", county);
+    Serial.printf("Fail Count: %d\n", countfail);
+  #endif
 
   //Trains at the end of each line are handled differently (to avoid lingering LEDs).
   //Check each line's last station and set the LED as appropriate.

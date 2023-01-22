@@ -6,6 +6,7 @@
 *   Followed by values that may occasionally change, but are still required
 *   Followed by required values
 *
+*   (c) Logan Arkema 2023
 */
 
 //Include Standard and Custom libraries and classes
@@ -23,16 +24,20 @@
 */
 
 //If using own WMATA API key, enter here. Otherwise, one built into downloaded binary
-#define SECRET_WMATA_API_KEY "hexkey"
+#define SECRET_WMATA_API_KEY "abcdef0123456789abcdef0123456789"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
-const bool AUTOUPDATE = true;
+#define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
 //#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
 #define WAIT_SEC 20
+
+//Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
+#define WIFI_NAME "DCTransistor"
+#define WIFI_PASSWORD "trainsareneat"
 
 // ----  LED Configuration Values ----
 #define LED_BRIGHTNESS 10 //Range of 0-100. Can get very bright very fast
@@ -61,28 +66,27 @@ const bool AUTOUPDATE = true;
 */
 
 //Version string. Changes with every software version
-const String VERSION = "0.2.0";
+#define VERSION "0.2.0"
 
 //Web server certificate SHA1 fingerprints for TLS connections. Need to update as certs expire
-const char* github_fingerprint = "1E 16 CC 3F 84 2F 65 FC C0 AB 93 2D 63 8A C6 4A 95 C9 1B 7A"; //7A
-const char* ghub_content_fingerprint = "8F 0E 79 24 71 C5 A7 D2 A7 46 76 30 C1 3C B7 2A 13 B0 01 B2"; //B2
-const char* wmata_fingerprint = "C5 14 29 8E E1 04 75 0C A3 B3 1C 9D BB 43 BA 13 A0 CA A0 F7"; //F7
+#define GITHUB_FINGERPRINT "1E 16 CC 3F 84 2F 65 FC C0 AB 93 2D 63 8A C6 4A 95 C9 1B 7A" //7A
+#define GHUB_CONTENT_FINGERPRINT "8F 0E 79 24 71 C5 A7 D2 A7 46 76 30 C1 3C B7 2A 13 B0 01 B2" //B2
+#define WMATA_FINGERPRINT "C5 14 29 8E E1 04 75 0C A3 B3 1C 9D BB 43 BA 13 A0 CA A0 F7" //F7
 
 /*
 *   REQUIRED CONFIGURATION VALUES
 *   (Things will break or not work right if changed)
 */
 
-
 //Headers to grab from response to request to /releases/latest (returns redirect to URL containing version umber)
 const char* github_header_keys[] = {"location"};
 const int github_num_headers = 1;
 
 //URLs and remote hosts for software updates and WMATA data
-const String latest_version_url = "https://github.com/LArkema/dctransistor-project/releases/latest";
-const String update_bin_url = "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor.bin.gz";
-const String update_host = "raw.githubusercontent.com";
-const String wmata_endpoint = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
+#define LATEST_VERSION_URL "https://github.com/LArkema/dctransistor-project/releases/latest"
+#define UPDATE_BIN_URL "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor.bin.gz"
+#define UPDATE_HOST "raw.githubusercontent.com"
+#define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
 #define HTTPS_PORT 443
 
 //Frequency for sending debug messages from ESP8266 chip to computer
@@ -95,6 +99,9 @@ const String wmata_endpoint = "https://api.wmata.com/TrainPositions/TrainPositio
 #define PWR_LED 104 //index of "Power" (should be last)
 #define WIFI_LED 103 //indoex of "WiFi" (2nd to last)
 #define WEB_LED 102 //index of "Web" (3rd to last)
+
+// Number of circuits before a Station's exact circuit to count a train as "at" that station
+#define CIRCS_BEFORE_STATION 2
 
 // ----- TRAIN LINE CONFIGURATIONS -----
 
