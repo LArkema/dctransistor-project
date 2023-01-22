@@ -78,7 +78,7 @@ void setup() {
   }
 
   //Set HTTPS connection settings to WMATA API
-  client.setFingerprint(WMATA_FINGERPRINT);
+  client.setFingerprint(API_WMATA_COM_FINGERPRINT);
   client.setTimeout(15000); //recommended default
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
