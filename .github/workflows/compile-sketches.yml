@@ -5,9 +5,9 @@ on:
   workflow_call:
     inputs:
       auto-update:
-      required: false
-      type: boolean
-      default: false
+        required: false
+        type: boolean
+        default: false
 
 env:
   CONFIG_FILE: ./DCTransistor/config.h
