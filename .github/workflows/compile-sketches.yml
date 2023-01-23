@@ -90,7 +90,7 @@ jobs:
           draft: false
           prerelease: false
           release_name: ${{ needs.compile-sketches.outputs.release-version }}
-          tag_name: ${{ jobs.compile-sketches.outputs.release-version }}
+          tag_name: ${{ needs.compile-sketches.outputs.release-version }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload binary
