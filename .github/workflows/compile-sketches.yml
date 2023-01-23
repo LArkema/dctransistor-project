@@ -1,4 +1,4 @@
-name: Compile Sketches
+name: Compile and Release Binary
 
 # Run compile at 10:26 every night.
 on:
@@ -69,15 +69,15 @@ jobs:
           gzip -k ${BIN_NAME}
       - name: Commit changes to repo
         run: |
-        if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
-          git config user.email "<>"
-          git config user.name "Binary Update Bot"
-          git add .
-          git commit -m "Update Binary"
-          git push origin main
-        else
-          echo "No updates!"
-        fi
+          if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
+            git config user.email "<>"
+            git config user.name "Binary Update Bot"
+            git add .
+            git commit -m "Update Binary"
+            git push origin main
+          else
+            echo "No updates!"
+          fi
 
   build-release:
     needs: compile-sketches
