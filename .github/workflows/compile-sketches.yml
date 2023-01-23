@@ -114,8 +114,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ${BIN_NAME}
-          asset_name: ${BIN_NAME}
+          asset_path: ${{ env.BIN_NAME }}
+          asset_name: ${{ env.BIN_NAME }}
           asset_content_type: application/bin
       - name: Upload GZIP binary
         uses: actions/upload-release-asset@v1
@@ -123,6 +123,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ${BIN_NAME}.gz
-          asset_name: ${BIN_NAME}.gz
+          asset_path: ${{ env.BIN_NAME }}.gz
+          asset_name: ${{ env.BIN_NAME }}.gz
           asset_content_type: application/gzip
