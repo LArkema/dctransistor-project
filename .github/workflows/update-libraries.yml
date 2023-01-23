@@ -56,9 +56,4 @@ jobs:
         else
           echo "No updates!"
         fi
-    - name: Compile and Release
-      uses: ./github/workflows/compile-sketches.yml
-      with: 
-        auto-update: false
-
 
