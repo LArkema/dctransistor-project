@@ -76,7 +76,7 @@ jobs:
       #       - --export-binaries
       - name: Move and GZip binaries
         run: |
-          mv ./tmp/*.bin ${BIN_NAME}
+          mv /tmp/*.bin ${BIN_NAME}
           gzip -k ${BIN_NAME}
       - name: Commit changes to repo
         run: |
