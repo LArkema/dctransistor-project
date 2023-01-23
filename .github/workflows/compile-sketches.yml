@@ -12,8 +12,8 @@ on:
 
 env:
   CONFIG_FILE: ./DCTransistor/config.h
-  BOM_FILE: ./bom.json
-  BIN_NAME: ./dctransistor.bin
+  BOM_FILE: bom.json
+  BIN_NAME: dctransistor.bin
   
 jobs:
   compile-sketches:
@@ -61,22 +61,6 @@ jobs:
       - name: Compile sketches
         run: |
           arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries --output-dir ${COMPILE_OUT_DIR} ./DCTransistor/
-      # - name: Compile sketches
-      #   uses: arduino/compile-sketches@v1.0.1
-      #   with:
-      #     platforms: |
-      #       - source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
-      #         name: esp8266:esp8266
-      #     fqbn: esp8266:esp8266:nodemcuv2
-      #     sketch-paths: |
-      #       - DCTransistor
-      #     libraries: |
-      #       - name: ArduinoJson
-      #       - name: Adafruit NeoPixel
-      #       - name: WiFiManager
-      #       - source-path: ./DCTransistor/
-      #     cli-compile-flags: |
-      #       - --export-binaries
       - name: Move and GZip binaries
         run: |
           mv ${COMPILE_OUT_DIR}${COMPILE_OUT_NAME} ${BIN_NAME}
@@ -92,6 +76,17 @@ jobs:
           else
             echo "No updates!"
           fi
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.BIN_NAME }}
+          path: ${{ env.BIN_NAME }}
+      - name: Upload GZIP Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.BIN_NAME }}.gz
+          path: ${{ env.BIN_NAME }}.gz
+
 
   build-release:
     needs: compile-sketches
@@ -108,6 +103,14 @@ jobs:
           tag_name: ${{ needs.compile-sketches.outputs.release-version }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Download Binary Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.BIN_NAME }}
+      - name: Download GZIP Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.BIN_NAME }}.gz
       - name: Upload binary
         uses: actions/upload-release-asset@v1
         env:
