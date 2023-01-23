@@ -10,7 +10,7 @@ sed -i "s/$OldVer|$NewVer/g" bom.json
 
 ## Update NeoPixel library version
 OldVer=$(cat bom.json | jq '.components[] | select(.name == "Adafruit NeoPixel") | .version' | cut -d'"' -f 2)
-NewVer=$(find ~/ -path "*Adafruit_LED_Backpack_Library*" -name "library.properties" -exec grep "version" {} \; | cut -d '=' -f 2)
+NewVer=$(find ~/ -path "*Adafruit_NeoPixel*" -name "library.properties" -exec grep "version" {} \; | cut -d '=' -f 2)
 
 sed -i "s/$OldVer/$NewVer/" bom.json
 
