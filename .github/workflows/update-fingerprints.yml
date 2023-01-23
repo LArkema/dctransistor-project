@@ -40,8 +40,13 @@ jobs:
           sed -i -e "s/${conf_string}/${new_conf_string}/" $CONFIG_FILE
         done
         
-        git config user.email "<>"
-        git config user.name "SSL Update Action"
-        git add $CONFIG_FILE
-        git commit -m "Update SSL fingerprint"
-        git push origin main
+        if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
+          git config user.email "<>"
+          git config user.name "SSL Update Action"
+          git add $CONFIG_FILE
+          git commit -m "Update SSL fingerprint"
+          git push origin main
+        else
+          echo "No updates"
+        fi
+
