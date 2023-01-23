@@ -48,7 +48,9 @@ jobs:
           fi
           
           echo "version=$next_version" >> $GITHUB_OUTPUT
-      # See: https://github.com/arduino/compile-sketches#readme
+      - name: Inject API Key
+        run: |
+          sed -i -E "/SECRET_WMATA_API_KEY/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY }}/" ${CONFIG_FILE}
       - name: Install Arduino Cli
         uses: arduino/setup-arduino-cli@v1.1.1
       - name: Install boards and libraries
@@ -65,6 +67,9 @@ jobs:
         run: |
           mv ${COMPILE_OUT_DIR}${COMPILE_OUT_NAME} ${BIN_NAME}
           gzip -k -f ${BIN_NAME}
+      - name: Remove WMATA API Key
+        run: |
+          sed -i "s/{{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${CONFIG_FILE}
       - name: Commit changes to repo
         run: |
           if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
