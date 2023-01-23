@@ -1,6 +1,6 @@
 name: Update Arduino Libraries and BOM
 
-# Run compile at 1:26 every morning.
+# Check for library updates every night at 9:41 and commit changes to BOM file
 on:
   push:
   pull_request:

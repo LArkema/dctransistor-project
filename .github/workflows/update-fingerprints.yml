@@ -1,6 +1,6 @@
 name: Update TLS Fingerprints
 
-# Run compile at 1:26 every morning.
+# Check for new TLS certificate fingerprints for three hosts used at 1:26 every morning.
 on:
   push:
   pull_request:
@@ -10,6 +10,8 @@ on:
 jobs:
   update-fingerprint:
     runs-on: ubuntu-latest
+    env:
+      CONFIG_FILE: ./DCTransistor/config.h
     
     steps:
     - name: Checkout
@@ -21,8 +23,7 @@ jobs:
         function get_current_fingerprint {
         echo | openssl s_client -showcerts -servername $1-connect $1:443 2>/dev/null | openssl x509 -inform pem -fingerprint -sha1 | head -n 1 | cut -d '=' -f 2 | sed "s/:/ /g";
         }
-        
-        CONFIG_FILE="./DCTransistor/config.h"
+      
         WMATA_SERVER=$(grep WMATA_ENDPOINT $CONFIG_FILE | cut -d '/' -f 3)
         UPDATE_SERVER=$(grep UPDATE_HOST $CONFIG_FILE | cut -d '"' -f 2)
         GITHUB_SERVER=$(grep LATEST_VERSION_URL $CONFIG_FILE | cut -d '/' -f 3)

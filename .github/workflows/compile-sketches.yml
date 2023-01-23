@@ -4,16 +4,48 @@ name: Compile Sketches
 on:
   push:
   pull_request:
-  schedule:
-    - cron: '26 22 * * *'
+  workflow_call:
+    inputs:
+      auto-update:
+      required: false
+      type: boolean
+      default: false
+
+env:
+  CONFIG_FILE: ./DCTransistor/config.h
+  BOM_FILE: ./bom.json
+  BIN_NAME: ./dctransistor.bin
   
 jobs:
   compile-sketches:
     runs-on: ubuntu-latest
+    outputs:
+      release-version: ${{ steps.set-version.outputs.version }}
+
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3.3.0
+      - name: Install tools
+        run: sudo apt-get install -y gzip
+      - name: Set release version
+        id: set-version
+        run: |
+          code_version=$(grep "#define VERSION" $CONFIG_FILE | cut -d '"' -f 2)
+          # If updating release b/c of upstream update, auto-increment minor version. 
+          # Else, version must be changed in code upload
+          if [[ "${{ inputs.auto-update }} ]]; then
+            code_minor_version=$(echo ${code_version} | cut -d '.' -f 3)
+            let "new_minor_version=code_minor_version+1"
+            next_version=$(echo ${code_version} | cut -d '.' -f 1-2).${new_minor_version})
+            sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${CONFIG_FILE}
+            sed -i -e "/dctransistor-/s/${code_version}/${next_version}/" ${BOM_FILE}
+            sed -i -e "/version/s/${code_version}/${next_version}/" ${BOM_FILE}
+          else
+            next_version=$code_version
+          fi
+          
+          echo "version=$next_version" >> $GITHUB_OUTPUT
       # See: https://github.com/arduino/compile-sketches#readme
       - name: Compile sketches
         uses: arduino/compile-sketches@v1.0.1
@@ -28,5 +60,55 @@ jobs:
             - name: ArduinoJson
             - name: Adafruit NeoPixel
             - name: WiFiManager
-            - source-path: ./
-      # BOM update moved to separate workflow
+            - source-path: ./DCTransistor/
+          cli-compile-flags: |
+            - --export-binaries
+      - name: Move and GZip binaries
+        run: |
+          mv ./DCTransistor/*.bin ${BIN_NAME}
+          gzip -k ${BIN_NAME}
+      - name: Commit changes to repo
+        run: |
+        if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
+          git config user.email "<>"
+          git config user.name "Binary Update Bot"
+          git add .
+          git commit -m "Update Binary"
+          git push origin main
+        else
+          echo "No updates!"
+        fi
+
+  build-release:
+    needs: compile-sketches
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: create-release
+        uses: actions/create-release@v1
+        id: create-release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ needs.compile-sketches.outputs.release-version }}
+          tag_name: ${{ jobs.compile-sketches.outputs.release-version }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ${BIN_NAME}
+          asset_name: ${BIN_NAME}
+          asset_content_type: application/bin
+      - name: Upload GZIP binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ${BIN_NAME}.gz
+          asset_name: ${BIN_NAME}.gz
+          asset_content_type: application/gzip

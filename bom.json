@@ -4,10 +4,10 @@
   "version": 1,
   "metadata": {
     "component": {
-      "bom-ref": "wmata-pcb-0.2",
+      "bom-ref": "dctransistor-0.2.0",
       "type": "device",
-      "name": "WMATA PCB",
-      "version": "0.2"
+      "name": "DCTransistor",
+      "version": "0.2.0"
     }
   },
   "components": [
@@ -16,7 +16,7 @@
       "type": "firmware",
       "name": "ESP8266 Arduino Core",
       "version": "3.1.1",
-      "purl": "pkg:github/esp8266/Arduino@3.1.9",
+      "purl": "pkg:github/esp8266/Arduino@3.1.1",
       "url": "https://github.com/esp8266/Arduino",
       "license": {
         "id": "LGPL-2.1-or-later",
@@ -73,7 +73,7 @@
     ],
   "dependencies": [
     {
-      "ref": "wmata-pcb-0.2",
+      "ref": "dctransistor-0.2.0",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.1",
         "pkg:github/bblanchon/ArduinoJson@6.20.0",
