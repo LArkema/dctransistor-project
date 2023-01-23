@@ -261,7 +261,7 @@
         },
         {
             "name": "Arduino",
-            "compilerPath": "@/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/tools/warnings/none-g++",
+            "compilerPath": "@/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/tools/warnings/none-g++",
             "compilerArgs": [
                 "-U__STRICT_ANSI__",
                 "-free",
@@ -275,21 +275,21 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/tools/sdk/include",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/tools/sdk/lwip2/include",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/cores/esp8266",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/variants/nodemcu",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/tools/sdk/include",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/tools/sdk/lwip2/include",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/cores/esp8266",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/variants/nodemcu",
                 "/home/dev/Arduino/libraries/ArduinoJson/src",
                 "/home/dev/Arduino/libraries/Adafruit_NeoPixel",
                 "/home/dev/Arduino/libraries/WiFiManager",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/libraries/ESP8266WiFi/src",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/libraries/ESP8266WebServer/src",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/libraries/DNSServer/src",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/libraries/ESP8266HTTPClient/src",
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/libraries/ESP8266httpUpdate/src"
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/libraries/ESP8266WiFi/src",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/libraries/ESP8266WebServer/src",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/libraries/DNSServer/src",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/libraries/ESP8266HTTPClient/src",
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/libraries/ESP8266httpUpdate/src"
             ],
             "forcedInclude": [
-                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.0/cores/esp8266/Arduino.h"
+                "/home/dev/.arduino15/packages/esp8266/hardware/esp8266/3.1.1/cores/esp8266/Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
