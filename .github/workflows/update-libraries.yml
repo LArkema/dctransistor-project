@@ -1,0 +1,56 @@
+name: Update Arduino Libraries and BOM
+
+# Run compile at 1:26 every morning.
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '41 21 * * *'
+  
+jobs:
+  update-fingerprint:
+    runs-on: ubuntu-latest
+    env:
+      BOM_FILE: bom.json
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.3.0
+    - name: Install Arduino CLI
+      uses: arduino/setup-arduino-cli@v1.1.1
+    - name: Install packages and boards
+      run: |
+        arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+        arduino-cli core install --fqbn esp8266:esp8266:nodemcuv2
+        arduino-cli lib install ArduinoJson
+        arduino-cli lib install Adafruit NeoPixel
+        arduino-cli lib install WiFiManager
+    - name: Update package and board versions in BOM
+      run: |
+
+        # Loop through libraries (consistent format between downloaded file and BOM name)
+        library_array=("ArduinoJson" "Adafruit NeoPixel" "WiFiManager")
+        for ((i = 0; i < ${#library_array[@]}; i++)); do
+          lib_file_name=$(echo ${library_array[$i]} | sed 's/ /_/g')
+          OldVer=$(cat $BOM_FILE | jq -r --arg lib_name "${library_array[$i]}" '.components[] | select(.name == $lib_name) | .version' | cut -d'"' -f 2)
+          NewVer=$(find ~/ -path "*${lib_file_name}*" -name "library.properties" -exec grep "version" {} \; | cut -d '=' -f 2)
+          sed -i "s/${OldVer}/${NewVer}/g" $BOM_FILE
+        done
+
+        # Get version for board manager (version number in file name)
+        OldVer=$(cat $BOM_FILE | jq '.components[] | select(.name == "ESP8266 Arduino Core") | .version' | cut -d'"' -f 2)
+        NewVer=$(find ~/ -path "*esp8266*" -name "package.json" | grep -E "esp8266\/[0-9]+.[0-9]+.[0-9]*" -o | cut -d '/' -f 2 | head -n 1)
+        sed -i "s/${OldVer}/${NewVer}/g" $BOM_FILE
+    - name: Validate BOM
+      run: |
+        go install github.com/neilpa/yajsv@latest
+        /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json $BOM_FILE
+    - name: Check-in changes to repo
+      run: |
+        git config user.email "<>"
+        git config user.name "Library and BOM Update Action"
+        git add $BOM_FILE
+        git commit -m "Update BOM"
+        git push origin main
+
+
