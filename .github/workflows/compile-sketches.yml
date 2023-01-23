@@ -36,7 +36,7 @@ jobs:
           if [[ "${{ inputs.auto-update }} ]]; then
             code_minor_version=$(echo ${code_version} | cut -d '.' -f 3)
             let "new_minor_version=code_minor_version+1"
-            next_version=$(echo ${code_version} | cut -d '.' -f 1-2).${new_minor_version})
+            next_version=$(echo $(echo ${code_version} | cut -d '.' -f 1-2).${new_minor_version})
             sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${CONFIG_FILE}
             sed -i -e "/dctransistor-/s/${code_version}/${next_version}/" ${BOM_FILE}
             sed -i -e "/version/s/${code_version}/${next_version}/" ${BOM_FILE}
