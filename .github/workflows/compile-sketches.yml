@@ -2,8 +2,6 @@ name: Compile and Release Binary
 
 # Run compile at 10:26 every night.
 on:
-  push:
-  pull_request:
   workflow_call:
     inputs:
       auto-update:

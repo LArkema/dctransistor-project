@@ -8,7 +8,7 @@ on:
     - cron: '41 21 * * *'
   
 jobs:
-  update-fingerprint:
+  update-libraries:
     runs-on: ubuntu-latest
     env:
       BOM_FILE: bom.json
@@ -56,5 +56,9 @@ jobs:
         else
           echo "No updates!"
         fi
+    - name: Compile and Release
+      uses: ./github/workflows/compile-sketches.yml
+      with: 
+        auto-update: false
 
 
