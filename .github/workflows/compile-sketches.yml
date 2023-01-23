@@ -69,7 +69,7 @@ jobs:
           gzip -k -f ${BIN_NAME}
       - name: Remove WMATA API Key
         run: |
-          sed -i "s/{{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${CONFIG_FILE}
+          sed -i "s/${{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${CONFIG_FILE}
       - name: Commit changes to repo
         run: |
           if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then

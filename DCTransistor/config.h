@@ -23,7 +23,7 @@
 */
 
 //If using own WMATA API key, enter here. Otherwise, one built into downloaded binary
-#define SECRET_WMATA_API_KEY "32d2f5a4d06f434aadd436b991a65768"
+#define SECRET_WMATA_API_KEY "abcdef0123456789abcdef0123456789"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
 #define AUTOUPDATE true
