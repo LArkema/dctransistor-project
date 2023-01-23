@@ -11,7 +11,6 @@
 
 //Include Standard and Custom libraries and classes
 #include <Arduino.h>
-#include <Adafruit_LEDBackpack.h>
 #include <ArduinoJson.h>
 #include <Adafruit_NeoPixel.h>
 #include <WiFiManager.h>

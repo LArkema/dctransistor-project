@@ -12,10 +12,10 @@
   },
   "components": [
     {
-      "bom-ref": "pkg:github/esp8266/Arduino@3.1.0",
+      "bom-ref": "pkg:github/esp8266/Arduino@3.0.6",
       "type": "firmware",
       "name": "ESP8266 Arduino Core",
-      "version": "3.1.0",
+      "version": "3.0.6",
       "purl": "pkg:github/esp8266/Arduino@3.1.9",
       "url": "https://github.com/esp8266/Arduino",
       "license": {
@@ -38,11 +38,11 @@
        ]
     },
     {
-      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.20.0",
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@6.19.7",
       "type": "library",
       "name": "ArduinoJson",
-      "version":  "6.20.0",
-      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.20.0",
+      "version":  "6.19.7",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v6.19.7",
       "license": {
         "id": "MIT",
         "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
@@ -75,14 +75,14 @@
     {
       "ref": "wmata-pcb-0.2",
       "dependsOn": [
-        "pkg:github/esp8266/Arduino@3.1.0",
-        "pkg:github/bblanchon/ArduinoJson@6.20.0",
+        "pkg:github/esp8266/Arduino@3.0.6",
+        "pkg:github/bblanchon/ArduinoJson@6.19.7",
         "pkg:github/adafruit/Adafruit_NeoPixel@1.10.7",
         "pkg:github/tzapu/WifiManager@2.0.15-rc.1"
         ]
     },
     {
-      "ref": "pkg:github/esp8266/Arduino@3.1.0",
+      "ref": "pkg:github/esp8266/Arduino@3.0.6",
       "dependsOn": [
         "pkg:github/earlephilhower/bearssl-esp8266@6105635531027f5b298aa656d44be2289b2d434f"
         ]
