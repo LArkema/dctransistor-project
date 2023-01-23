@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.set-version.outputs.version }}
+    env:
+      COMPILE_OUT_DIR: /tmp/
+      COMPILE_OUT_NAME: DCTransistor.ino.bin
 
 
     steps:
@@ -57,7 +60,7 @@ jobs:
           arduino-cli lib install WiFiManager
       - name: Compile sketches
         run: |
-          arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries --output-dir /tmp/ ./DCTransistor/
+          arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries --output-dir ${COMPILE_OUT_DIR} ./DCTransistor/
       # - name: Compile sketches
       #   uses: arduino/compile-sketches@v1.0.1
       #   with:
@@ -76,9 +79,8 @@ jobs:
       #       - --export-binaries
       - name: Move and GZip binaries
         run: |
-          ls /tmp/
-          mv /tmp/*.bin ${BIN_NAME}
-          gzip -k ${BIN_NAME}
+          mv ${COMPILE_OUT_DIR}${COMPILE_OUT_NAME} ${BIN_NAME}
+          gzip -k -f ${BIN_NAME}
       - name: Commit changes to repo
         run: |
           if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
