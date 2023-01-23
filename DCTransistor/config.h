@@ -86,6 +86,7 @@ const int github_num_headers = 1;
 #define LATEST_VERSION_URL "https://github.com/LArkema/dctransistor-project/releases/latest"
 #define UPDATE_BIN_URL "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor.bin.gz"
 #define UPDATE_HOST "raw.githubusercontent.com"
+#define GITHUB_HOST "github.com"
 #define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
 #define HTTPS_PORT 443
 

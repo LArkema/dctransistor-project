@@ -1,4 +1,4 @@
-name: Compile Sketches and Update BOM
+name: Compile Sketches
 
 # Run compile at 10:26 every night.
 on:
@@ -19,35 +19,14 @@ jobs:
         uses: arduino/compile-sketches@v1.0.1
         with:
           platforms: |
-            - source-url: http://arduino.esp8266.com/stable/package_esp8266com_index.json
+            - source-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
               name: esp8266:esp8266
           fqbn: esp8266:esp8266:nodemcuv2
           sketch-paths: |
             - DCTransistor
           libraries: |
             - name: ArduinoJson
-            - name: Adafruit LED Backpack Library
             - name: Adafruit NeoPixel
             - name: WiFiManager
-            - source-path: inc
             - source-path: ./
-      # After succesful compilation, update the BOM with the latest dependencies installed by Arduino Compiler (from source), and validate the update against BOM schema.
-      - name: Validate BOM - Setup GO
-        uses: actions/setup-go@v3.5.0
-      - name: Update BOM
-        run: bash ./bom_update.sh
-      - name: Validate BOM
-        run: |
-          go install github.com/neilpa/yajsv@latest
-          /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json bom.json
-      - name: Push BOM to Repo
-        run: |
-          git config user.email "BOM_Update_Bot@github.com"
-          git config user.name "BOM Update / Sketch Compile Action"
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/LArkema/dctransistor-project.git
-          if git status | grep "bom.json"
-          then
-            git add bom.json
-            git commit -m "Update Dependency Versions in BOM"
-            git push origin main
-          fi
+      # BOM update moved to separate workflow

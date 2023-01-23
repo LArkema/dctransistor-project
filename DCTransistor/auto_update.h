@@ -6,7 +6,11 @@ HTTPClient https;
 void update_arduino(WiFiClientSecure &client, String cur_version){
 
   client.setFingerprint(RAW_GITHUBUSERCONTENT_COM_FINGERPRINT);
-  client.connect(UPDATE_HOST, HTTPS_PORT);
+  
+  if(!client.connect(UPDATE_HOST, HTTPS_PORT)){
+    client.setInsecure(); //Needed in case board has not turned on and downloaded binary with updated github fingerprints
+    client.connect(UPDATE_HOST, HTTPS_PORT);
+  }
   
   t_httpUpdate_return ret = ESPhttpUpdate.update(client, UPDATE_BIN_URL);
 
@@ -27,6 +31,12 @@ void check_for_update(WiFiClientSecure &client){
 
   //Send HTTP request to /releases/latest on GitHub page, which always returns a 302
   client.setFingerprint(GITHUB_COM_FINGERPRINT);
+  
+  if(!client.connect(GITHUB_HOST, HTTPS_PORT)){
+    client.setInsecure(); //Needed in case board has not turned on and downloaded binary with updated github fingerprints
+    client.connect(GITHUB_HOST, HTTPS_PORT);
+  }
+
   https.begin(client, LATEST_VERSION_URL);
   https.collectHeaders(github_header_keys, github_num_headers); //collect location header (defined in config)
   https.GET();
