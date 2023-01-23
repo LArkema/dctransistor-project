@@ -57,7 +57,7 @@ jobs:
           arduino-cli lib install WiFiManager
       - name: Compile sketches
         run: |
-          arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries ./DCTransistor/
+          arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries --output-dir /tmp/ ./DCTransistor/
       # - name: Compile sketches
       #   uses: arduino/compile-sketches@v1.0.1
       #   with:
@@ -76,7 +76,7 @@ jobs:
       #       - --export-binaries
       - name: Move and GZip binaries
         run: |
-          mv ./DCTransistor/*.bin ${BIN_NAME}
+          mv ./tmp/*.bin ${BIN_NAME}
           gzip -k ${BIN_NAME}
       - name: Commit changes to repo
         run: |
