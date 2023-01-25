@@ -11,7 +11,7 @@ jobs:
   update-fingerprint:
     runs-on: ubuntu-latest
     env:
-      CONFIG_FILE: ./DCTransistor/config
+      CONFIG_FILE: ./DCTransistor/config.h
     outputs:
       compile: ${{ steps.update-fingerprints.outputs.compile }}
     
