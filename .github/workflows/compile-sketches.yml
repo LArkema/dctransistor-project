@@ -136,4 +136,3 @@ jobs:
       #     asset_path: ${{ env.BIN_NAME }}.gz
       #     asset_name: ${{ env.BIN_NAME }}.gz
       #     asset_content_type: application/gzip
-

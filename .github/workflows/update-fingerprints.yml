@@ -2,7 +2,7 @@ name: Update TLS Fingerprints
 
 # Check for new TLS certificate fingerprints for three hosts used at 1:26 every morning.
 on:
-  push:
+  #push:
   pull_request:
   schedule:
     - cron: '26 01 * * *'
