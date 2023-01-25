@@ -66,6 +66,7 @@ jobs:
     needs: update-libraries
     if: ${{ needs.update-libraries.outputs.compile }} == 'true'
     uses: ./.github/workflows/compile-sketches.yml
+    secrets: inherit
     with:
       auto-update: true
 
