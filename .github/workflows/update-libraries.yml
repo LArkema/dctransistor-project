@@ -59,12 +59,12 @@ jobs:
           echo "compile='true'" >> $GITHUB_OUTPUT
         else
           echo "No updates!"
-          echo "compile=false" >> $GITHUB_OUTPUT
+          echo "compile='false'" >> $GITHUB_OUTPUT
         fi
   
   call-update-binary:
     needs: update-libraries
-    if: ${{ needs.update-libraries.outputs.compile }} == 'true'
+    if: needs.update-libraries.outputs.compile == 'true'
     uses: ./.github/workflows/compile-sketches.yml
     secrets: inherit
     with:
