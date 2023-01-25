@@ -12,11 +12,11 @@
   },
   "components": [
     {
-      "bom-ref": "pkg:github/esp8266/Arduino@3.1.0",
+      "bom-ref": "pkg:github/esp8266/Arduino@3.1.1",
       "type": "firmware",
       "name": "ESP8266 Arduino Core",
-      "version": "3.1.0",
-      "purl": "pkg:github/esp8266/Arduino@3.1.0",
+      "version": "3.1.1",
+      "purl": "pkg:github/esp8266/Arduino@3.1.1",
       "url": "https://github.com/esp8266/Arduino",
       "license": {
         "id": "LGPL-2.1-or-later",
