@@ -1,4 +1,4 @@
-[![Compile Sketches](https://github.com/LArkema/WMATA_PCB/actions/workflows/compile-sketches.yml/badge.svg)](https://github.com/LArkema/WMATA_PCB/actions/workflows/compile-sketches.yml)
+[![Compile and Release Binary](https://github.com/LArkema/dctransistor-project/actions/workflows/compile-sketches.yml/badge.svg)](https://github.com/LArkema/dctransistor-project/actions/workflows/compile-sketches.yml)
 
 Project to make a PCB version of the WMATA metro map that tracks train positions using LEDs. Repository currently contains source code for DCTransistor boards (source code for board design and schematics coming soon).
 
