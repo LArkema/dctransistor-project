@@ -11,7 +11,9 @@ jobs:
   update-fingerprint:
     runs-on: ubuntu-latest
     env:
-      CONFIG_FILE: ./DCTransistor/config.h
+      CONFIG_FILE: ./DCTransistor/config.
+    outputs:
+      compile: ${{ steps.update-fingerprints.outputs.compile }}
     
     steps:
     - name: Checkout
@@ -19,6 +21,7 @@ jobs:
     - name: Instal openssl
       run: sudo apt-get install -y openssl
     - name: Update Fingerprints
+      id: update-fingerprints
       run: |
         function get_current_fingerprint {
         echo | openssl s_client -showcerts -servername $1-connect $1:443 2>/dev/null | openssl x509 -inform pem -fingerprint -sha1 | head -n 1 | cut -d '=' -f 2 | sed "s/:/ /g";
@@ -47,7 +50,16 @@ jobs:
           git add $CONFIG_FILE
           git commit -m "Update SSL fingerprint"
           git push origin main
+          echo "compile='true'" >> $GITHUB_OUTPUT
         else
           echo "No updates"
+          echo "compile='false'" >> $GITHUB_OUTPUT
         fi
 
+  call-update-binary:
+    needs: update-fingerprint
+    if: ${{ needs.update-fingerprint.outputs.compile }} == 'true'
+    uses: ./.github/workflows/compile-sketches.yml
+    secrets: inherit
+    with:
+      auto-update: true
