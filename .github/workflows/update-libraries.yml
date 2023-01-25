@@ -3,7 +3,7 @@ name: Update Arduino Libraries and BOM
 # Check for library updates every night at 9:41 and commit changes to BOM file
 on:
   #push:
-  pull_request:
+  #pull_request:
   schedule:
     - cron: '41 21 * * *'
   

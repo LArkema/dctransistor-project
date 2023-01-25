@@ -2,7 +2,7 @@ name: Compile and Release Binary
 
 # Compile binary and create release only in response to a pull request or a call from an auto-update workflow.
 on:
-  push:
+  #push:
   pull_request:
   workflow_call:
     inputs:
@@ -117,22 +117,3 @@ jobs:
           artifacts: "${{ env.BIN_NAME }},${{ env.BIN_NAME}}.gz"
           tag: ${{ needs.compile-sketches.outputs.release-version }}
           body: "Automated pipeline release of dctransistor binary"
-
-      # - name: Upload binary to release
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create-release.outputs.upload_url }}
-      #     asset_path: ${{ env.BIN_NAME }}
-      #     asset_name: ${{ env.BIN_NAME }}
-      #     asset_content_type: application/bin
-      # - name: Upload GZIP binary
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create-release.outputs.upload_url }}
-      #     asset_path: ${{ env.BIN_NAME }}.gz
-      #     asset_name: ${{ env.BIN_NAME }}.gz
-      #     asset_content_type: application/gzip
