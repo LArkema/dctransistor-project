@@ -1,8 +1,8 @@
 name: Compile and Release Binary
 
-# Run compile at 10:26 every night.
+# Compile binary and create release only in response to a pull request or a call from an auto-update workflow.
 on:
-  push:
+  pull_request:
   workflow_call:
     inputs:
       auto-update:
@@ -41,11 +41,14 @@ jobs:
             let "new_minor_version=code_minor_version+1"
             next_version=$(echo -n ${code_version} | awk -F. '{printf("%s.%s", $1, $2)}'; echo -n ".${new_minor_version}")
             sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${CONFIG_FILE}
-            sed -i -e "/dctransistor-/s/${code_version}/${next_version}/" ${{ env.BOM_FILE }}
-            sed -i -e "/version/s/${code_version}/${next_version}/" ${{ env.BOM_FILE }}
           else
             next_version=$code_version
           fi
+
+          # Update version in BOM with version in code and release
+          old_ver=$(cat ${{ env.BOM_FILE }} | jq '.metadata.component.version' | cut -d '"' -f 2)
+          sed -i -e "/dctransistor-/s/${old_ver}/${next_version}/" ${{ env.BOM_FILE }}
+          sed -i -e "/version/s/${old_ver}/${next_version}/" ${{ env.BOM_FILE }}
           
           echo "version=$next_version" >> $GITHUB_OUTPUT
       - name: Inject API Key

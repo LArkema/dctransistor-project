@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BOM_FILE: bom.json
+    outputs:
+      compile: ${{ steps.check-in.outputs.compile }}
     
     steps:
     - name: Checkout
@@ -46,6 +48,7 @@ jobs:
         go install github.com/neilpa/yajsv@latest
         /home/runner/go/bin/yajsv -s cyclonedx-schema-1_2.json $BOM_FILE
     - name: Check-in changes to repo
+      id: check-in
       run: |
         if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
           git config user.email "<>"
@@ -53,7 +56,18 @@ jobs:
           git add $BOM_FILE
           git commit -m "Update BOM"
           git push origin main
+          echo "compile=true" >> $GITHUB_OUTPUT
         else
           echo "No updates!"
+          echo "compile=false" >> $GITHUB_OUTPUT
         fi
+  
+  update-binary:
+    needs: update-libraries
+    runs-on: ubuntu-latest
+    if: needs.update-libraries.outputs.compile == true
+    steps:
+      - uses: ./.github/workflows/compile-sketches.yml
+        with:
+          auto-update: true
 
