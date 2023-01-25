@@ -2,7 +2,7 @@ name: Compile and Release Binary
 
 # Compile binary and create release only in response to a pull request or a call from an auto-update workflow.
 on:
-  push:
+  #push:
   pull_request:
   workflow_call:
     inputs:
