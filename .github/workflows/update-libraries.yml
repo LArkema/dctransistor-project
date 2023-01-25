@@ -65,7 +65,7 @@ jobs:
   update-binary:
     needs: update-libraries
     runs-on: ubuntu-latest
-    if: needs.update-libraries.outputs.compile == "true"
+    if: needs.update-libraries.outputs.compile == 'true'
     steps:
       - uses: ./.github/workflows/compile-sketches.yml
         with:
