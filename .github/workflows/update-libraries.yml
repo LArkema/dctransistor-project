@@ -62,15 +62,10 @@ jobs:
           echo "compile=false" >> $GITHUB_OUTPUT
         fi
   
-  update-binary:
+  call-update-binary:
     needs: update-libraries
-    runs-on: ubuntu-latest
     if: needs.update-libraries.outputs.compile == 'true'
-    steps:
-      - uses: actions/checkout@v3.3.0
-        name: Checkout
-      - uses: ./.github/workflows/compile-sketches.yml
-        name: Call compile workflow
-        with:
-          auto-update: true
+    uses: ./.github/workflows/compile-sketches.yml
+    with:
+      auto-update: true
 
