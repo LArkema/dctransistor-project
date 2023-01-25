@@ -56,7 +56,7 @@ jobs:
           git add $BOM_FILE
           git commit -m "Update BOM"
           git push origin main
-          echo "compile=true" >> $GITHUB_OUTPUT
+          echo "compile='true'" >> $GITHUB_OUTPUT
         else
           echo "No updates!"
           echo "compile=false" >> $GITHUB_OUTPUT
@@ -64,7 +64,7 @@ jobs:
   
   call-update-binary:
     needs: update-libraries
-    if: needs.update-libraries.outputs.compile == 'true'
+    if: ${{ needs.update-libraries.outputs.compile }} == 'true'
     uses: ./.github/workflows/compile-sketches.yml
     with:
       auto-update: true
