@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "0.2.16"
+#define VERSION "0.2.17"
 
 /*
 *   USER CONFIGURATION VALUES
