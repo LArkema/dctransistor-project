@@ -58,7 +58,7 @@ jobs:
 
   call-update-binary:
     needs: update-fingerprint
-    if: ${{ needs.update-fingerprint.outputs.compile }} == 'true'
+    if: needs.update-fingerprint.outputs.compile == 'true'
     uses: ./.github/workflows/compile-sketches.yml
     secrets: inherit
     with:
