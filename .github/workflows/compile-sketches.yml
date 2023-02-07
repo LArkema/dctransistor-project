@@ -77,6 +77,7 @@ jobs:
       - name: Commit changes to repo
         run: |
           if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
+            git pull origin main
             git config user.email "<>"
             git config user.name "Binary Update Bot"
             git add .
