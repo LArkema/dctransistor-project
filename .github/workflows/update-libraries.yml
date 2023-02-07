@@ -2,7 +2,7 @@ name: Update Arduino Libraries and BOM
 
 # Check for library updates every night at 9:41 and commit changes to BOM file
 on:
-  #push:
+  push:
   #pull_request:
   schedule:
     - cron: '41 21 * * *'
@@ -56,10 +56,10 @@ jobs:
           git add $BOM_FILE
           git commit -m "Update BOM"
           git push origin main
-          echo "compile='true'" >> $GITHUB_OUTPUT
+          echo "compile=true" >> $GITHUB_OUTPUT
         else
           echo "No updates!"
-          echo "compile='false'" >> $GITHUB_OUTPUT
+          echo "compile=false" >> $GITHUB_OUTPUT
         fi
   
   call-update-binary:
