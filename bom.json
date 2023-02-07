@@ -60,10 +60,10 @@
       }
     },
     {
-      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.10.0",
+      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.11.0",
       "type": "library",
       "name": "Adafruit NeoPixel",
-      "version":  "1.10.0",
+      "version":  "1.11.0",
       "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.11.0",
       "license": {
         "id": "LGPL-3.0",
