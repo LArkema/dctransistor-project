@@ -50,10 +50,10 @@ jobs:
           git add $CONFIG_FILE
           git commit -m "Update SSL fingerprint"
           git push origin main
-          echo "compile='true'" >> $GITHUB_OUTPUT
+          echo "compile=true" >> $GITHUB_OUTPUT
         else
           echo "No updates"
-          echo "compile='false'" >> $GITHUB_OUTPUT
+          echo "compile=false" >> $GITHUB_OUTPUT
         fi
 
   call-update-binary:
