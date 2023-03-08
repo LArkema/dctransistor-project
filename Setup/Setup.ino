@@ -33,6 +33,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); //object to c
 void update_arduino(){
 
   strip.setPixelColor(WEB_LED, BL_HEX_COLOR);
+  strip.show();
 
   //client.setFingerprint(RAW_GITHUBUSERCONTENT_COM_FINGERPRINT);
   
