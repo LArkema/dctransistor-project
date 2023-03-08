@@ -74,6 +74,7 @@ void setup() {
 
   //After connecting to WiFi, check for software update and download if possible
   if(AUTOUPDATE){
+    strip.setPixelColor(WEB_LED, BL_HEX_COLOR);
     check_for_update(client);
   }
 
