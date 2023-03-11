@@ -4,10 +4,10 @@
   "version": 1,
   "metadata": {
     "component": {
-      "bom-ref": "dctransistor-0.2.22",
+      "bom-ref": "dctransistor-0.3.0",
       "type": "device",
       "name": "DCTransistor",
-      "version": "0.2.22"
+      "version": "0.3.0"
     }
   },
   "components": [
@@ -73,7 +73,7 @@
     ],
   "dependencies": [
     {
-      "ref": "dctransistor-0.2.22",
+      "ref": "dctransistor-0.3.0",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.1",
         "pkg:github/bblanchon/ArduinoJson@6.20.1",
