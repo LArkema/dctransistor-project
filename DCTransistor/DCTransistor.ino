@@ -125,7 +125,7 @@ void loop() {
 
   //Request train data from server. If unsuccessful, set LED red. If successful, deserialize the JSON data returned by the API
   int httpCode = https.GET();
-  if (httpCode < 200 || htppCode >= 300) {
+  if (httpCode < 200 || httpCode >= 300) {
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
