@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "0.3.1"
+#define VERSION "0.3.2"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -32,7 +32,7 @@
 #define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
-//#define PRINT
+#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
 #define WAIT_SEC 20
@@ -42,7 +42,7 @@
 #define WIFI_PASSWORD "trainsareneat"
 
 // ----  LED Configuration Values ----
-#define LED_BRIGHTNESS 4 //Range of 0-100. Can get very bright very fast
+#define LED_BRIGHTNESS 2 //Range of 0-100. Can get very bright very fast
 
 //Define LED color for each train line. Defined as WWRRGGBB values where white (first byte) is always set to 0.
 //Pick own colors using a tool like https://www.w3schools.com/colors/colors_picker.asp

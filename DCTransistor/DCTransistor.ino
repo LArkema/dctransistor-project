@@ -118,13 +118,14 @@ void loop() {
     #ifdef PRINT
       Serial.println("HTTPS connection failed");
     #endif
+    return;
   }
 
   https.addHeader("api_key", SECRET_WMATA_API_KEY);
 
   //Request train data from server. If unsuccessful, set LED red. If successful, deserialize the JSON data returned by the API
   int httpCode = https.GET();
-  if (httpCode <= 0) {
+  if (httpCode < 200 || htppCode >= 300) {
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
@@ -132,6 +133,7 @@ void loop() {
       Serial.println("GET Request failed");
       Serial.println(httpCode);
     #endif
+    return;
   }
 
   //Filter to only relevant data (set in setup function)
