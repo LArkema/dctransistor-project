@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "0.3.0"
+#define VERSION "0.3.1"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -42,7 +42,7 @@
 #define WIFI_PASSWORD "trainsareneat"
 
 // ----  LED Configuration Values ----
-#define LED_BRIGHTNESS 7 //Range of 0-100. Can get very bright very fast
+#define LED_BRIGHTNESS 4 //Range of 0-100. Can get very bright very fast
 
 //Define LED color for each train line. Defined as WWRRGGBB values where white (first byte) is always set to 0.
 //Pick own colors using a tool like https://www.w3schools.com/colors/colors_picker.asp
