@@ -14,7 +14,7 @@
 #define LED_PIN  4 //GPIO pin sending data to 1st WS2812B LED
 #define LED_COUNT 105 //total # LEDs
 #define PWR_LED 104 //index of "Power" (should be last)
-#define WIFI_LED 103 //indoex of "WiFi" (2nd to last)
+#define WIFI_LED 103 //indoex of "WiFi" (2nd to last) 
 #define WEB_LED 102 //index of "Web" (3rd to last)
 
 #define RD_HEX_COLOR 0x00FF0000 
