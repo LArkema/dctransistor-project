@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "0.3.3"
+#define VERSION "0.3.6"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -69,7 +69,7 @@
 
 //Web server certificate SHA1 fingerprints for TLS connections. Updated daily by update-fingerprints action
 #define GITHUB_COM_FINGERPRINT "A3 B5 9E 5F E8 84 EE 1F 34 D9 8E EF 85 8E 3F B6 62 AC 10 4A"
-#define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "8F 0E 79 24 71 C5 A7 D2 A7 46 76 30 C1 3C B7 2A 13 B0 01 B2"
+#define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "A1 46 14 C7 2A 1D 52 79 F6 AA 2B B2 C5 0A 3B D3 F5 02 06 75"
 #define API_WMATA_COM_FINGERPRINT "C5 14 29 8E E1 04 75 0C A3 B3 1C 9D BB 43 BA 13 A0 CA A0 F7"
 
 /*
