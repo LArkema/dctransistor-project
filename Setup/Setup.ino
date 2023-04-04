@@ -23,8 +23,7 @@
 #define GN_HEX_COLOR 0x0000FF00
 #define LED_BRIGHTNESS 10
 
-WiFiManager wifi_manager;
-WiFiClientSecure client;
+WiFiManager wifi_manager;WiFiClientSecure client;
 HTTPClient https;
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); //object to control colors of all LEDs (i.e. a "strip" of WS2812Bs)
