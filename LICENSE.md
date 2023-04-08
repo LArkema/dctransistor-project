@@ -2,7 +2,7 @@ THIS PROJECT IS DUAL-LICENSED
 
 "Software" files are provided under an MIT license, while "hardware" / board design files are provided under a Creative Commons BY-NA-SA 4.0 license.
 
-Copyright (c) 2022 Logan Arkema applies to all files, as applicable.
+Copyright (c) 2023 Logan Arkema applies to all files, as applicable.
 
 Sub-folders will have license files to delineate which files are under which license. If a sub-folder or folder does not have a license file, it is
 provided under an MIT license.
