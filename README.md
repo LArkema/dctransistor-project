@@ -5,8 +5,11 @@ Project to make a PCB version of the WMATA metro map that tracks train positions
 For more information on DCTransistor Boards, visit the [website](https://dctransistor.com)
 
 Source code running on the boards is currently under the `DCTransistor` folder. 
+
 Project files used to design and manufacture the boards themselves are in the `board_files` folder.
+
 Business logic used to process board orders on the backend is in the `business_logic` folder.
+
 Code initially loaded onto the board before users perform first-time setup is in the `Setup` folder.
 
 The software bill of materials for the project is in `bom.json`. The hardware bill of materials is in `board_files/DCTransistor_BOM.xlsx` 
