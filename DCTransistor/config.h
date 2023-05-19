@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.0.3"
+#define VERSION "1.0.4"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -127,9 +127,9 @@ const uint16_t rstations_0[NUM_RD_STATIONS] = {7, 32, 53, 62, 80, 95, 109, 126, 
 const uint16_t rstations_1[NUM_RD_STATIONS] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686, 677, 667, 661, 389, 378, 363, 356, 346, 336, 326, 309, 294, 278, 260, 251, 232, 210};
 
 //Blue Line
-#define NUM_BL_STATIONS 27
-const uint16_t bstations_0[NUM_BL_STATIONS] = {2604, 2634, 969, 976, 1010, 1024, 1036, 1052, 1070, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
-const uint16_t bstations_1[NUM_BL_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 1265, 1246, 1230, 1217, 1204, 1170, 1162, 2709, 2679};
+#define NUM_BL_STATIONS 28
+const uint16_t bstations_0[NUM_BL_STATIONS] = {2604, 2634, 969, 976, 991, 1010, 1024, 1036, 1052, 1070, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
+const uint16_t bstations_1[NUM_BL_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 1265, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 2709, 2679};
 
 //Orange line
 #define NUM_OR_STATIONS 26
@@ -142,9 +142,9 @@ const uint16_t sstations_0[NUM_SV_STATIONS] = {3523, 3544, 3577, 3594, 3612, 362
 const uint16_t sstations_1[NUM_SV_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 3377, 3370, 3359, 3352, 3290, 3741, 3724, 3706, 3689, 3657, 3637};
 
 //Yellow Line
-#define NUM_YL_STATIONS 21               // !! PENTAGON & L'ENFANT STATION INDEXES AND BRIDGE CIRCUITS ARE HARDCODED IN setTrainState !!
-const uint16_t ystations_0[NUM_YL_STATIONS] = {944, 955, 969, 976, 1010, 1024, 1036, 1052, 2231, 2241, 2246, 1753, 1764, 1773, 1782, 1796, 1809, 1833, 1850, 1871, 1894};
-const uint16_t ystations_1[NUM_YL_STATIONS] = {2055, 2030, 2009, 1992, 1971, 1956, 1942, 1932, 1923, 1911, 1899, 2376, 2364, 1246, 1230, 1217, 1204, 1170, 1162, 1148, 1137};
+#define NUM_YL_STATIONS 13               // !! PENTAGON & L'ENFANT STATION INDEXES AND BRIDGE CIRCUITS ARE HARDCODED IN setTrainState !!
+const uint16_t ystations_0[NUM_YL_STATIONS] = {944, 955, 969, 976, 991, 1010, 1024, 1036, 1052, 2231, 2241, 2246, 1753};
+const uint16_t ystations_1[NUM_YL_STATIONS] = {1911, 1899, 2376, 2364, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 1148, 1137};
 
 //Green Line
 #define NUM_GN_STATIONS 21
@@ -154,8 +154,8 @@ const uint16_t gstations_1[NUM_GN_STATIONS] = {2055, 2030, 2009, 1992, 1971, 195
 //LED arrays map each line's stations, in the same order as stations_0, to the index of that station in the continuous "string" of LEDs.
 //See dctransistor.com/documentation for a reference diagram
 const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
-const uint8_t bl_led_array[NUM_BL_STATIONS] = {101, 100, 97, 96, 94, 93, 92, 91, 90, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
+const uint8_t bl_led_array[NUM_BL_STATIONS] = {101, 100, 97, 96, 95, 94, 93, 92, 91, 90, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
 const uint8_t or_led_array[NUM_OR_STATIONS] = {87, 88, 89, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53};
 const uint8_t sv_led_array[NUM_SV_STATIONS] = {86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
-const uint8_t yl_led_array[NUM_YL_STATIONS] = {99, 98, 97, 96, 94, 93, 92, 91, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27};
+const uint8_t yl_led_array[NUM_YL_STATIONS] = {99, 98, 97, 96, 95, 94, 93, 92, 91, 39, 38, 37, 36};
 const uint8_t gn_led_array[NUM_GN_STATIONS] = {47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27};
