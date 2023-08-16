@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.0.4"
+#define VERSION "1.0.6"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -59,8 +59,8 @@
 */
 
 //JSON document sizes must be predefined, and may need to be increased if amount of data increases
-#define JSON_FILTER_SIZE 80 //Bytes of filter to apply to JSON data returned from WMATA
-#define JSON_DOC_SIZE 8096 //Bytes of parsed and filtered JSON data returned from WMATA (All trian line, position, and circuitIDs)
+#define JSON_FILTER_SIZE 120 //Bytes of filter to apply to JSON data returned from WMATA
+#define JSON_DOC_SIZE 10000 //Bytes of parsed and filtered JSON data returned from WMATA (All trian line, position, and circuitIDs). 8096 -> 8096. 20000 -> 0 HTTP:22820 16000 -> 16000
 
 
 /*

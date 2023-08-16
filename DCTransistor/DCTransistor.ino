@@ -85,10 +85,10 @@ void setup() {
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
 
   //Set options to filter WMATA API data to only include the current circuit, direction, and line for every train currently running
-  JsonObject tmp_filter = train_pos_filter["TrainPositions"].createNestedObject();
-  tmp_filter["CircuitId"] = true;
-  tmp_filter["DirectionNum"] = true;
-  tmp_filter["LineCode"] = true;
+  //JsonObject tmp_filter = train_pos_filter["TrainPositions"].createNestedObject();
+  train_pos_filter["TrainPositions"][0]["CircuitId"] = true;
+  train_pos_filter["TrainPositions"][0]["DirectionNum"] = true;
+  train_pos_filter["TrainPositions"][0]["LineCode"] = true;
   
   //Leave setup and turn Web led yellow
   #ifdef PRINT
@@ -146,8 +146,11 @@ void loop() {
     strip.show();
 
     #ifdef PRINT
-      Serial.println("JSON Deserialization Failed:");
-      Serial.println(error.f_str());
+      Serial.printf("JSON Deserialization Failed: %s\n", error.f_str());
+      Serial.printf("Intended JSON Document Size: %d\n", json_size);
+      Serial.printf("Actual JSON Document Size: %d\n", doc.capacity());
+      Serial.printf("HTTP Body Size: %d\n", https.getSize());
+      Serial.printf("Overflowed? %s\n", doc.overflowed());
     #endif
 
     return;
@@ -230,6 +233,8 @@ void loop() {
 
     }//end if train is on a line
   } //end loop through active trains
+
+ 
 
   #ifdef PRINT
     Serial.printf("Red Count: %d\n", countr);
