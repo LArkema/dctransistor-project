@@ -102,9 +102,11 @@ TrainLine::TrainLine(){
 
 
   //Given system-wide led number, map to that station's index in this line.
+  /*
   for(uint8_t i=0; i<total_num_stations; i++){
     led_to_station_map[station_leds[i]] = i;
   }
+  */
 
   //Set opposite direction's first circuit for both dirs
   opp_dir_1st_cid[0] = station_circuits_1[0];
