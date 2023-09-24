@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.0.7"
+#define VERSION "1.0.6"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -29,13 +29,13 @@
 #define SECRET_WMATA_API_KEY "0123456789abcdef0123456789abcdef"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
-#define AUTOUPDATE true
+#define AUTOUPDATE false //true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
-//#define PRINT
+#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 15
+#define WAIT_SEC 1
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
@@ -95,10 +95,10 @@ const int github_num_headers = 1;
 // ----- LED CONFIGURATIONS ----
 //configurations for chained together WS2812B LEDS. Datasheet: https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
 #define LED_PIN  4 //GPIO pin sending data to 1st WS2812B LED
-#define LED_COUNT 105 //total # LEDs
-#define PWR_LED 104 //index of "Power" (should be last)
-#define WIFI_LED 103 //indoex of "WiFi" (2nd to last)
-#define WEB_LED 102 //index of "Web" (3rd to last)
+#define LED_COUNT 207 //total # LEDs 
+#define PWR_LED 206 //index of "Power" (should be last)
+#define WIFI_LED 205 //indoex of "WiFi" (2nd to last)
+#define WEB_LED 204 //index of "Web" (3rd to last)
 
 // Number of circuits before a Station's exact circuit to count a train as "at" that station
 #define CIRCS_BEFORE_STATION 2
@@ -117,7 +117,7 @@ so the first station circuit in one direction represents the same station as the
 See misc_commands.sh for how each array was created from WMATA's information
 */
 
-#define TOTAL_SYSTEM_STATIONS 104 //Includes 2 stations for intersectionS (not in LED count) and future stations.
+#define TOTAL_SYSTEM_STATIONS 204 //Includes 2 stations for intersections (not in LED count) and future stations.
 
 #define NUM_LINES 6
 
@@ -141,7 +141,7 @@ const uint16_t ostations_1[NUM_OR_STATIONS] = {1711, 1692, 1670, 1657, 1643, 161
 const uint16_t sstations_0[NUM_SV_STATIONS] = {3523, 3544, 3577, 3594, 3612, 3627, 3155, 3214, 3221, 3232, 3238, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
 const uint16_t sstations_1[NUM_SV_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 3377, 3370, 3359, 3352, 3290, 3741, 3724, 3706, 3689, 3657, 3637};
 
-//Yellow Line   - add Shaw in otherwise disappears at Mt. Vernon with circuit ID jump
+//Yellow Line
 #define NUM_YL_STATIONS 14               // !! PENTAGON & L'ENFANT STATION INDEXES AND BRIDGE CIRCUITS ARE HARDCODED IN setTrainState !!
 const uint16_t ystations_0[NUM_YL_STATIONS] = {944, 955, 969, 976, 991, 1010, 1024, 1036, 1052, 2231, 2241, 2246, 1753, 1764};
 const uint16_t ystations_1[NUM_YL_STATIONS] = {1923, 1911, 1899, 2376, 2364, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 1148, 1137};
@@ -153,17 +153,24 @@ const uint16_t gstations_1[NUM_GN_STATIONS] = {2055, 2030, 2009, 1992, 1971, 195
 
 //LED arrays map each line's stations, in the same order as stations_0, to the index of that station in the continuous "string" of LEDs.
 //See dctransistor.com/documentation for a reference diagram
-const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
-const uint8_t bl_led_array[NUM_BL_STATIONS] = {101, 100, 97, 96, 95, 94, 93, 92, 91, 90, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
-const uint8_t or_led_array[NUM_OR_STATIONS] = {87, 88, 89, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53};
-const uint8_t sv_led_array[NUM_SV_STATIONS] = {86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
-const uint8_t yl_led_array[NUM_YL_STATIONS] = {99, 98, 97, 96, 95, 94, 93, 92, 91, 39, 38, 37, 36, 35};
-const uint8_t gn_led_array[NUM_GN_STATIONS] = {47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27};
 
-/*****************************/
-/** COMPLETE TRACK CIRCUITS **/
-/**       FOR TESTING       **/
-/*****************************/
+const uint8_t rd_led_array_0[NUM_RD_STATIONS] = {0, 3, 4, 7, 8, 11, 12, 14, 17, 18, 21, 22, 25, 26, 28, 30, 33, 34, 37, 38, 41, 43, 44, 47, 48, 51, 52};
+const uint8_t rd_led_array_1[NUM_RD_STATIONS] = {53, 50, 49, 46, 45, 42, 40, 39, 36, 35, 32, 31, 29, 27, 24, 23, 20, 19, 16, 15, 13, 10, 9, 6, 5, 2, 1};
+
+const uint8_t bl_led_array_0[NUM_BL_STATIONS] = {202, 201, 195, 192, 191, 188, 187, 184, 183, 181, 140, 139, 136, 135, 132, 131, 128, 127, 124, 123, 120, 118, 117, 104, 103, 100, 99, 96};
+const uint8_t bl_led_array_1[NUM_BL_STATIONS] = {97, 98, 101, 102, 105, 116, 119, 121, 122, 125, 126, 129, 130, 133, 134, 137, 138, 141, 180, 182, 185, 186, 189, 190, 193, 194, 200, 203};
+
+const uint8_t or_led_array_0[NUM_OR_STATIONS] = {175, 176, 179, 151, 148, 147, 144, 143, 140, 139, 136, 135, 132, 131, 128, 127, 124, 123, 120, 118, 117, 114, 113, 110, 109, 106};
+const uint8_t or_led_array_1[NUM_OR_STATIONS] = {107, 108, 111, 112, 115, 116, 119, 121, 122, 125, 126, 129, 130, 133, 134, 137, 138, 141, 142, 145, 146, 149, 150, 178, 177, 174};
+
+const uint8_t sv_led_array_0[NUM_SV_STATIONS] = {172, 171, 168, 167, 164, 163, 160, 159, 156, 155, 152, 151, 148, 147, 144, 143, 140, 139, 136, 135, 132, 131, 128, 127, 124, 123, 120, 118, 117, 104, 103, 100, 99, 96};
+const uint8_t sv_led_array_1[NUM_SV_STATIONS] = {97, 98, 101, 102, 105, 116, 119, 121, 122, 125, 126, 129, 130, 133, 134, 137, 138, 141, 142, 145, 146, 149, 150, 153, 154, 157, 158, 161, 162, 165, 166, 169, 170, 173};
+
+const uint8_t yl_led_array_0[NUM_YL_STATIONS] = {198, 197, 195, 192, 191, 188, 187, 184, 183, 79, 76, 75, 72, 71};
+const uint8_t yl_led_array_1[NUM_YL_STATIONS] = {70, 73, 74, 77, 78, 182, 185, 186, 189, 190, 193, 194, 196, 199};
+
+const uint8_t gn_led_array_0[NUM_GN_STATIONS] = {95, 92, 91, 88, 87, 84, 83, 80, 79, 76, 75, 72, 71, 68, 67, 64, 63, 60, 59, 56, 55};
+const uint8_t gn_led_array_1[NUM_GN_STATIONS] = {54, 57, 58, 61, 62, 65, 66, 69, 70, 73, 74, 77, 78, 81, 82, 85, 86, 89, 90, 93, 94};
 
 // int16_t CIRC_COUNT = 556; //current line test list size - 1
 // int16_t TEST_COUNT = 0;
@@ -185,3 +192,5 @@ const uint8_t gn_led_array[NUM_GN_STATIONS] = {47, 46, 45, 44, 43, 42, 41, 40, 3
 
 //const uint16_t YL_LINE_CIRCUITS_0[208] = {943, 944, 945, 946, 947, 948, 949, 950, 951, 952, 953, 954, 955, 956, 957, 958, 959, 960, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971, 972, 973, 974, 975, 976, 977, 978, 979, 980, 981, 982, 983, 984, 985, 991, 995, 996, 997, 998, 999, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050, 1051, 1052, 1053, 1054, 3105, 3106, 3107, 3108, 3109, 3110, 3111, 3112, 3113, 3114, 3115, 3116, 3117, 3118, 3119, 3120, 3121, 3122, 3123, 2229, 2230, 2231, 2232, 2233, 2234, 2235, 2236, 2237, 2238, 2239, 2240, 2241, 2242, 2243, 2244, 2245, 2246, 1744, 1745, 1746, 1747, 1748, 1749, 1750, 1751, 1752, 1753, 1754, 1755, 1756, 1757, 1758, 1759, 1760, 1761, 1762, 1763, 1764, 1765, 1766, 1767, 1768, 1769, 1770, 1771, 1772, 1773, 1774, 1775, 1776, 1777, 1778, 1779, 1780, 1781, 1782, 1783, 1784, 1785, 1786, 1787, 1788, 1789, 1790, 1791, 1792, 1793, 1794, 1795, 1796, 1797, 1798, 1799, 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810};
 //const uint16_t YL_LINE_CIRCUITS_1[236] = {1193, 3502, 3503, 3504, 3505, 3506, 3507, 3508, 3509, 3510, 3511, 3512, 3513, 1187, 3514, 3515, 3516, 1136, 1137, 1138, 1139, 1140, 1141, 1142, 1143, 1144, 1145, 1146, 1147, 1148, 1149, 1150, 1151, 1152, 1153, 1154, 1155, 1156, 1157, 1158, 1159, 1160, 1161, 1162, 1163, 1164, 1165, 1166, 1167, 1168, 1169, 1170, 1171, 1172, 1173, 1174, 1175, 1176, 1177, 1178, 1179, 1180, 1181, 1182, 1187, 1193, 1194, 1195, 1196, 1197, 1198, 1199, 1200, 1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, 1209, 1210, 1211, 1212, 1213, 1214, 1215, 1216, 1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1225, 1226, 1227, 1228, 1229, 1230, 1231, 1232, 1233, 1234, 1235, 1236, 1237, 1238, 1239, 1240, 1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 3124, 3125, 3126, 3127, 3128, 3129, 3130, 3131, 3132, 3133, 3134, 3135, 3136, 3137, 3138, 3139, 3140, 3141, 3142, 3143, 3144, 3145, 2362, 2363, 2364, 2365, 2366, 2367, 2368, 2369, 2370, 2371, 2372, 2373, 2374, 2375, 2376, 2377, 2378, 2379, 2380, 1899, 1900, 1901, 1902, 1903, 1904, 1905, 1906, 1907, 1908, 1909, 1910, 1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919, 1920, 1921, 1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931, 1932, 1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 1941, 1942, 1943, 1944, 1945, 1946, 1947, 1948, 1949, 1950, 1951, 1952, 1953, 1954, 1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1967, 1968, 1969, 1970, 1971, 1972};
+
+

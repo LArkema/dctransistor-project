@@ -17,3 +17,6 @@ for i in {0..11}; do fname=$(head -n 1 misc_files/track_out_$i.txt | cut -d '"' 
 
 #get comma separated list of circuitIDs associated w/ stations, in reverse order for Dirction 2 cirucits
 cat RD_2_station_circuits.txt | tail -n 10 | cut -d ' ' -f 4 | cut -d '"' -f 1 | sort -nr | sed -z 's/\n/, /g'
+
+#get comma separated list of circuit IDs for a given line and direction (in comments in config.h)
+cat StandRoutes.json | jq -r '.StandardRoutes[] | select((.LineCode == "GR") and (.TrackNum == 2)) | .TrackCircuits[].CircuitId' | tr '\n' ', ' | sed 's/,/, /g' | less
