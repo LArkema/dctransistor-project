@@ -19,7 +19,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3.3.0
     - name: Install Arduino CLI
-      uses: arduino/setup-arduino-cli@v1.1.1
+      uses: arduino/setup-arduino-cli@v1.1.2
     - name: Install packages and boards
       run: |
         arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
