@@ -19,6 +19,7 @@
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); //object to control colors of all LEDs (i.e. a "strip" of WS2812Bs)
 WiFiManager wifi_manager; //WiFi manager to auto-connect to wifi
 WiFiClientSecure client; //One client used to connect to all webservers. HTTP client defined in auto_update.h
+uint8_t data_failure_count; //Count API failures / empty responses
 
 //Define JSON Deserialization objects to initialize in setup and use in every loop
 StaticJsonDocument<JSON_FILTER_SIZE> train_pos_filter; 
@@ -43,9 +44,9 @@ TrainLine* all_lines[NUM_LINES] = {orangeline, silverline, blueline, yellowline,
 //SETUP WIFI CONNECTION
 void setup() {
 
-  #ifdef PRINT
-    Serial.begin(BAUD_RATE); //NodeMCU ESP8266 runs on 9600 baud rate. Defined in config.
-  #endif
+  //#ifdef PRINT
+  Serial.begin(BAUD_RATE); //NodeMCU ESP8266 runs on 9600 baud rate. Defined in config.
+  //#endif
 
   //Set LED strip settings and turn power light on
   strip.begin();
@@ -83,6 +84,7 @@ void setup() {
   client.setFingerprint(API_WMATA_COM_FINGERPRINT);
   client.setTimeout(15000); //recommended default
   https.useHTTP10(true); //enables more efficient Json deserialization per https://arduinojson.org/v6/how-to/use-arduinojson-with-httpclient/
+  data_failure_count = 0;
 
   //Set options to filter WMATA API data to only include the current circuit, direction, and line for every train currently running
   //JsonObject tmp_filter = train_pos_filter["TrainPositions"].createNestedObject();
@@ -110,15 +112,19 @@ void loop() {
     Serial.println("---- NEW LOOP ----");
   #endif
 
+  bool getting_live_trains = true; // Set boolean that can be set to false if any error condition met.
+
   //Connect and confirm HTTPS connection to api.wmata.com. If not, set LED red.
   if(!https.begin(client, WMATA_ENDPOINT)){
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
+    data_failure_count++; //increment number of failures for programatic display
+    getting_live_trains = false;
+
     #ifdef PRINT
       Serial.println("HTTPS connection failed");
     #endif
-    return;
   }
 
   https.addHeader("api_key", SECRET_WMATA_API_KEY);
@@ -129,12 +135,14 @@ void loop() {
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
+    data_failure_count++; //increment number of failures for programatic display
+    getting_live_trains = false;
+
     #ifdef PRINT
       Serial.println("GET Request failed");
       Serial.println(httpCode);
     #endif
-    return;
-  }
+  } 
 
   //Filter to only relevant data (set in setup function)
   DynamicJsonDocument doc(json_size);
@@ -145,6 +153,9 @@ void loop() {
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
 
+    data_failure_count++; //increment number of failures for programatic display
+    getting_live_trains = false;
+
     #ifdef PRINT
       Serial.printf("JSON Deserialization Failed: %s\n", error.f_str());
       Serial.printf("Intended JSON Document Size: %d\n", json_size);
@@ -152,106 +163,149 @@ void loop() {
       Serial.printf("HTTP Body Size: %d\n", https.getSize());
       Serial.printf("Overflowed? %s\n", doc.overflowed());
     #endif
-
-    return;
   }
 
-  //If no error, set Web pixel to green and begin iterating through each train
-  strip.setPixelColor(WEB_LED, GN_HEX_COLOR);
-  strip.show();
+  // If WMATA API returns empty array
+  if (doc["TrainPositions"].size() == 0){
+    strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
+    strip.show();
+    data_failure_count++; //increment number of failures for programatic display
+    getting_live_trains = false;
 
-  #ifdef PRINT
-  Serial.println("Begin loop through trains");
-  #endif
-
-  //counts for trains on different lines
-  uint8_t countr=0;
-  uint8_t countb=0;
-  uint8_t counto=0;
-  uint8_t county=0;
-  uint8_t counts=0;
-  uint8_t countg=0;
-  uint8_t countfail=0;
-
-  //For each train, determine if it is on a line (WMATA returns some that are not active), determine which line it is on,
-  //then pass it to that line to determine what station the train is at or in-between
-  for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
-  
-    //Only work on trains that are on a line. JsonObject removes key if value is null.
-    if(train["LineCode"]){
-
-      //Isolate variables from JsonObject returned by API
-      const uint16_t circID = train["CircuitId"].as<unsigned int>();
-      const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
-      const char* train_line = train["LineCode"];
-
-      const char line_char = train_line[0]; //get first character of line, as switch statements work on chars but not strings.
-
-      int res = 0; //store result of setting each train
-
-      #ifdef PRINT
-        Serial.printf("Line: %s, Direction: %d, Circuit: %d, ", train_line, train_dir, circID); //continued after station determined
-      #endif
-
-      //Update state for whichever line train is on.
-      switch (line_char)
-      {
-        case 'R':
-          res = redline->setTrainState(circID, train_dir-1);
-          countr++;
-          break;
-        case 'B':
-          res = blueline->setTrainState(circID, train_dir-1);
-          countb++;
-          break;
-        case 'O':
-          res = orangeline->setTrainState(circID, train_dir-1);
-          counto++;
-          break;
-        case 'S':
-          res = silverline->setTrainState(circID, train_dir-1);
-          counts++;
-          break;
-        case 'Y':
-          res = yellowline->setTrainState(circID, train_dir-1);
-          county++;
-          break;
-        case 'G':
-          res = greenline->setTrainState(circID, train_dir-1);
-          countg++;
-          break;
-        default:
-          res = -1;
-          break;
-      }//end switch statement
-
-      #ifdef PRINT
-        Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
-      #endif
-
-      if (res == -1){countfail++;}
-
-    }//end if train is on a line
-  } //end loop through active trains
-
- 
-
-  #ifdef PRINT
-    Serial.printf("Red Count: %d\n", countr);
-    Serial.printf("Blue Count: %d\n", countb);
-    Serial.printf("Orange Count: %d\n", counto);
-    Serial.printf("Silver Count: %d\n", counts);
-    Serial.printf("Green Count: %d\n", countg);
-    Serial.printf("Yellow Count: %d\n", county);
-    Serial.printf("Fail Count: %d\n", countfail);
-  #endif
-
-  //Trains at the end of each line are handled differently (to avoid lingering LEDs).
-  //Check each line's last station and set the LED as appropriate.
-  for(uint8_t l=0; l < NUM_LINES; l++){
-    all_lines[l]->setEndLED();
+    #ifdef PRINT
+      Serial.println("Empty Array");
+    #endif
   }
+
+  // If connection to live data has repeatedly failed and still failing, resort to generated display
+  if (getting_live_trains == false){
+
+    #ifdef PRINT
+      Serial.printf("Failure Count: %d\n", data_failure_count);
+    #endif
+
+    // Put trains on the board in increments of 3 (one train every three cycles)
+    uint8_t start_time = data_failure_count % 3;
+
+    // Start blue line one ahead of others so it doesn't conflict with Yellow / Silver
+    for (uint8_t l=0; l< NUM_LINES; l++){
+      if (all_lines[l]->getLEDColor() == BL_HEX_COLOR){
+        all_lines[l]->defaultShiftDisplay((start_time == 2));
+      }
+      else{
+        all_lines[l]->defaultShiftDisplay( (start_time == 0));
+      }
+    }
+
+    if (data_failure_count == 255) {data_failure_count = 3;} //reset to prevent overflow
+
+  }
+
+  // Normal operations if no errors
+  else{
+
+    //If no error, set Web pixel to green and begin iterating through each train
+    strip.setPixelColor(WEB_LED, GN_HEX_COLOR);
+    strip.show();
+    data_failure_count = 0; //Reset data failure count on success.
+    getting_live_trains = true;
+
+    #ifdef PRINT
+    Serial.println("Begin loop through trains");
+    #endif
+
+    //counts for trains on different lines
+    uint8_t countr=0;
+    uint8_t countb=0;
+    uint8_t counto=0;
+    uint8_t county=0;
+    uint8_t counts=0;
+    uint8_t countg=0;
+    uint8_t countfail=0;
+
+
+
+    //For each train, determine if it is on a line (WMATA returns some that are not active), determine which line it is on,
+    //then pass it to that line to determine what station the train is at or in-between
+    for(JsonObject train : doc["TrainPositions"].as<JsonArray>()){ //from https://arduinojson.org/v6/api/jsonarray/begin_end/
+    
+      //Only work on trains that are on a line. JsonObject removes key if value is null.
+      if(train["LineCode"]){
+
+        //Isolate variables from JsonObject returned by API
+        const uint16_t circID = train["CircuitId"].as<unsigned int>();
+        const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
+        const char* train_line = train["LineCode"];
+
+        const char line_char = train_line[0]; //get first character of line, as switch statements work on chars but not strings.
+
+        int res = 0; //store result of setting each train
+
+        #ifdef PRINT
+          Serial.printf("Line: %s, Direction: %d, Circuit: %d, ", train_line, train_dir, circID); //continued after station determined
+        #endif
+
+        //Update state for whichever line train is on.
+        switch (line_char)
+        {
+          case 'R':
+            res = redline->setTrainState(circID, train_dir-1);
+            countr++;
+            break;
+          case 'B':
+            res = blueline->setTrainState(circID, train_dir-1);
+            countb++;
+            break;
+          case 'O':
+            res = orangeline->setTrainState(circID, train_dir-1);
+            counto++;
+            break;
+          case 'S':
+            res = silverline->setTrainState(circID, train_dir-1);
+            counts++;
+            break;
+          case 'Y':
+            res = yellowline->setTrainState(circID, train_dir-1);
+            county++;
+            break;
+          case 'G':
+            res = greenline->setTrainState(circID, train_dir-1);
+            countg++;
+            break;
+          default:
+            res = -1;
+            break;
+        }//end switch statement
+
+        #ifdef PRINT
+          Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
+        #endif
+
+        if (res == -1){countfail++;}
+
+      }//end if train is on a line
+    } //end loop through active trains
+
   
+
+    #ifdef PRINT
+      Serial.printf("Red Count: %d\n", countr);
+      Serial.printf("Blue Count: %d\n", countb);
+      Serial.printf("Orange Count: %d\n", counto);
+      Serial.printf("Silver Count: %d\n", counts);
+      Serial.printf("Green Count: %d\n", countg);
+      Serial.printf("Yellow Count: %d\n", county);
+      Serial.printf("Fail Count: %d\n", countfail);
+    #endif
+
+    //Trains at the end of each line are handled differently (to avoid lingering LEDs).
+    //Check each line's last station and set the LED as appropriate.
+    for(uint8_t l=0; l < NUM_LINES; l++){
+      all_lines[l]->setEndLED();
+    }
+  
+  }//END normal operations loop
+
   //For each LED, check if there is a train at the station represented by that LED.
   //If so, turn the station's LED that line's color. If no trains, turn the LED off.
 
@@ -280,8 +334,10 @@ void loop() {
   strip.show();
 
   //Clear each line's internal state. Reset to reflect the data in a single API call.
-  for(uint8_t l=0; l < NUM_LINES; l++){
-    all_lines[l]->clearState();
+  if (getting_live_trains){
+    for(uint8_t l=0; l < NUM_LINES; l++){
+      all_lines[l]->clearState();
+    }
   }
     
   //wait set number of seconds (default 20) until next loop and API call.

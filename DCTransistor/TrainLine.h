@@ -58,6 +58,7 @@ class TrainLine {
     void setEndLED(); //For minimally stateful version, set last station's led on if necessary
     bool trainAtLED(uint8_t led); //If a train is at a station represented by the given led, return true.
     void clearState(); //reset state after every API call.
+    void defaultShiftDisplay(bool train); //"Move" trains along line procedurally when not getting WMATA data.
 
     //Getters
     uint8_t* getStations(bool dir);
@@ -432,6 +433,12 @@ void TrainLine::setEndLED(){
   }
 
 }//END setEndLED
+
+// Shift state by one. Add new train to start of line or not
+void TrainLine::defaultShiftDisplay(bool train){
+  state = state << 1;
+  if(train){state |= 1;}
+}
 
 //Clear line's state. Call after setting LEDs after each API call
 void TrainLine::clearState(){
