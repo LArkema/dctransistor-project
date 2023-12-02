@@ -223,7 +223,7 @@ void loop() {
 
     if (data_failure_count == 255) {data_failure_count = 3;} //reset to prevent overflow
 
-  }
+  } //end shift display for whenable to get live data
 
   // Normal operations if no errors
   else{

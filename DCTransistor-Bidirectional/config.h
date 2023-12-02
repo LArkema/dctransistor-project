@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.1"
+#define VERSION "1.1.2"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -32,7 +32,7 @@
 #define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
-// #define PRINT
+#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
 #define WAIT_SEC 10
