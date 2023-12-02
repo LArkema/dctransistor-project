@@ -25,6 +25,8 @@ uint8_t data_failure_count; //Count API failures / empty responses
 StaticJsonDocument<JSON_FILTER_SIZE> train_pos_filter; 
 const uint16_t json_size = JSON_DOC_SIZE; //space to allocate for data FROM WMATA API. Change to 3072 without Line Code, 2048 for just CircuitIDs
 
+//Array of different API keys associated with different "default tier" products on the WMATA developer page.
+String wmata_api_keys[3] = {SECRET_WMATA_API_KEY_0, SECRET_WMATA_API_KEY_1, SECRET_WMATA_API_KEY_2};
 
 //Create objects representing each line
 TrainLine* redline = new TrainLine(NUM_RD_STATIONS, rstations_0, rstations_1, RD_HEX_COLOR, rd_led_array);
@@ -127,7 +129,8 @@ void loop() {
     #endif
   }
 
-  https.addHeader("api_key", SECRET_WMATA_API_KEY);
+  //Use one of three WMATA API Keys to stay under usage quota. Actuall randomness not important, just variance in key usage.
+  https.addHeader("api_key", wmata_api_keys[random(3)]); /* Flawfinder: ignore */
 
   //Request train data from server. If unsuccessful, set LED red. If successful, deserialize the JSON data returned by the API
   int httpCode = https.GET();

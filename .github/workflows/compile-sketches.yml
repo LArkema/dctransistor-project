@@ -60,8 +60,11 @@ jobs:
           echo "version=$next_version" >> $GITHUB_OUTPUT
       - name: Inject API Key
         run: |
-          sed -i -E "/SECRET_WMATA_API_KEY/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY }}/" ${CONFIG_FILE}
-          sed -i -E "/SECRET_WMATA_API_KEY/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY }}/" ${BI_CONFIG_FILE}
+          for config in ${CONFIG_FILE} ${BI_CONFIG_FILE}; do
+            sed -i -E "/SECRET_WMATA_API_KEY_0/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY_0 }}/" ${config}
+            sed -i -E "/SECRET_WMATA_API_KEY_1/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY_1 }}/" ${config}
+            sed -i -E "/SECRET_WMATA_API_KEY_2/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY_2 }}/" ${config};
+          done
       - name: Install Arduino Cli
         uses: arduino/setup-arduino-cli@v1.1.2
       - name: Install boards and libraries
@@ -83,8 +86,11 @@ jobs:
           gzip -k -f ${BI_BIN_NAME}
       - name: Remove WMATA API Key
         run: |
-          sed -i "s/${{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${CONFIG_FILE}
-          sed -i "s/${{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${BI_CONFIG_FILE}
+          for config in ${CONFIG_FILE} ${BI_CONFIG_FILE}; do
+            sed -i "s/${{ secrets.WMATA_API_KEY_0 }}/0123456789abcdef0123456789abcdef/" ${config}
+            sed -i "s/${{ secrets.WMATA_API_KEY_1 }}/123456789abcdef0123456789abcdef0/" ${config}
+            sed -i "s/${{ secrets.WMATA_API_KEY_2 }}/2123456789abcdef0123456789abcdef/" ${config};
+          done
       - name: Commit changes to repo
         run: |
           if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then

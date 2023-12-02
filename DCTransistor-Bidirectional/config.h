@@ -19,14 +19,16 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.2"
+#define VERSION "1.1.3"
 
 /*
 *   USER CONFIGURATION VALUES
 */
 
-//If using own WMATA API key, enter here. Otherwise, one built into downloaded binary
-#define SECRET_WMATA_API_KEY "0123456789abcdef0123456789abcdef"
+//If using own WMATA API key, enter here (can set same key for every value). Otherwise, one built into downloaded binary
+#define SECRET_WMATA_API_KEY_0 "0123456789abcdef0123456789abcdef"
+#define SECRET_WMATA_API_KEY_1 "123456789abcdef0123456789abcdef0"
+#define SECRET_WMATA_API_KEY_2 "2123456789abcdef0123456789abcdef"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
 #define AUTOUPDATE true
