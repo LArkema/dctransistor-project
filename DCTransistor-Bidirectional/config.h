@@ -35,7 +35,7 @@
 // #define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 1
+#define WAIT_SEC 10
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"

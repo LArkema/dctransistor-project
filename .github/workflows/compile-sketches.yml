@@ -47,7 +47,7 @@ jobs:
             let "new_minor_version=code_minor_version+1"
             next_version=$(echo -n ${code_version} | awk -F. '{printf("%s.%s", $1, $2)}'; echo -n ".${new_minor_version}")
             sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${CONFIG_FILE}
-            sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${BI_CONFIG_FILE}"
+            sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${BI_CONFIG_FILE}
           else
             next_version=$code_version
           fi
