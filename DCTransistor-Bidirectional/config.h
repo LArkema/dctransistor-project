@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.0"
+#define VERSION "1.1.1"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -83,7 +83,7 @@ const int github_num_headers = 1;
 
 //URLs and remote hosts for software updates and WMATA data
 #define LATEST_VERSION_URL "https://github.com/LArkema/dctransistor-project/releases/latest"
-#define UPDATE_BIN_URL "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor.bin.gz"
+#define UPDATE_BIN_URL "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor-bidirectional.bin.gz"
 #define UPDATE_HOST "raw.githubusercontent.com"
 #define GITHUB_HOST "github.com"
 #define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"

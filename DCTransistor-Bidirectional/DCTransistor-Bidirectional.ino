@@ -192,8 +192,6 @@ void loop() {
     #endif
   }
 
-  getting_live_trains = false;
-
   if (getting_live_trains == false){
 
     #ifdef PRINT
