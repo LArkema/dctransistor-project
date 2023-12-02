@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.0.10"
+#define VERSION "1.1.0"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -35,7 +35,7 @@
 //#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 15
+#define WAIT_SEC 10
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
@@ -48,8 +48,8 @@
 //Pick own colors using a tool like https://www.w3schools.com/colors/colors_picker.asp
 #define RD_HEX_COLOR 0x00FF0000 
 #define BL_HEX_COLOR 0x000000FF
-#define OR_HEX_COLOR 0x00FF8000
-#define SV_HEX_COLOR 0x00808080
+#define OR_HEX_COLOR 0x00FFFF00
+#define SV_HEX_COLOR 0x00FFFFFF
 #define YL_HEX_COLOR 0x00FFFF00
 #define GN_HEX_COLOR 0x0000FF00
 

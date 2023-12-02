@@ -26,8 +26,6 @@ class TrainLine {
     uint8_t* station_leds[2]; //simple array to point to lists of LEDs for each direction
     uint8_t* station_leds_0; //Array of global LED indexes for LEDs on current line and 'forward' direciton
     uint8_t* station_leds_1; //Same, but for opposite direction
-    //int8_t led_to_station_map_0[TOTAL_SYSTEM_STATIONS]; //Array to map a global LED index to current line's station index
-    //int8_t led_to_station_map_1[TOTAL_SYSTEM_STATIONS];
     uint32_t led_color; //Hex WWRRGGBB color to represent train's on line.
 
     // NOTE:   
@@ -61,6 +59,7 @@ class TrainLine {
     void setEndLED(); //For minimally stateful version, set last station's led on if necessary
     bool trainAtLED(uint8_t led); //If a train is at a station represented by the given led, return true.
     void clearState(); //reset state after every API call.
+    void defaultShiftDisplay(bool dir, bool train); //function to run state shift function if no live data
 
     //Getters
     uint8_t* getStations(bool dir);
@@ -456,6 +455,12 @@ void TrainLine::setEndLED(){
   }
 
 }//END setEndLED
+
+// Shift the state for a given direction one if train "set" to arrive.
+void TrainLine::defaultShiftDisplay(bool dir, bool train){
+  state[dir] = state[dir] << 1;
+  if(train){state[dir] |= 1;}
+}
 
 //Clear line's state. Call after setting LEDs after each API call
 void TrainLine::clearState(){

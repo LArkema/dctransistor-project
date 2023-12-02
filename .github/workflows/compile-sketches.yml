@@ -13,8 +13,10 @@ on:
 
 env:
   CONFIG_FILE: ./DCTransistor/config.h
+  BI_CONFIG_FILE: ./DCTransistor-Bidirectional/config.h
   BOM_FILE: bom.json
   BIN_NAME: dctransistor.bin
+  BI_BIN_NAME: dctransistor-bidirectional.bin
   
 jobs:
   compile-sketches:
@@ -24,6 +26,7 @@ jobs:
     env:
       COMPILE_OUT_DIR: /tmp/
       COMPILE_OUT_NAME: DCTransistor.ino.bin
+      COMPILE_OUT_BI_NAME: DCTransistor-Bidirectional.ino.bin
 
 
     steps:
@@ -44,6 +47,7 @@ jobs:
             let "new_minor_version=code_minor_version+1"
             next_version=$(echo -n ${code_version} | awk -F. '{printf("%s.%s", $1, $2)}'; echo -n ".${new_minor_version}")
             sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${CONFIG_FILE}
+            sed -i -e "/define VERSION /s/${code_version}/${next_version}/" ${BI_CONFIG_FILE}"
           else
             next_version=$code_version
           fi
@@ -57,6 +61,7 @@ jobs:
       - name: Inject API Key
         run: |
           sed -i -E "/SECRET_WMATA_API_KEY/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY }}/" ${CONFIG_FILE}
+          sed -i -E "/SECRET_WMATA_API_KEY/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY }}/" ${BI_CONFIG_FILE}
       - name: Install Arduino Cli
         uses: arduino/setup-arduino-cli@v1.1.2
       - name: Install boards and libraries
@@ -69,34 +74,38 @@ jobs:
       - name: Compile sketches
         run: |
           arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries --output-dir ${COMPILE_OUT_DIR} ./DCTransistor/
+          arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 --export-binaries --output-dir ${COMPILE_OUT_DIR} ./DCTransistor-Bidirectional/
       - name: Move and GZip binaries
         run: |
           mv ${COMPILE_OUT_DIR}${COMPILE_OUT_NAME} ${BIN_NAME}
+          mv ${COMPILE_OUT_DIR}${COMPILE_OUT_BI_NAME} ${BI_BIN_NAME}
           gzip -k -f ${BIN_NAME}
+          gzip -k -f ${BI_BIN_NAME}
       - name: Remove WMATA API Key
         run: |
           sed -i "s/${{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${CONFIG_FILE}
+          sed -i "s/${{ secrets.WMATA_API_KEY }}/0123456789abcdef0123456789abcdef/" ${BI_CONFIG_FILE}
       - name: Commit changes to repo
         run: |
           if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
             git config user.email "<>"
             git config user.name "Binary Update Bot"
             git add .
-            git commit -m "Update Binary"
+            git commit -m "Update Binaries"
             git push origin main
           else
             echo "No updates!"
           fi
-      - name: Upload Binary Artifact
-        uses: actions/upload-artifact@v3.1.2
+      - name: Upload Binary Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.BIN_NAME }}
-          path: ${{ env.BIN_NAME }}
-      - name: Upload GZIP Artifact
-        uses: actions/upload-artifact@v3.1.2
+          name: Binary Artifact Uploads
+          path: dctransistor*.bin
+      - name: Upload GZIP Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.BIN_NAME }}.gz
-          path: ${{ env.BIN_NAME }}.gz
+          name: GZIP Artifact Uploads
+          path: dctransistor*.gz
 
 
   build-release:
@@ -107,15 +116,15 @@ jobs:
       - name: Download Binary Artifact
         uses: actions/download-artifact@v3.0.2
         with:
-          name: ${{ env.BIN_NAME }}
+          name: Binary Artifact Uploads
       - name: Download GZIP Artifact
         uses: actions/download-artifact@v3.0.2
         with:
-          name: ${{ env.BIN_NAME }}.gz
+          name: GZIP Artifact Uploads
       - name: create-release
         uses: ncipollo/release-action@v1.12.0
         id: create-release
         with:
-          artifacts: "${{ env.BIN_NAME }},${{ env.BIN_NAME}}.gz"
+          artifacts: "${{ env.BIN_NAME }},${{ env.BIN_NAME }}.gz,${{ env.BI_BIN_NAME }},${{ env.BI_BIN_NAME }}.gz"
           tag: ${{ needs.compile-sketches.outputs.release-version }}
-          body: "Automated pipeline release of dctransistor binary"
+          body: "Automated pipeline release of dctransistor binaries"

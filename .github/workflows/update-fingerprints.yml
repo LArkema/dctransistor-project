@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CONFIG_FILE: ./DCTransistor/config.h
+      BI_CONFIG_FILE: ./DCTransistor-Bidirectional/config.h
     outputs:
       compile: ${{ steps.update-fingerprints.outputs.compile }}
     
@@ -41,13 +42,15 @@ jobs:
           cur_fingerprint=$(get_current_fingerprint $server)
           new_conf_string=$(echo -n "define ${fingerprint_var} \""${cur_fingerprint}"\"")
           
-          sed -i -e "s/${conf_string}/${new_conf_string}/" $CONFIG_FILE
+          sed -i -e "s/${conf_string}/${new_conf_string}/" ${CONFIG_FILE}
+          sed -i -e "s/${conf_string}/${new_conf_string}/" ${BI_CONFIG_FILE}
         done
         
         if [[ $(git status) != *"nothing to commit, working tree clean"* ]]; then
           git config user.email "<>"
           git config user.name "SSL Update Action"
-          git add $CONFIG_FILE
+          git add ${CONFIG_FILE}
+          git add ${BI_CONFIG_FILE}
           git commit -m "Update SSL fingerprint"
           git push origin main
           echo "compile=true" >> $GITHUB_OUTPUT
