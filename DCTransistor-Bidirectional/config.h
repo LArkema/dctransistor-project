@@ -29,7 +29,7 @@
 #define SECRET_WMATA_API_KEY "0123456789abcdef0123456789abcdef"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
-#define AUTOUPDATE false //true
+#define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
 // #define PRINT
