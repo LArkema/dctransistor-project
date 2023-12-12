@@ -50,7 +50,7 @@
 //Pick own colors using a tool like https://www.w3schools.com/colors/colors_picker.asp
 #define RD_HEX_COLOR 0x00FF0000 
 #define BL_HEX_COLOR 0x000000FF
-#define OR_HEX_COLOR 0x00FFFF00
+#define OR_HEX_COLOR 0x00FF8000
 #define SV_HEX_COLOR 0x00FFFFFF
 #define YL_HEX_COLOR 0x00FFFF00
 #define GN_HEX_COLOR 0x0000FF00
