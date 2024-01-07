@@ -10,7 +10,7 @@
  * then updates LEDs with new position / state data.
  * 
  * Code from this file occasionally moved to "snipits" folder when substantive feature developed.
- * (c) Logan Arkema, 1/12/2023
+ * (c) Logan Arkema, 1/7/2024
 */
 
 #include "TrainLine.h"

@@ -6,7 +6,7 @@
 *   Followed by values that may occasionally change, but are still required
 *   Followed by required values
 *
-*   (c) Logan Arkema 2023
+*   (c) Logan Arkema 2024
 */
 
 //Include Standard and Custom libraries and classes
@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.6"
+#define VERSION "1.1.7"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -37,7 +37,7 @@
 #define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 10
+#define WAIT_SEC 20
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
