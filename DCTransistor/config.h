@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.11"
+#define VERSION "1.1.12"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -37,7 +37,7 @@
 //#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 20
+#define WAIT_SEC 15
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"

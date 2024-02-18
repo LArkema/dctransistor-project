@@ -66,7 +66,7 @@ jobs:
             sed -i -E "/SECRET_WMATA_API_KEY_2/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY_2 }}/" ${config};
           done
       - name: Install Arduino Cli
-        uses: arduino/setup-arduino-cli@v1
+        uses: arduino/setup-arduino-cli@v1.1.2
       - name: Install boards and libraries
         run: |
           arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
