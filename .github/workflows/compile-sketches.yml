@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v4
       - name: Install tools
         run: sudo apt-get install -y gzip
       - name: Real Checkout
@@ -66,7 +66,7 @@ jobs:
             sed -i -E "/SECRET_WMATA_API_KEY_2/s/[0-9a-f]{32}/${{ secrets.WMATA_API_KEY_2 }}/" ${config};
           done
       - name: Install Arduino Cli
-        uses: arduino/setup-arduino-cli@v1.1.2
+        uses: arduino/setup-arduino-cli@v1
       - name: Install boards and libraries
         run: |
           arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -103,12 +103,12 @@ jobs:
             echo "No updates!"
           fi
       - name: Upload Binary Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Binary Artifact Uploads
           path: dctransistor*.bin
       - name: Upload GZIP Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: GZIP Artifact Uploads
           path: dctransistor*.gz
@@ -120,15 +120,15 @@ jobs:
 
     steps:
       - name: Download Binary Artifact
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4
         with:
           name: Binary Artifact Uploads
       - name: Download GZIP Artifact
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4
         with:
           name: GZIP Artifact Uploads
       - name: create-release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1
         id: create-release
         with:
           artifacts: "${{ env.BIN_NAME }},${{ env.BIN_NAME }}.gz,${{ env.BI_BIN_NAME }},${{ env.BI_BIN_NAME }}.gz"
