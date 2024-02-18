@@ -44,13 +44,13 @@
 #define WIFI_PASSWORD "trainsareneat"
 
 // ----  LED Configuration Values ----
-#define LED_BRIGHTNESS 2 //Range of 0-100. Can get very bright very fast
+#define LED_BRIGHTNESS 3 //Range of 0-100. Can get very bright very fast
 
 //Define LED color for each train line. Defined as WWRRGGBB values where white (first byte) is always set to 0.
 //Pick own colors using a tool like https://www.w3schools.com/colors/colors_picker.asp
 #define RD_HEX_COLOR 0x00FF0000 
 #define BL_HEX_COLOR 0x000000FF
-#define OR_HEX_COLOR 0x00FF8000
+#define OR_HEX_COLOR 0x00FF4000
 #define SV_HEX_COLOR 0x00FFFFFF
 #define YL_HEX_COLOR 0x00FFFF00
 #define GN_HEX_COLOR 0x0000FF00
