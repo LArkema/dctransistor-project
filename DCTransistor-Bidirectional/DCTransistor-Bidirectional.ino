@@ -93,6 +93,10 @@ void setup() {
   train_pos_filter["TrainPositions"][0]["CircuitId"] = true;
   train_pos_filter["TrainPositions"][0]["DirectionNum"] = true;
   train_pos_filter["TrainPositions"][0]["LineCode"] = true;
+
+  if(SPECIAL_TRAIN){
+    train_pos_filter["TrainPositions"][0]["TrainId"] = true;
+  }
   
   //Leave setup and turn Web led yellow
   #ifdef PRINT
@@ -165,6 +169,11 @@ void loop() {
   //Filter to only relevant data (set in setup function)
   DynamicJsonDocument doc(json_size);
   DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_filter));
+
+  //Constants to track the presence of special trains
+  uint8_t special_train_index = 0;
+  uint8_t special_train_dir = 0;
+  TrainLine* special_train_line = NULL;
 
   //Check that JSON Deserialization didn't fail. If so, print errors and return.
   if (error) {
@@ -261,10 +270,16 @@ void loop() {
         const uint16_t circID = train["CircuitId"].as<unsigned int>();
         const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
         const char* train_line = train["LineCode"];
+        uint8_t trainID = 0;
+
+        if (SPECIAL_TRAIN){
+          trainID = train["TrainId"].as<unsigned int>();
+        }
 
         const char line_char = train_line[0]; //get first character of line, as switch statements work on chars but not strings.
 
         int res = 0; //store result of setting each train
+        TrainLine* cur_train_line = NULL; //store which TrainLine object has current line
 
         #ifdef PRINT
           Serial.printf("Line: %s, Direction: %d, Circuit: %d, ", train_line, train_dir, circID); //continued after station determined
@@ -275,32 +290,46 @@ void loop() {
         {
           case 'R':
             res = redline->setTrainState(circID, train_dir-1);
+            cur_train_line = redline;
             countr++;
             break;
           case 'B':
             res = blueline->setTrainState(circID, train_dir-1);
+            cur_train_line=blueline;
             countb++;
             break;
           case 'O':
             res = orangeline->setTrainState(circID, train_dir-1);
+            cur_train_line=orangeline;
             counto++;
             break;
           case 'S':
             res = silverline->setTrainState(circID, train_dir-1);
+            cur_train_line=silverline;
             counts++;
             break;
           case 'Y':
             res = yellowline->setTrainState(circID, train_dir-1);
+            cur_train_line=yellowline;
             county++;
             break;
           case 'G':
             res = greenline->setTrainState(circID, train_dir-1);
+            cur_train_line=greenline;
             countg++;
             break;
           default:
             res = -1;
             break;
         }//end switch statement
+
+        if (SPECIAL_TRAIN == true){ 
+          if(SPECIAL_TRAIN_ID == trainID){
+            special_train_index = res;
+            special_train_line = cur_train_line;
+            special_train_dir = train_dir-1;
+          }
+        }
 
         #ifdef PRINT
           Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
@@ -353,6 +382,11 @@ void loop() {
     }
 
   }//end loop through each LED
+
+  if(SPECIAL_TRAIN){
+    uint8_t special_led = special_train_line->getLEDForIndex(special_train_index, special_train_dir);
+    strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX);
+  }
 
   //Update the board with new state of the system
   strip.show();

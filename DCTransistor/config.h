@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.18"
+#define VERSION "1.1.19"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -42,6 +42,11 @@
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
 #define WIFI_PASSWORD "trainsareneat"
+
+//Setup LED for special trains
+#define SPECIAL_TRAIN true
+#define SPECIAL_TRAIN_ID 167
+#define SPECIAL_TRAIN_HEX 0x00F17EB1
 
 // ----  LED Configuration Values ----
 #define LED_BRIGHTNESS 3 //Range of 0-100. Can get very bright very fast

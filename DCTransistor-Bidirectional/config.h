@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.18"
+#define VERSION "1.1.19"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -34,7 +34,13 @@
 #define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
-#define PRINT
+//#define PRINT
+
+//Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
+#define WAIT_SEC 15
+
+//Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
+//#define PRINT
 
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
 #define WAIT_SEC 15
@@ -42,6 +48,11 @@
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
 #define WIFI_PASSWORD "trainsareneat"
+
+//Setup LED for special trains
+#define SPECIAL_TRAIN true
+#define SPECIAL_TRAIN_ID 167
+#define SPECIAL_TRAIN_HEX 0x00F17EB1
 
 // ----  LED Configuration Values ----
 #define LED_BRIGHTNESS 3 //Range of 0-100. Can get very bright very fast
@@ -70,8 +81,8 @@
 */
 
 //Web server certificate SHA1 fingerprints for TLS connections. Updated daily by update-fingerprints action
-#define GITHUB_COM_FINGERPRINT "E7 03 5B CC 1C 18 77 1F 79 2F 90 86 6B 6C 1D F8 DF AA BD C0"
-#define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "97 D8 C5 70 0F 12 24 6C 88 BC FA 06 7E 8C A7 4D A8 62 67 28"
+#define GITHUB_COM_FINGERPRINT "A3 B5 9E 5F E8 84 EE 1F 34 D9 8E EF 85 8E 3F B6 62 AC 10 4A"
+#define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "A1 46 14 C7 2A 1D 52 79 F6 AA 2B B2 C5 0A 3B D3 F5 02 06 75"
 #define API_WMATA_COM_FINGERPRINT "99 E2 96 23 71 DD 13 88 D0 5F 0B 72 2C FA 69 87 7A 8C 1F 40"
 
 /*

@@ -68,6 +68,7 @@ class TrainLine {
     uint16_t getOppCID(bool dir);
     uint16_t getLastCID(bool dir);
     int16_t getStationCircuit(uint8_t index, bool dir); //get circuitID of any given station
+    uint8_t getLEDForIndex(uint8_t index);
 
 };//END TrainLine definitiong
 
@@ -413,6 +414,10 @@ bool TrainLine::trainAtLED(uint8_t led){
 //Get current line's LED color (defined at construction time)
 uint32_t TrainLine::getLEDColor(){
   return led_color;
+}
+
+uint8_t TrainLine::getLEDForIndex(uint8_t index){
+  return station_leds[index];
 }
 
 //Keep led on for last station in line for 3 cycles after arriving, then turn off. Call after looping through API data.
