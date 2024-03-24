@@ -323,7 +323,6 @@ void loop() {
                 special_train_id = trainID;
                 special_train_index = res;
                 special_train_line = cur_train_line;
-                special_train_dir = train_dir-1;
                 break;
               }
             }
@@ -382,7 +381,7 @@ void loop() {
 
     #ifdef PRINT
       Serial.printf("Setting special train LED\n");
-      Serial.printf("Train ID: %d;   Train Index: %d;   Train Dir: %d\n", special_train_id, special_train_index, special_train_dir);
+      Serial.printf("Train ID: %d;   Train Index: %d;\n", special_train_id, special_train_index);
     #endif
 
     if(special_train_line != NULL){
