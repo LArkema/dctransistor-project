@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.19"
+#define VERSION "1.1.20"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -39,19 +39,14 @@
 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
 #define WAIT_SEC 15
 
-//Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
-//#define PRINT
-
-//Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 15
-
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
 #define WIFI_PASSWORD "trainsareneat"
 
 //Setup LED for special trains
 #define SPECIAL_TRAIN true
-#define SPECIAL_TRAIN_ID 167
+#define NUM_SPECIAL_TRAIN_IDS 2
+const uint16_t special_train_ids[NUM_SPECIAL_TRAIN_IDS] = {167,341};
 #define SPECIAL_TRAIN_HEX 0x00F17EB1
 
 // ----  LED Configuration Values ----

@@ -171,6 +171,7 @@ void loop() {
   DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_filter));
 
   //Constants to track the presence of special trains
+  uint16_t special_train_id = 0;
   uint8_t special_train_index = 0;
   uint8_t special_train_dir = 0;
   TrainLine* special_train_line = NULL;
@@ -270,14 +271,13 @@ void loop() {
         const uint16_t circID = train["CircuitId"].as<unsigned int>();
         const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
         const char* train_line = train["LineCode"];
-        uint8_t trainID = 0;
+        uint16_t trainID = 0;
 
         if (SPECIAL_TRAIN){
           trainID = train["TrainId"].as<unsigned int>();
         }
 
         const char line_char = train_line[0]; //get first character of line, as switch statements work on chars but not strings.
-
         int res = 0; //store result of setting each train
         TrainLine* cur_train_line = NULL; //store which TrainLine object has current line
 
@@ -323,13 +323,30 @@ void loop() {
             break;
         }//end switch statement
 
+        // If looking for special trains, make sure train is valid then check if current train is special train and set info appropriately
         if (SPECIAL_TRAIN == true){ 
-          if(SPECIAL_TRAIN_ID == trainID){
-            special_train_index = res;
-            special_train_line = cur_train_line;
-            special_train_dir = train_dir-1;
+          if (res != -1){
+            for (uint8_t i=0; i < NUM_SPECIAL_TRAIN_IDS; i++){
+
+              #ifdef PRINT
+                Serial.printf("Checking trainID %d against special train ID %d\n", trainID, special_train_ids[i]);
+              #endif
+
+              if(special_train_ids[i] == trainID){
+
+                #ifdef PRINT
+                  Serial.printf("Setting Special Train on line: %c index: %d\n", line_char, res);
+                #endif
+
+                special_train_id = trainID;
+                special_train_index = res;
+                special_train_line = cur_train_line;
+                special_train_dir = train_dir-1;
+                break;
+              }
+            }
           }
-        }
+        }// end special train detection logic
 
         #ifdef PRINT
           Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
@@ -339,6 +356,8 @@ void loop() {
 
       }//end if train is on a line
     } //end loop through active trains
+
+    doc.clear(); //clear JSON response document to ensure memory is available.
 
   
 
@@ -364,6 +383,10 @@ void loop() {
 
   //"Collisions" with trains on different lines "at" the same station are determined by
   //the order lines are put into the all_lines array in the configuration section of this file.
+
+  #ifdef PRINT
+    Serial.printf("Setting Strip LEDs\n");
+  #endif
   
   for(uint8_t k=0; k<strip.numPixels()-3; k++){ //do not turn off board status LEDs at end of "strip."
     bool ledOn = false;
@@ -383,10 +406,23 @@ void loop() {
 
   }//end loop through each LED
 
+  //If setting special LED color for a special train, do so, assuming the train is active. 
   if(SPECIAL_TRAIN){
-    uint8_t special_led = special_train_line->getLEDForIndex(special_train_index, special_train_dir);
-    strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX);
+
+    #ifdef PRINT
+      Serial.printf("Setting special train LED\n");
+      Serial.printf("Train ID: %d;   Train Index: %d;   Train Dir: %d\n", special_train_id, special_train_index, special_train_dir);
+    #endif
+
+    if(special_train_line != NULL){
+      uint8_t special_led = special_train_line->getLEDForIndex(special_train_index, special_train_dir);
+      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX);
+    }
   }
+
+  #ifdef PRINT
+    Serial.printf("Updating Strip with new State\n");
+  #endif
 
   //Update the board with new state of the system
   strip.show();
@@ -397,6 +433,10 @@ void loop() {
       all_lines[l]->clearState();
     }
   }
+
+  #ifdef PRINT
+    Serial.printf("End of loop\n");
+  #endif
     
   //wait set number of seconds (default 20) until next loop and API call.
   delay(WAIT_SEC * 1000);

@@ -156,6 +156,7 @@ void loop() {
   DeserializationError error = deserializeJson(doc, https.getStream(), DeserializationOption::Filter(train_pos_filter));
 
   //Constants to track the presence of special trains
+  uint16_t special_train_id = 0;
   uint8_t special_train_index = 0;
   TrainLine* special_train_line = NULL;
 
@@ -247,7 +248,7 @@ void loop() {
         const uint16_t circID = train["CircuitId"].as<unsigned int>();
         const uint8_t train_dir = train["DirectionNum"].as<unsigned short>();
         const char* train_line = train["LineCode"];
-        uint8_t trainID = 0;
+        uint16_t trainID = 0;
 
         if (SPECIAL_TRAIN){
           trainID = train["TrainId"].as<unsigned int>();
@@ -304,12 +305,30 @@ void loop() {
           Serial.printf("Station Index: %d\n", res); //Finish debugging / output info
         #endif
 
+        // If looking for special trains, make sure train is valid then check if current train is special train and set info appropriately
         if (SPECIAL_TRAIN == true){ 
-          if(SPECIAL_TRAIN_ID == trainID){
-            special_train_index = res;
-            special_train_line = cur_train_line;
+          if (res != -1){
+            for (uint8_t i=0; i < NUM_SPECIAL_TRAIN_IDS; i++){
+
+              #ifdef PRINT
+                Serial.printf("Checking trainID %d against special train ID %d\n", trainID, special_train_ids[i]);
+              #endif
+
+              if(special_train_ids[i] == trainID){
+
+                #ifdef PRINT
+                  Serial.printf("Setting Special Train on line: %c index: %d\n", line_char, res);
+                #endif
+
+                special_train_id = trainID;
+                special_train_index = res;
+                special_train_line = cur_train_line;
+                special_train_dir = train_dir-1;
+                break;
+              }
+            }
           }
-        }
+        }// end special train detection logic
 
         if (res == -1){countfail++;}
 
@@ -358,9 +377,18 @@ void loop() {
 
   }//end loop through each LED
 
+  //If setting special LED color for a special train, do so, assuming the train is active. 
   if(SPECIAL_TRAIN){
-    uint8_t special_led = special_train_line->getLEDForIndex(special_train_index);
-    strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX);
+
+    #ifdef PRINT
+      Serial.printf("Setting special train LED\n");
+      Serial.printf("Train ID: %d;   Train Index: %d;   Train Dir: %d\n", special_train_id, special_train_index, special_train_dir);
+    #endif
+
+    if(special_train_line != NULL){
+      uint8_t special_led = special_train_line->getLEDForIndex(special_train_index);
+      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX);
+    }
   }
 
   //Update the board with new state of the system

@@ -19,7 +19,7 @@
 #include <ESP8266httpUpdate.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.19"
+#define VERSION "1.1.20"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -45,7 +45,8 @@
 
 //Setup LED for special trains
 #define SPECIAL_TRAIN true
-#define SPECIAL_TRAIN_ID 167
+#define NUM_SPECIAL_TRAIN_IDS 2
+const uint16_t special_train_ids[NUM_SPECIAL_TRAIN_IDS] = {167,341};
 #define SPECIAL_TRAIN_HEX 0x00F17EB1
 
 // ----  LED Configuration Values ----
