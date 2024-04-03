@@ -1,5 +1,5 @@
 # Get WMATA certificate fingerprint in format WiFiClientSecure library expects
-echo | openssl s_client -showcerts -servername api.wmata.com -connect api.wmata.com:443 2>/dev/null | openssl x509 -inform pem -fingerprint -sha1 | head -n 1 | cut -d '=' -f 2 | sed "s/:/ /g"
+HOST="api.wmata.com"; echo | openssl s_client -showcerts -servername ${HOST} -connect ${HOST}:443 2>/dev/null | openssl x509 -inform pem -fingerprint -sha1 | head -n 1 | cut -d '=' -f 2 | sed "s/:/ /g"
 
 
 # Get list of stations for development reference

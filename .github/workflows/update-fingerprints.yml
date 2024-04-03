@@ -31,8 +31,10 @@ jobs:
         WMATA_SERVER=$(grep WMATA_ENDPOINT $CONFIG_FILE | cut -d '/' -f 3)
         UPDATE_SERVER=$(grep UPDATE_HOST $CONFIG_FILE | cut -d '"' -f 2)
         GITHUB_SERVER=$(grep LATEST_VERSION_URL $CONFIG_FILE | cut -d '/' -f 3)
+        GIS_SERVER=$(grep GIS_CONFIG_ENDPOING $CONFIG_FILE | cut -d '/' -f 3)
+        GIS_SERVICES_SERVER=$(grep GIS_TRAIN_LOC_ENDPOINT $CONFIG_FILE | cut -d '/' -f 3)
         
-        server_array=($WMATA_SERVER $UPDATE_SERVER $GITHUB_SERVER)
+        server_array=($WMATA_SERVER $UPDATE_SERVER $GITHUB_SERVER $GIS_SERVER $GIS_SERVICES_SERVER)
         
         for server in ${server_array[@]}; do
           fingerprint_var=$(echo ${server}_fingerprint | sed 's/\./_/g' )

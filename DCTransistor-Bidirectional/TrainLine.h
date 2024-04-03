@@ -20,13 +20,15 @@ class TrainLine {
 
     //static line data
     uint8_t total_num_stations; //number of stations on the line
-    uint16_t* station_circuits[2]; //simple array to point to the lists of station circuit IDs for each direction
-    uint16_t* station_circuits_0; //dynamically allocated list for station circuitIDs, trains move positively along circuits
-    uint16_t* station_circuits_1; //stores station circuits for other direction, trains move negatively along circuits
-    uint8_t* station_leds[2]; //simple array to point to lists of LEDs for each direction
-    uint8_t* station_leds_0; //Array of global LED indexes for LEDs on current line and 'forward' direciton
-    uint8_t* station_leds_1; //Same, but for opposite direction
     uint32_t led_color; //Hex WWRRGGBB color to represent train's on line.
+    const char* color; //String of line's color
+    const uint16_t* station_circuits[2]; //simple array to point to the lists of station circuit IDs for each direction
+    const uint16_t* station_circuits_0; //list for station circuitIDs, trains move positively along circuits
+    const uint16_t* station_circuits_1; //stores station circuits for other direction, trains move negatively along circuits
+    const uint8_t* station_leds[2]; //simple array to point to lists of LEDs for each direction
+    const uint8_t* station_leds_0; //Array of global LED indexes for LEDs on current line and 'forward' direciton
+    const uint8_t* station_leds_1; //Same, but for opposite direction
+
 
     // NOTE:   
     // List of circuitIDs in station_circuits are arranged in direction train travels
@@ -35,6 +37,7 @@ class TrainLine {
 
     //Line state variables
     uint64_t state[2]; //simple binary array of whether or not a train is "at" a given station. One for each line.
+    uint8_t num_trains; //Count of trains on the line in current iteration.
 
     //Arrays that hold specific end-of-line data for each direction
     uint8_t cycles_at_end[2]; //hold how many cycles a train has been at last station
@@ -50,8 +53,8 @@ class TrainLine {
   public:
 
     //Constructors and Destructor
-    TrainLine();
-    TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const uint16_t* circuit_list_1, uint32_t hex_color, const uint8_t* led_list_0, const uint8_t* led_list_1);
+    //TrainLine();
+    TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const uint16_t* circuit_list_1, const char* color_name, uint32_t hex_color, const uint8_t* led_list_0, const uint8_t* led_list_1);
     ~TrainLine();
 
     //Functions called by main loop
@@ -65,7 +68,9 @@ class TrainLine {
     uint8_t* getStations(bool dir);
     String printVariables(bool dir);
     uint32_t getLEDColor();
+    const char* getColor();
     uint8_t getTotalNumStations();
+    uint8_t getTrainCount();
     uint16_t getOppCID(bool dir);
     uint16_t getLastCID(bool dir);
     int16_t getStationCircuit(uint8_t index, bool dir); //get circuitID of any given station
@@ -75,75 +80,81 @@ class TrainLine {
 
 //Constructor sets first station as waiting and initializes rest of list to 0.
 //Set default values for testing northbound end of redline.
-TrainLine::TrainLine(){
-  total_num_stations = 10;
+// TrainLine::TrainLine(){
+//   total_num_stations = 10;
 
-  //Set state arrays to number of stations in track.
-  station_circuits_0 = new uint16_t[total_num_stations];
-  station_circuits_1 = new uint16_t[total_num_stations];
-  station_leds_0 = new uint8_t[total_num_stations];
-  station_leds_1 = new uint8_t[total_num_stations];
-
-
-  station_circuits[0] = station_circuits_0;
-  station_circuits[1] = station_circuits_1;
-  station_leds[0] = station_leds_0;
-  station_leds[1] = station_leds_1;
-
-  //Set map of all LEDs to -1 by default (LED not on this line)
-  //memset(led_to_station_map_0, -1, sizeof(uint8_t) * TOTAL_SYSTEM_STATIONS);
-  //memset(led_to_station_map_1, -1, sizeof(uint8_t) * TOTAL_SYSTEM_STATIONS);
-
-  //Default constructor dummy input data
-  uint16_t tmp_station_circuits_0[10] = {485, 496, 513, 527, 548, 571, 591, 611, 629, 652};
-  uint16_t tmp_station_circuits_1[10] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686};
-  uint8_t tmp_leds[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-  led_color = 0x00FF0000; //Red in hex-based RGB value
-
-  //Copy input circuit ID and LED lists into class' array
-  memcpy(station_circuits_0, tmp_station_circuits_0, sizeof(uint16_t) * total_num_stations); /*FlawFinder: Ignore */
-  memcpy(station_circuits_1, tmp_station_circuits_1, sizeof(uint16_t) * total_num_stations); /*FlawFinder: Ignore */
-
-  memcpy(station_leds_0, tmp_leds, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
-  memcpy(station_leds_1, tmp_leds, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
+//   //Set state arrays to number of stations in track.
+//   station_circuits_0 = new uint16_t[total_num_stations];
+//   station_circuits_1 = new uint16_t[total_num_stations];
+//   station_leds_0 = new uint8_t[total_num_stations];
+//   station_leds_1 = new uint8_t[total_num_stations];
 
 
-  //Given system-wide led number, map to that station's index in this line.
-  /*
-  for(uint8_t i=0; i<total_num_stations; i++){
-    led_to_station_map_0[station_leds_0[i]] = i;
-    led_to_station_map_1[station_leds_1[i]] = i;
-  }
-  */
+//   station_circuits[0] = station_circuits_0;
+//   station_circuits[1] = station_circuits_1;
+//   station_leds[0] = station_leds_0;
+//   station_leds[1] = station_leds_1;
 
-  //Set opposite direction's first circuit for both dirs
-  opp_dir_1st_cid[0] = station_circuits_1[0];
-  opp_dir_1st_cid[1] = station_circuits_0[0];
+//   //Set map of all LEDs to -1 by default (LED not on this line)
+//   //memset(led_to_station_map_0, -1, sizeof(uint8_t) * TOTAL_SYSTEM_STATIONS);
+//   //memset(led_to_station_map_1, -1, sizeof(uint8_t) * TOTAL_SYSTEM_STATIONS);
 
-  //Set all state data to empty
-  cycles_at_end[0] = 0;
-  cycles_at_end[1] = 0;
-  state[0] = 0;
-  state[1] = 0;
+//   //Default constructor dummy input data
+//   uint16_t tmp_station_circuits_0[10] = {485, 496, 513, 527, 548, 571, 591, 611, 629, 652};
+//   uint16_t tmp_station_circuits_1[10] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686};
+//   uint8_t tmp_leds[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-  last_station_waiting[0] = false;
-  last_station_waiting[1] = false;
+//   led_color = 0x00FF0000; //Red in hex-based RGB value
+//   color = (char*)malloc(sizeof(char) * 3); //Red Line default
+//   color[0] = 'R';
+//   color[1] = 'D';
+//   color[2] = 0;
 
-}
-//END default constructor
+//   //Copy input circuit ID and LED lists into class' array
+//   memcpy(station_circuits_0, tmp_station_circuits_0, sizeof(uint16_t) * total_num_stations); /*FlawFinder: Ignore */
+//   memcpy(station_circuits_1, tmp_station_circuits_1, sizeof(uint16_t) * total_num_stations); /*FlawFinder: Ignore */
+
+//   memcpy(station_leds_0, tmp_leds, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
+//   memcpy(station_leds_1, tmp_leds, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
+
+
+//   //Given system-wide led number, map to that station's index in this line.
+//   /*
+//   for(uint8_t i=0; i<total_num_stations; i++){
+//     led_to_station_map_0[station_leds_0[i]] = i;
+//     led_to_station_map_1[station_leds_1[i]] = i;
+//   }
+//   */
+
+//   //Set opposite direction's first circuit for both dirs
+//   opp_dir_1st_cid[0] = station_circuits_1[0];
+//   opp_dir_1st_cid[1] = station_circuits_0[0];
+
+//   //Set all state data to empty
+//   cycles_at_end[0] = 0;
+//   cycles_at_end[1] = 0;
+//   state[0] = 0;
+//   state[1] = 0;
+
+//   last_station_waiting[0] = false;
+//   last_station_waiting[1] = false;
+
+//   num_trains = 0;
+
+// }
+// //END default constructor
 
 //Overloaded constructor that takes list of track circuitIDs corresponding to each station on line
-TrainLine::TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const uint16_t* circuit_list_1, uint32_t hex_color, const uint8_t* led_list_0, const uint8_t* led_list_1){
+TrainLine::TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const uint16_t* circuit_list_1, const char* color_name, uint32_t hex_color, const uint8_t* led_list_0, const uint8_t* led_list_1){
   
   //Serial.println("In constructor");
 
-  //Set state arrays to number of stations in track.
+  //Set state arrays to constant arrays in config file
   total_num_stations = num_stations;
-  station_circuits_0 = new uint16_t[total_num_stations];
-  station_circuits_1 = new uint16_t[total_num_stations];
-  station_leds_0 = new uint8_t[total_num_stations];
-  station_leds_1 = new uint8_t[total_num_stations];
+  station_circuits_0 = circuit_list_0; //new uint16_t[total_num_stations];
+  station_circuits_1 = circuit_list_1; //new uint16_t[total_num_stations];
+  station_leds_0 = led_list_0; //new uint8_t[total_num_stations];
+  station_leds_1 = led_list_1; //new uint8_t[total_num_stations];
 
   //Point directional arrays to each list
   station_circuits[0] = station_circuits_0;
@@ -160,10 +171,10 @@ TrainLine::TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const
   //Serial.println("About to memcpy stations");
 
   //Set list of station circuitIDs and LEDs to lists passed in as arguments
-  memcpy(station_circuits_0, circuit_list_0, sizeof(uint16_t) * total_num_stations); /* FlawFinder: Ignore */
-  memcpy(station_circuits_1, circuit_list_1, sizeof(uint16_t) * total_num_stations); /* FlawFinder: Ignore */
-  memcpy(station_leds_0, led_list_0, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
-  memcpy(station_leds_1, led_list_1, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
+  // memcpy(station_circuits_0, circuit_list_0, sizeof(uint16_t) * total_num_stations); /* FlawFinder: Ignore */
+  // memcpy(station_circuits_1, circuit_list_1, sizeof(uint16_t) * total_num_stations); /* FlawFinder: Ignore */
+  // memcpy(station_leds_0, led_list_0, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
+  // memcpy(station_leds_1, led_list_1, sizeof(uint8_t) * total_num_stations); /*FlawFinder: Ignore */
 
   //Given system-wide led number passed as argument, map to that station's index in this line.
   /*
@@ -173,7 +184,11 @@ TrainLine::TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const
   }
   */
 
+  //Set LED color to its own string
   led_color = hex_color;
+  color = color_name;
+  // color = (char*)malloc(strlen(color_name)+1); /*FlawFinder: Ignore */
+  // strncpy(color, color_name, strlen(color_name)+1); /*FlawFinder: Ignore */
 
   //Set opposite direction's 1st circuit and empty state data
   opp_dir_1st_cid[0] = station_circuits_1[0];
@@ -187,6 +202,8 @@ TrainLine::TrainLine(uint8_t num_stations, const uint16_t* circuit_list_0, const
 
   last_station_waiting[0] = false;
   last_station_waiting[1] = false;
+
+  num_trains = 0;
 
 }
 //END overloaded constructor
@@ -361,6 +378,8 @@ int TrainLine::checkAllStations(uint16_t circID, uint8_t train_dir){
 //Given a circuit, use it to update line's state after checking number of conditions
 int TrainLine::setTrainState(uint16_t circID, uint8_t train_dir){
 
+  num_trains++; //Increment number of trains on line
+
   //If waiting for last station and train shows up at opposite direction's 1st station (but going in current direction)
   if(circID == getOppCID(train_dir) && (last_station_waiting[train_dir] == true) ){
     return setLastTrain(circID, train_dir);
@@ -436,6 +455,11 @@ uint32_t TrainLine::getLEDColor(){
   return led_color;
 }
 
+//Get current line's two-letter line color
+const char* TrainLine::getColor(){
+  return color;
+}
+
 // Get the LED Number for an index on the station's line
 uint8_t TrainLine::getLEDForIndex(uint8_t index, uint8_t train_dir){
   return station_leds[train_dir][index];
@@ -472,11 +496,17 @@ void TrainLine::defaultShiftDisplay(bool dir, bool train){
 void TrainLine::clearState(){
   state[0] = 0;
   state[1] = 0;
+  num_trains = 0;
 }//end clearState
 
 //total_num_stations getter
 uint8_t TrainLine::getTotalNumStations(){
   return total_num_stations;
+}
+
+//number of current trains getter
+uint8_t TrainLine::getTrainCount(){
+  return num_trains;
 }
 
 //return circuitID for the "1st" station in opposite direction (last station in cur direction)
@@ -515,6 +545,7 @@ TrainLine::~TrainLine(){
   delete[] station_circuits_1;
   delete[] station_leds_0;
   delete[] station_leds_1;
+  //free(color);
 }
 
 // END FUNCTION IMPLEMENTATION

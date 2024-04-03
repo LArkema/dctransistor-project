@@ -17,9 +17,10 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
+#include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.1.20"
+#define VERSION "1.2.0"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -36,18 +37,14 @@
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
 //#define PRINT
 
-//Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define WAIT_SEC 15
+//Set wait times for different (roughly) time-based events
+#define WAIT_SEC 2 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
+#define SPECIAL_TRAIN_CHECK_HOURS 2 //Number of hours to see if there is a new TrainID for special train (updates every day or so)
+#define UPDATE_CHECK_HOURS 24 //Number of hours to see if new board update
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
 #define WIFI_NAME "DCTransistor"
 #define WIFI_PASSWORD "trainsareneat"
-
-//Setup LED for special trains
-#define SPECIAL_TRAIN true
-#define NUM_SPECIAL_TRAIN_IDS 2
-const uint16_t special_train_ids[NUM_SPECIAL_TRAIN_IDS] = {167,341};
-#define SPECIAL_TRAIN_HEX 0x00F17EB1
 
 // ----  LED Configuration Values ----
 #define LED_BRIGHTNESS 3 //Range of 0-100. Can get very bright very fast
@@ -61,6 +58,9 @@ const uint16_t special_train_ids[NUM_SPECIAL_TRAIN_IDS] = {167,341};
 #define YL_HEX_COLOR 0x00FFFF00
 #define GN_HEX_COLOR 0x0000FF00
 
+// Led Color for special promotional train. Will only show up if campaign is active
+#define SPECIAL_TRAIN_HEX 0x00F17EB1
+
 
 /*
 *   DEBUG CONFIGURATION VALUES
@@ -68,7 +68,7 @@ const uint16_t special_train_ids[NUM_SPECIAL_TRAIN_IDS] = {167,341};
 
 //JSON document sizes must be predefined, and may need to be increased if amount of data increases
 #define JSON_FILTER_SIZE 120 //Bytes of filter to apply to JSON data returned from WMATA
-#define JSON_DOC_SIZE 10000 //Bytes of parsed and filtered JSON data returned from WMATA (All trian line, position, and circuitIDs). 8096 -> 8096. 20000 -> 0 HTTP:22820 16000 -> 16000
+#define JSON_DOC_SIZE 1024 //Bytes of parsed and filtered JSON data returned from WMATA (All trian line, position, and circuitIDs). 8096 -> 8096. 20000 -> 0 HTTP:22820 16000 -> 16000
 
 
 /*
@@ -79,6 +79,8 @@ const uint16_t special_train_ids[NUM_SPECIAL_TRAIN_IDS] = {167,341};
 #define GITHUB_COM_FINGERPRINT "A3 B5 9E 5F E8 84 EE 1F 34 D9 8E EF 85 8E 3F B6 62 AC 10 4A"
 #define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "A1 46 14 C7 2A 1D 52 79 F6 AA 2B B2 C5 0A 3B D3 F5 02 06 75"
 #define API_WMATA_COM_FINGERPRINT "99 E2 96 23 71 DD 13 88 D0 5F 0B 72 2C FA 69 87 7A 8C 1F 40"
+#define GIS_WMATA_COM_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
+#define GISSERVICES_WMATA_COM_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
 
 /*
 *   REQUIRED CONFIGURATION VALUES
@@ -95,6 +97,9 @@ const int github_num_headers = 1;
 #define UPDATE_HOST "raw.githubusercontent.com"
 #define GITHUB_HOST "github.com"
 #define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
+#define GIS_CONFIG_ENDPOINT "https://gis.wmata.com/live/appconfig.json"
+#define GIS_SPECIAL_TRAIN_ENDPOINT "https://gis.wmata.com/proxy/proxy.ashx?https://gispro.wmata.com/RpmSpecialTrains/api/SpcialTrain"
+#define GIS_TRAIN_LOC_ENDPOINT "https://gisservices.wmata.com/gisservices/rest/services/Public/TRAIN_LOC_WMS_PUB/MapServer/2/query?f=json&where=TRACKLINE%20%3C%3E%20%27Non-revenue%27%20and%20TRACKLINE%20is%20not%20null&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*"
 #define HTTPS_PORT 443
 
 //Frequency for sending debug messages from ESP8266 chip to computer
