@@ -38,8 +38,8 @@
 //#define PRINT
 
 //Set wait times for different (roughly) time-based events
-#define WAIT_SEC 2 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
-#define SPECIAL_TRAIN_CHECK_HOURS 2 //Number of hours to see if there is a new TrainID for special train (updates every day or so)
+#define WAIT_SEC 15 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
+#define SPECIAL_TRAIN_CHECK_HOURS 1 //Number of hours to see if there is a new TrainID for special train (updates every day or so)
 #define UPDATE_CHECK_HOURS 24 //Number of hours to see if new board update
 
 //Name of WiFi Network (SSID) Board Creates when unable to connect to wifi
