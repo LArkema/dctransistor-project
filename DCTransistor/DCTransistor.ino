@@ -391,7 +391,7 @@ void loop() {
 
     if(special_train_line != NULL){
       uint8_t special_led = special_train_line->getLEDForIndex(special_train_index);
-      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX);
+      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX[0]);
     }
   }
 
@@ -401,6 +401,20 @@ void loop() {
 
   //Update the board with new state of the system
   strip.show();
+
+  // If there is a special train with multiple colors (pride), make it strobe.
+  bool strobe = false;
+  if(special_train_line != NULL && SPECIAL_TRAIN_HEX_COUNT > 1){
+    strobe = true;
+    uint delay_count = 0;
+    while(delay_count < (WAIT_SEC * 2)){
+      delay(1000);
+      uint8_t special_led = special_train_line->getLEDForIndex(special_train_index);
+      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX[delay_count % SPECIAL_TRAIN_HEX_COUNT]);
+      strip.show();
+      delay_count++;
+    }
+  }
 
   //Clear each line's internal state. Reset to reflect the data in a single API call.
   if(getting_live_trains){
@@ -428,7 +442,9 @@ void loop() {
     Serial.printf("End of loop\n");
   #endif
     
-  //wait set number of seconds (default 20) until next loop and API call.
-  delay(WAIT_SEC * 1000);
+  //wait set number of seconds (default 20) until next loop and API call. If strobing, waiting done already
+  if (!strobe){
+    delay(WAIT_SEC * 1000);
+  }
 
 }//END LOOP()

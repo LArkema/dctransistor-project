@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.2.1"
+#define VERSION "1.2.4"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -58,8 +58,25 @@
 #define YL_HEX_COLOR 0x00FFFF00
 #define GN_HEX_COLOR 0x0000FF00
 
-// Led Color for special promotional train. Will only show up if campaign is active
-#define SPECIAL_TRAIN_HEX 0x00F17EB1
+// LED Colors for Special Trains
+#define CH_BLOSSOM_HEX_COLOR 0x00F17EB1 // Cherry Blossom
+#define PURPLE_HEX_COLOR 0x00FF00FF//0x0099CCFF //0x00722A82 //Pride
+#define TEAL_HEX_COLOR 0x007ACFE7 //Pride
+#define PINK_HEX_COLOR 0x00FF66FF //0x00F5ACC5 //Pride
+
+//#define BROWN_HEX_COLOR 0x00998833//0x00603A17 //Pride
+
+// Led Configuration for special promotional trains. Will only show up if campaign is active
+
+// Pride Special Train
+#define SPECIAL_TRAIN_HEX_COUNT 8
+const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, OR_HEX_COLOR, YL_HEX_COLOR, GN_HEX_COLOR, BL_HEX_COLOR, PURPLE_HEX_COLOR, TEAL_HEX_COLOR, PINK_HEX_COLOR}; //Pride
+
+// Cherry Blossom Special Train
+// #define SPECIAL_TRAIN_HEX_COUNT 1
+// const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {CH_BLOSSOM_HEX_COLOR};
+
+
 
 
 /*
