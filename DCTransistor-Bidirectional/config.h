@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.2.6"
+#define VERSION "1.2.7"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -32,7 +32,7 @@
 #define SECRET_WMATA_API_KEY_2 "2123456789abcdef0123456789abcdef"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
-#define AUTOUPDATE false
+#define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
 //#define PRINT
