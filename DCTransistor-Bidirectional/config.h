@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.2.5"
+#define VERSION "1.2.6"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -32,7 +32,7 @@
 #define SECRET_WMATA_API_KEY_2 "2123456789abcdef0123456789abcdef"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
-#define AUTOUPDATE true
+#define AUTOUPDATE false
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
 //#define PRINT
@@ -63,14 +63,17 @@
 #define PURPLE_HEX_COLOR 0x00FF00FF//0x0099CCFF //0x00722A82 //Pride
 #define TEAL_HEX_COLOR 0x007ACFE7 //Pride
 #define PINK_HEX_COLOR 0x00FF66FF //0x00F5ACC5 //Pride
-
 //#define BROWN_HEX_COLOR 0x00998833//0x00603A17 //Pride
 
 // Led Configuration for special promotional trains. Will only show up if campaign is active
 
+// 4th of July Special Trains
+#define SPECIAL_TRAIN_HEX_COUNT 3
+const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HEX_COLOR, BL_HEX_COLOR};
+
 // Pride Special Train
-#define SPECIAL_TRAIN_HEX_COUNT 8
-const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, OR_HEX_COLOR, YL_HEX_COLOR, GN_HEX_COLOR, BL_HEX_COLOR, PURPLE_HEX_COLOR, TEAL_HEX_COLOR, PINK_HEX_COLOR}; //Pride
+// #define SPECIAL_TRAIN_HEX_COUNT 8
+// const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, OR_HEX_COLOR, YL_HEX_COLOR, GN_HEX_COLOR, BL_HEX_COLOR, PURPLE_HEX_COLOR, TEAL_HEX_COLOR, PINK_HEX_COLOR}; //Pride
 
 // Cherry Blossom Special Train
 // #define SPECIAL_TRAIN_HEX_COUNT 1
