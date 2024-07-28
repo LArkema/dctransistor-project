@@ -4,13 +4,13 @@
  * Class for representing state of each WMATA line defined in TrainLine.h
  * Functions to auto-update software in auto_update.h
  * 
- * This file sets up WiFi and access to WMATA API, 
- * then loops through calls to WMATA API for current train positions,
+ * This file sets up WiFi and access to WMATA Data Source, 
+ * then loops through calls to WMATA Data Source for current train positions,
  * uses returned values to convert positions into nearest station LED,
  * then updates LEDs with new position / state data.
  * 
  * Code from this file occasionally moved to "snipits" folder when substantive feature developed.
- * (c) Logan Arkema, 1/7/2024
+ * (c) Logan Arkema, 7/28/2024
 */
 
 #include "TrainLine.h"
@@ -30,19 +30,32 @@ int16_t special_train_id = -1; //Constant to get the TrainID of a special train.
 StaticJsonDocument<JSON_FILTER_SIZE> train_pos_filter; 
 const uint16_t json_size = JSON_DOC_SIZE; //space to allocate for data FROM WMATA API. Change to 3072 without Line Code, 2048 for just CircuitIDs
 
-//Array of different API keys associated with different "default tier" products on the WMATA developer page.
-String wmata_api_keys[3] = {SECRET_WMATA_API_KEY_0, SECRET_WMATA_API_KEY_1, SECRET_WMATA_API_KEY_2};
-
 //Create objects representing each line
-TrainLine* redline = new TrainLine(NUM_RD_STATIONS, rstations_0, rstations_1, "RD", RD_HEX_COLOR, rd_led_array_0, rd_led_array_1);
-TrainLine* blueline = new TrainLine(NUM_BL_STATIONS, bstations_0, bstations_1, "BL", BL_HEX_COLOR, bl_led_array_0, bl_led_array_1);
-TrainLine* orangeline = new TrainLine(NUM_OR_STATIONS, ostations_0, ostations_1, "OR", OR_HEX_COLOR, or_led_array_0, or_led_array_1);
-TrainLine* silverline = new TrainLine(NUM_SV_STATIONS, sstations_0, sstations_1, "SV", SV_HEX_COLOR, sv_led_array_0, sv_led_array_1);
-TrainLine* yellowline = new TrainLine(NUM_YL_STATIONS, ystations_0, ystations_1, "YL", YL_HEX_COLOR, yl_led_array_0, yl_led_array_1);
-TrainLine* greenline = new TrainLine(NUM_GN_STATIONS, gstations_0, gstations_1, "GR", GN_HEX_COLOR, gn_led_array_0, gn_led_array_1);
+TrainLine* redline = new TrainLine(NUM_RD_STATIONS, rstation_codes, "Red", RD_HEX_COLOR, rd_led_array_0, rd_led_array_1, RD_END_TRK_0, RD_END_TRK_1);
+TrainLine* blueline = new TrainLine(NUM_BL_STATIONS, bstation_codes, "Blue", BL_HEX_COLOR, bl_led_array_0, bl_led_array_1, BL_END_TRK_0, BL_END_TRK_1);
+TrainLine* orangeline = new TrainLine(NUM_OR_STATIONS, ostation_codes, "Orange", OR_HEX_COLOR, or_led_array_0, or_led_array_1, OR_END_TRK_0, OR_END_TRK_1);
+TrainLine* silverline = new TrainLine(NUM_SV_STATIONS, sstation_codes, "Silver", SV_HEX_COLOR, sv_led_array_0, sv_led_array_1, SV_END_TRK_0, SV_END_TRK_1);
+TrainLine* yellowline = new TrainLine(NUM_YL_STATIONS, ystations_codes, "Yellow", YL_HEX_COLOR, yl_led_array_0, yl_led_array_1, YL_END_TRK_0, YL_END_TRK_1);
+TrainLine* greenline = new TrainLine(NUM_GN_STATIONS, gstation_codes, "Green", GN_HEX_COLOR, gn_led_array_0, gn_led_array_1, GN_END_TRK_0, GN_END_TRK_1);
+
+/*
+* VERSION 1.0 TrainLine objects and api key daa
+*
+*/
+
+//TrainLine* redline = new TrainLine(NUM_RD_STATIONS, rstations_0, rstations_1, "RD", RD_HEX_COLOR, rd_led_array_0, rd_led_array_1);
+// TrainLine* blueline = new TrainLine(NUM_BL_STATIONS, bstations_0, bstations_1, "BL", BL_HEX_COLOR, bl_led_array_0, bl_led_array_1);
+// TrainLine* orangeline = new TrainLine(NUM_OR_STATIONS, ostations_0, ostations_1, "OR", OR_HEX_COLOR, or_led_array_0, or_led_array_1);
+// TrainLine* silverline = new TrainLine(NUM_SV_STATIONS, sstations_0, sstations_1, "SV", SV_HEX_COLOR, sv_led_array_0, sv_led_array_1);
+// TrainLine* yellowline = new TrainLine(NUM_YL_STATIONS, ystations_0, ystations_1, "YL", YL_HEX_COLOR, yl_led_array_0, yl_led_array_1);
+// TrainLine* greenline = new TrainLine(NUM_GN_STATIONS, gstations_0, gstations_1, "GR", GN_HEX_COLOR, gn_led_array_0, gn_led_array_1);
+
+//Array of different API keys associated with different "default tier" products on the WMATA developer page.
+//String wmata_api_keys[3] = {SECRET_WMATA_API_KEY_0, SECRET_WMATA_API_KEY_1, SECRET_WMATA_API_KEY_2};
 
 //Create an array to hold all train lines to iterate through
 TrainLine* all_lines[NUM_LINES] = {orangeline, silverline, blueline, yellowline, greenline, redline};
+
 
 /***********************************************/
 /*                SETUP CODE                   */
@@ -101,14 +114,20 @@ void setup() {
   data_failure_count = 0;
   total_run_count = 0;
 
-  //Set options to filter WMATA API data to only include the current circuit, direction, and line for every train currently running
-  // When loading entire Json document at once, filter must account for array, i.e. ["TrainPositions"][0]["CircuitId"]
-  train_pos_filter["CircuitId"] = true;
-  train_pos_filter["DirectionNum"] = true;
-  train_pos_filter["LineCode"] = true;
+  // VERSION 1.0 TRAIN POSITION FILTERS
+  // train_pos_filter["CircuitId"] = true;
+  // train_pos_filter["DirectionNum"] = true;
+  // train_pos_filter["LineCode"] = true;
+  // train_pos_filter["TrainId"] = true;
+
+  //Set options to filter response data to only include the current track, direction, and line for every train currently running
+  // When loading entire Json document at once, filter must account for array.
+  train_pos_filter["attributes"]["TRKID"] = true;
+  train_pos_filter["attributes"]["TRACKLINE"] = true;
+  train_pos_filter["attributes"]["TRIP_DIRECTION"] = true;
 
   if(special_train_id != -1){
-    train_pos_filter["TrainId"] = true;
+    train_pos_filter["attributes"]["ITT"] = true; //Was just ["TrainId"]
   }
   
   //Leave setup and turn Web led yellow
@@ -131,28 +150,9 @@ void loop() {
 
   bool getting_live_trains = true;
 
-  //check_for_special_train(client);
-
-
-  // TEST CODE
-
-  // int64_t ret = 0;
-  // if (CIRC_COUNT > -1 ){
-  //   silverline->setTrainState(SV_LINE_CIRCUITS_1[CIRC_COUNT], 1); 
-  //   CIRC_COUNT -= 1;
-  // }
- 
-  // if (TEST_COUNT < CIRC_COUNT ){
-  //   ret = silverline->setTrainState(SV_LINE_CIRCUITS_0[TEST_COUNT], 0);
-  //   TEST_COUNT += 1;
-  // }
-
-  // Serial.printf("Circuit: %d;  Ret: %d\n", SV_LINE_CIRCUITS_1[CIRC_COUNT], ret);
-
-
   //Connect and confirm HTTPS connection to api.wmata.com. If not, set LED red.
-  client.setFingerprint(API_WMATA_COM_FINGERPRINT);
-  if(!https.begin(client, WMATA_ENDPOINT)){
+  client.setFingerprint(DATA_SOURCE_FINGERPRINT);
+  if(!https.begin(client, DATA_SOURCE_ENDPOINT)){
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
     getting_live_trains = false;
@@ -163,7 +163,7 @@ void loop() {
   }
 
   //Use one of three WMATA API Keys to stay under usage quota. Actuall randomness not important, just variance in key usage.
-  https.addHeader("api_key", wmata_api_keys[random(3)]); /* Flawfinder: ignore */
+  //https.addHeader("api_key", wmata_api_keys[random(3)]); /* Flawfinder: ignore */
 
   //Request train data from server. If unsuccessful, set LED red. If successful, deserialize the JSON data returned by the API
   int httpCode = https.GET();
@@ -196,11 +196,11 @@ void loop() {
 
   //Only load each train object into a JSON document at a time to preserve RAM by iterating through TCP stream.
   //WifiClient is actual consistent source of https stream. If can't find, create error. 
-  if(!client.find("\"TrainPositions\":[")){
+  if(!client.find("\"features\":[")){     // VERSION 1.0: client.find("\"TrainPositions\":[")
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
     getting_live_trains = false;
-
+ 
     #ifdef PRINT
       Serial.println("Unable to find '\"TrainPositions\":[' in HTTP response.");
     #endif
@@ -227,21 +227,29 @@ void loop() {
         Serial.printf("Actual JSON Document Size: %d\n", doc.capacity());
         Serial.printf("HTTP Response Code %d\n", httpCode);
         Serial.printf("HTTP Body Size: %d\n", https.getSize());
-        Serial.printf("Overflowed? %s\n", doc.overflowed());
+        //Serial.printf("Overflowed? %s\n", doc.overflowed());
       #endif
     }
 
     //Only work on trains that are on a line. JsonObject removes key if value is null.
-    else if(doc["LineCode"]){
+    else if(doc["attributes"]["TRACKLINE"]){ // VERSION 1.0: Check  doc["LineCode"]
 
       //Isolate variables from JsonObject returned by API
+      const char* trkID = doc["attributes"]["TRKID"].as<const char*>();
+      const uint8_t train_dir = doc["attributes"]["TRIP_DIRECTION"].as<unsigned short>();
+      const char* train_line = doc["attributes"]["TRACKLINE"].as<const char*>();
+
+      // Version 1.0 object names
+      /*
       const uint16_t circID = doc["CircuitId"].as<unsigned int>();
       const uint8_t train_dir = doc["DirectionNum"].as<unsigned short>();
       const char* train_line = doc["LineCode"].as<const char*>();
+      */
+
       int16_t trainID = -1;
 
       if (special_train_id != -1){
-        trainID = doc["TrainId"].as<int16_t>();
+        trainID = doc["attributes"]["ITT"].as<int16_t>();
       }
 
       // Current TrainLocation tracking variables
@@ -250,14 +258,14 @@ void loop() {
       TrainLine* cur_train_line = NULL; //store which TrainLine object has current line
 
       #ifdef PRINT
-        Serial.printf("Line: %s, Direction: %d, Circuit: %d, ", train_line, train_dir, circID); //continued after station determined
+        Serial.printf("Line: %s, Direction: %d, Circuit: %s, ", train_line, train_dir, trkID); //circID); //continued after station determined
       #endif
 
       // Find the line the train is on by color, and update that line with the train.
       for (uint8_t i=0; i<NUM_LINES; i++){
         if (strcmp(all_lines[i]->getColor(), train_line) == 0){
           cur_train_line = all_lines[i];
-          res = cur_train_line->setTrainState(circID, train_dir-1);
+          res = cur_train_line->setTrainStateByCode(trkID, train_dir-1); //setTrainState(cirID, train_dir);
           break;
         }
       }
@@ -272,7 +280,7 @@ void loop() {
       #endif
 
       // Check for special train. If special train is -1, ensure it fails.
-      if( special_train_id != -1 && special_train_id == trainID){
+      if( special_train_id != -1 && special_train_id == trainID ){
 
         special_train_index = res;
         special_train_line = cur_train_line;
@@ -304,7 +312,7 @@ void loop() {
     Serial.printf("Fail Count: %d\n", countfail);
   #endif
  
-  // If WMATA API returns empty array, show failure
+  // If Data API returns empty array, show failure
   if (total_count == 0){ //Was `doc["TrainPositions"].size()` when loading entire doc at once
     strip.setPixelColor(WEB_LED, RD_HEX_COLOR);
     strip.show();
@@ -365,12 +373,10 @@ void loop() {
   }
   // } // END live train data
 
+
+
   //For each LED, check if there is a train at the station represented by that LED.
   //If so, turn the station's LED that line's color. If no trains, turn the LED off.
-
-  //"Collisions" with trains on different lines "at" the same station are determined by
-  //the order lines are put into the all_lines array in the configuration section of this file.
-
   #ifdef PRINT
     Serial.printf("Setting Strip LEDs\n");
   #endif
@@ -403,7 +409,7 @@ void loop() {
 
     if(special_train_line != NULL){
       uint8_t special_led = special_train_line->getLEDForIndex(special_train_index, special_train_dir);
-      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX[0]);
+      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX[total_run_count % SPECIAL_TRAIN_HEX_COUNT]);
     }
   }
 
@@ -415,19 +421,19 @@ void loop() {
   strip.show();
 
   // If there is a special train with multiple colors (pride), make it strobe.
-  bool strobe = false;
-
-  if(special_train_line != NULL && SPECIAL_TRAIN_HEX_COUNT > 1){
-    strobe = true;
-    uint delay_count = 0;
-    while(delay_count < (WAIT_SEC * 2)){
-      delay(1000);
-      uint8_t special_led = special_train_line->getLEDForIndex(special_train_index, special_train_dir);
-      strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX[delay_count % SPECIAL_TRAIN_HEX_COUNT]);
-      strip.show();
-      delay_count++;
-    }
-  }
+  // VERSION 1.0 CODE TO DO STROBE PRE-UPDATE
+  // bool strobe = false;
+  // if(special_train_line != NULL && SPECIAL_TRAIN_HEX_COUNT > 1){
+  //   strobe = true;
+  //   uint delay_count = 0;
+  //   while(delay_count < (WAIT_SEC * 2)){
+  //     delay(1000);
+  //     uint8_t special_led = special_train_line->getLEDForIndex(special_train_index, special_train_dir);
+  //     strip.setPixelColor(special_led, SPECIAL_TRAIN_HEX[delay_count % SPECIAL_TRAIN_HEX_COUNT]);
+  //     strip.show();
+  //     delay_count++;
+  //   }
+  // }
 
   //Clear each line's internal state. Reset to reflect the data in a single API call.
   if(getting_live_trains){
@@ -456,8 +462,7 @@ void loop() {
   #endif
     
   // Wait set number of seconds (default 15) until next loop and API call. If strobing, waiting done already.
-  if (!strobe){
-    delay(WAIT_SEC * 1000);
-  }
+  delay(WAIT_SEC * 1000);
+
 
 }//END LOOP()

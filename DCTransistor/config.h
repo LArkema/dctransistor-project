@@ -20,16 +20,11 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "1.2.6"
+#define VERSION "2.0.0"
 
 /*
 *   USER CONFIGURATION VALUES
 */
-
-//If using own WMATA API key, enter here (can set same key for every value). Otherwise, one built into downloaded binary
-#define SECRET_WMATA_API_KEY_0 "0123456789abcdef0123456789abcdef"
-#define SECRET_WMATA_API_KEY_1 "123456789abcdef0123456789abcdef0"
-#define SECRET_WMATA_API_KEY_2 "2123456789abcdef0123456789abcdef"
 
 //Whether or not to check for automatic updates every time board powers on (turning to false may break board when web TLS certificates expire)
 #define AUTOUPDATE true
@@ -38,7 +33,8 @@
 //#define PRINT
 
 //Set wait times for different (roughly) time-based events
-#define WAIT_SEC 15 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
+#define WAIT_SEC 1 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)
+#define CYCLES_AT_END 120 //Set high so that it doesn't overwrite trains at start of opp. direction. Number of cycles to keep LED for last train on after arrival
 #define SPECIAL_TRAIN_CHECK_HOURS 1 //Number of hours to see if there is a new TrainID for special train (updates every day or so)
 #define UPDATE_CHECK_HOURS 24 //Number of hours to see if new board update
 
@@ -80,7 +76,6 @@ const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HE
 
 
 
-
 /*
 *   DEBUG CONFIGURATION VALUES
 */
@@ -94,10 +89,19 @@ const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HE
 *   OCCASIONALLY CHANGING VALUES
 */
 
+// VERSION 1.0 / API DATA SOURCE VALUES
+
+// #define SECRET_WMATA_API_KEY_0 "0123456789abcdef0123456789abcdef"
+// #define SECRET_WMATA_API_KEY_1 "123456789abcdef0123456789abcdef0"
+// #define SECRET_WMATA_API_KEY_2 "2123456789abcdef0123456789abcdef"
+// #define DATA_SOURCE_FINGERPRINT "99 E2 96 23 71 DD 13 88 D0 5F 0B 72 2C FA 69 87 7A 8C 1F 40"
+// #define DATA_SOURCE_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
+
+
 //Web server certificate SHA1 fingerprints for TLS connections. Updated daily by update-fingerprints action
-#define GITHUB_COM_FINGERPRINT "E7 03 5B CC 1C 18 77 1F 79 2F 90 86 6B 6C 1D F8 DF AA BD C0"
-#define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "97 D8 C5 70 0F 12 24 6C 88 BC FA 06 7E 8C A7 4D A8 62 67 28"
-#define API_WMATA_COM_FINGERPRINT "99 E2 96 23 71 DD 13 88 D0 5F 0B 72 2C FA 69 87 7A 8C 1F 40"
+#define GITHUB_COM_FINGERPRINT "A3 B5 9E 5F E8 84 EE 1F 34 D9 8E EF 85 8E 3F B6 62 AC 10 4A"
+#define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "A1 46 14 C7 2A 1D 52 79 F6 AA 2B B2 C5 0A 3B D3 F5 02 06 75"
+#define DATA_SOURCE_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
 #define GIS_WMATA_COM_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
 #define GISSERVICES_WMATA_COM_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
 
@@ -115,12 +119,12 @@ const int github_num_headers = 1;
 #define UPDATE_BIN_URL "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor.bin.gz"
 #define UPDATE_HOST "raw.githubusercontent.com"
 #define GITHUB_HOST "github.com"
-#define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
+#define DATA_SOURCE_ENDPOINT "https://gisservices.wmata.com/gisservices/rest/services/Public/TRAIN_LOC_WMS_PUB/MapServer/2/query?f=json&where=TRACKLINE%20%3C%3E%20%27Non-revenue%27%20and%20TRACKLINE%20is%20not%20null&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*"
 #define GIS_CONFIG_ENDPOINT "https://gis.wmata.com/live/appconfig.json"
 #define GIS_SPECIAL_TRAIN_ENDPOINT "https://gis.wmata.com/proxy/proxy.ashx?https://gispro.wmata.com/RpmSpecialTrains/api/SpcialTrain"
 #define GIS_TRAIN_LOC_ENDPOINT "https://gisservices.wmata.com/gisservices/rest/services/Public/TRAIN_LOC_WMS_PUB/MapServer/2/query?f=json&where=TRACKLINE%20%3C%3E%20%27Non-revenue%27%20and%20TRACKLINE%20is%20not%20null&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*"
 #define HTTPS_PORT 443
-#define HTTPS_PORT 443
+
 
 //Frequency for sending debug messages from ESP8266 chip to computer
 #define BAUD_RATE 9600
@@ -154,43 +158,85 @@ See misc_commands.sh for how each array was created from WMATA's information
 
 #define NUM_LINES 6
 
-//Red Line
-#define NUM_RD_STATIONS 27
-const uint16_t rstations_0[NUM_RD_STATIONS] = {7, 32, 53, 62, 80, 95, 109, 126, 133, 142, 154, 164, 179, 190, 203, 467, 477, 485, 496, 513, 527, 548, 571, 591, 611, 629, 652};
-const uint16_t rstations_1[NUM_RD_STATIONS] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686, 677, 667, 661, 389, 378, 363, 356, 346, 336, 326, 309, 294, 278, 260, 251, 232, 210};
-
-//Blue Line
+// Set number of stations per line
+#define NUM_RD_STATIONS 23 //27 - STATION CLOSURES
 #define NUM_BL_STATIONS 28
-const uint16_t bstations_0[NUM_BL_STATIONS] = {2604, 2634, 969, 976, 991, 1010, 1024, 1036, 1052, 1070, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
-const uint16_t bstations_1[NUM_BL_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 1265, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 2709, 2679};
-
-//Orange line
 #define NUM_OR_STATIONS 26
-const uint16_t ostations_0[NUM_OR_STATIONS] = {2774, 2796, 2817, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 1475, 1487, 1500, 1522, 1542};
-const uint16_t ostations_1[NUM_OR_STATIONS] = {1711, 1692, 1670, 1657, 1643, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 2976, 2954, 2933};
-
-//Silver Line
 #define NUM_SV_STATIONS 34
-const uint16_t sstations_0[NUM_SV_STATIONS] = {3523, 3544, 3577, 3594, 3612, 3627, 3155, 3214, 3221, 3232, 3238, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
-const uint16_t sstations_1[NUM_SV_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 3377, 3370, 3359, 3352, 3290, 3741, 3724, 3706, 3689, 3657, 3637};
-
-//Yellow Line   - add Shaw in otherwise disappears at Mt. Vernon with circuit ID jump
-#define NUM_YL_STATIONS 14               // !! PENTAGON & L'ENFANT STATION INDEXES AND BRIDGE CIRCUITS ARE HARDCODED IN setTrainState !!
-const uint16_t ystations_0[NUM_YL_STATIONS] = {944, 955, 969, 976, 991, 1010, 1024, 1036, 1052, 2231, 2241, 2246, 1753, 1764};
-const uint16_t ystations_1[NUM_YL_STATIONS] = {1923, 1911, 1899, 2376, 2364, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 1148, 1137};
-
-//Green Line
+#define NUM_YL_STATIONS 13  
 #define NUM_GN_STATIONS 21
-const uint16_t gstations_0[NUM_GN_STATIONS] = {2118, 2136, 2154, 2170, 2183, 2199, 2208, 2219, 2231, 2241, 2246, 1753, 1764, 1773, 1782, 1796, 1809, 1833, 1850, 1871, 1894};
-const uint16_t gstations_1[NUM_GN_STATIONS] = {2055, 2030, 2009, 1992, 1971, 1956, 1942, 1932, 1923, 1911, 1899, 2376, 2364, 2352, 2342, 2333, 2317, 2303, 2291, 2272, 2255};
+
+// Station Codes for each station on each line. Code is prefixed in "TRKID" response from GIS Server.
+
+//Exceptions: "B99" - Map to NoMa (B35)
+const char* rstation_codes[NUM_RD_STATIONS] = {"A15", "A14", "A13", "A12", "A11", "A10", "A09", "A08", "A07", "A06", "A05", "A04", "A03", "A02", "A01", "B01", "B02", "B03", "B35", "B04", "B05", "B06", "B07"}; //, "B08", "B09", "B10", "B11"};
+#define RD_END_TRK_0 382
+#define RD_END_TRK_1 942
+
+//Exceptions: "J01 & C98 - Van Dorn (J02), C97 - King St. (C13), D98 - Benning Road (G01)"
+const char* bstation_codes[NUM_BL_STATIONS] = {"J03", "J02", "C13", "C12", "C11", "C10", "C09", "C08", "C07", "C06", "C05", "C04", "C03", "C02", "C01", "D01", "D02", "D03", "D04", "D05", "D06", "D07", "D08", "G01", "G02", "G03", "G04", "G05"};
+#define BL_END_TRK_0 623
+#define BL_END_TRK_1 881
+
+//Exceptions: "K98 - West Falls Church (K06), D98 - Minnesota Ave (D09)"
+const char* ostation_codes[NUM_OR_STATIONS] = {"K08", "K07", "K06", "K05", "K04", "K03", "K02", "K01", "C05", "C04", "C03", "C02", "C01", "D01", "D02", "D03", "D04", "D05", "D06", "D07", "D08", "D09", "D10", "D11", "D12", "D13"};
+#define OR_END_TRK_0 594
+#define OR_END_TRK_1 783
+
+//Exceptions: "N05, N98A & N98B, N98, N96, N97, N96, N94, N95, N94, N93, N92, N91, K98 - McLean (N01), D98"
+const char* sstation_codes[NUM_SV_STATIONS] = {"N12", "N11", "N10", "N09", "N08", "N07", "N06", "N04", "N03", "N02", "N01", "K05", "K04", "K03", "K02", "K01", "C05", "C04", "C03", "C02", "C01", "D01", "D02", "D03", "D04", "D05", "D06", "D07", "D08", "G01", "G02", "G03", "G04", "G05"};
+#define SV_END_TRK_0 623
+#define SV_END_TRK_1 1664
+
+//Exceptions: "C97 - King St. (C13)"
+const char* ystations_codes[NUM_YL_STATIONS] = {"C15", "C14", "C13", "C12", "C11", "C10", "C09", "C08", "C07", "F03", "F02", "F01", "E01"};
+#define YL_END_TRK_0 37
+#define YL_END_TRK_1 623
+
+// No exceptions
+const char* gstation_codes[NUM_GN_STATIONS] = {"F11", "F10", "F09", "F08", "F07", "F06", "F05", "F04", "F03", "F02", "F01", "E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"};
+#define GN_END_TRK_0 662
+#define GN_END_TRK_1 540
+
+/*
+*
+* VERSION 1.0 TRACK CIRCUIT IDS
+*
+*/
+
+//Red Line
+// const uint16_t rstations_0[NUM_RD_STATIONS] = {7, 32, 53, 62, 80, 95, 109, 126, 133, 142, 154, 164, 179, 190, 203, 467, 477, 485, 496, 513, 527, 548, 571, 591, 611, 629, 652};
+// const uint16_t rstations_1[NUM_RD_STATIONS] = {868, 846, 828, 809, 785, 757, 731, 717, 700, 686, 677, 667, 661, 389, 378, 363, 356, 346, 336, 326, 309, 294, 278, 260, 251, 232, 210};
+
+// //Blue Line
+// const uint16_t bstations_0[NUM_BL_STATIONS] = {2604, 2634, 969, 976, 991, 1010, 1024, 1036, 1052, 1070, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
+// const uint16_t bstations_1[NUM_BL_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 1265, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 2709, 2679};
+
+// //Orange line
+// const uint16_t ostations_0[NUM_OR_STATIONS] = {2774, 2796, 2817, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 1475, 1487, 1500, 1522, 1542};
+// const uint16_t ostations_1[NUM_OR_STATIONS] = {1711, 1692, 1670, 1657, 1643, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 2976, 2954, 2933};
+
+// //Silver Line
+// const uint16_t sstations_0[NUM_SV_STATIONS] = {3523, 3544, 3577, 3594, 3612, 3627, 3155, 3214, 3221, 3232, 3238, 2844, 2870, 2886, 2898, 2911, 1092, 1105, 1117, 1126, 1135, 1384, 1393, 1400, 1406, 1418, 1424, 1436, 1443, 2420, 2434, 2449, 2469, 2487};
+// const uint16_t sstations_1[NUM_SV_STATIONS] = {2574, 2557, 2537, 2521, 2506, 1618, 1610, 1598, 1590, 1575, 1568, 1559, 1549, 1330, 1323, 1310, 1298, 1285, 3061, 3048, 3037, 3023, 3001, 3377, 3370, 3359, 3352, 3290, 3741, 3724, 3706, 3689, 3657, 3637};
+
+// //Yellow Line
+//              // !! PENTAGON & L'ENFANT STATION INDEXES AND BRIDGE CIRCUITS ARE HARDCODED IN setTrainState !!
+// const uint16_t ystations_0[NUM_YL_STATIONS] = {944, 955, 969, 976, 991, 1010, 1024, 1036, 1052, 2231, 2241, 2246, 1753, 1764};
+// const uint16_t ystations_1[NUM_YL_STATIONS] = {1923, 1911, 1899, 2376, 2364, 1246, 1230, 1217, 1204, 1187, 1170, 1162, 1148, 1137};
+
+// //Green Line
+// const uint16_t gstations_0[NUM_GN_STATIONS] = {2118, 2136, 2154, 2170, 2183, 2199, 2208, 2219, 2231, 2241, 2246, 1753, 1764, 1773, 1782, 1796, 1809, 1833, 1850, 1871, 1894};
+// const uint16_t gstations_1[NUM_GN_STATIONS] = {2055, 2030, 2009, 1992, 1971, 1956, 1942, 1932, 1923, 1911, 1899, 2376, 2364, 2352, 2342, 2333, 2317, 2303, 2291, 2272, 2255};
+
 
 //LED arrays map each line's stations, in the same order as stations_0, to the index of that station in the continuous "string" of LEDs.
 //See dctransistor.com/documentation for a reference diagram
-const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
+const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}; //, 23, 24, 25, 26};
 const uint8_t bl_led_array[NUM_BL_STATIONS] = {101, 100, 97, 96, 95, 94, 93, 92, 91, 90, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
 const uint8_t or_led_array[NUM_OR_STATIONS] = {87, 88, 89, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53};
 const uint8_t sv_led_array[NUM_SV_STATIONS] = {86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
-const uint8_t yl_led_array[NUM_YL_STATIONS] = {99, 98, 97, 96, 95, 94, 93, 92, 91, 39, 38, 37, 36, 35};
+const uint8_t yl_led_array[NUM_YL_STATIONS] = {99, 98, 97, 96, 95, 94, 93, 92, 91, 39, 38, 37, 36};
 const uint8_t gn_led_array[NUM_GN_STATIONS] = {47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27};
 
 /*****************************/
