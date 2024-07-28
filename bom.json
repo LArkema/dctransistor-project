@@ -4,10 +4,10 @@
   "version": 1,
   "metadata": {
     "component": {
-      "bom-ref": "dctransistor-1.2.5",
+      "bom-ref": "dctransistor-1.2.8",
       "type": "device",
       "name": "DCTransistor",
-      "version": "1.2.5"
+      "version": "1.2.8"
     }
   },
   "components": [
@@ -60,11 +60,11 @@
       }
     },
     {
-      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.12.2",
+      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.12.3",
       "type": "library",
       "name": "Adafruit NeoPixel",
-      "version":  "1.12.2",
-      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.12.2",
+      "version":  "1.12.3",
+      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.12.3",
       "license": {
         "id": "LGPL-3.0",
         "url": "https://github.com/adafruit/Adafruit_NeoPixel/blob/master/COPYING"
@@ -73,11 +73,11 @@
     ],
   "dependencies": [
     {
-      "ref": "dctransistor-1.2.5",
+      "ref": "dctransistor-1.2.8",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.2",
         "pkg:github/bblanchon/ArduinoJson@7.1.0",
-        "pkg:github/adafruit/Adafruit_NeoPixel@1.12.2",
+        "pkg:github/adafruit/Adafruit_NeoPixel@1.12.3",
         "pkg:github/tzapu/WifiManager@2.0.17"
         ]
     },
