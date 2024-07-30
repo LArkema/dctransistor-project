@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "2.0.0"
+#define VERSION "2.0.1"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -94,14 +94,12 @@ const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HE
 // #define SECRET_WMATA_API_KEY_0 "0123456789abcdef0123456789abcdef"
 // #define SECRET_WMATA_API_KEY_1 "123456789abcdef0123456789abcdef0"
 // #define SECRET_WMATA_API_KEY_2 "2123456789abcdef0123456789abcdef"
-// #define DATA_SOURCE_FINGERPRINT "99 E2 96 23 71 DD 13 88 D0 5F 0B 72 2C FA 69 87 7A 8C 1F 40"
-// #define DATA_SOURCE_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
 
 
 //Web server certificate SHA1 fingerprints for TLS connections. Updated daily by update-fingerprints action
 #define GITHUB_COM_FINGERPRINT "A3 B5 9E 5F E8 84 EE 1F 34 D9 8E EF 85 8E 3F B6 62 AC 10 4A"
 #define RAW_GITHUBUSERCONTENT_COM_FINGERPRINT "A1 46 14 C7 2A 1D 52 79 F6 AA 2B B2 C5 0A 3B D3 F5 02 06 75"
-#define DATA_SOURCE_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
+#define API_WMATA_COM_FINGERPRINT "99 E2 96 23 71 DD 13 88 D0 5F 0B 72 2C FA 69 87 7A 8C 1F 40"
 #define GIS_WMATA_COM_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
 #define GISSERVICES_WMATA_COM_FINGERPRINT "18 8B 85 55 50 B3 DD 75 3A 5A B9 D5 E4 BC E4 07 4D D9 E1 48"
 
@@ -119,12 +117,19 @@ const int github_num_headers = 1;
 #define UPDATE_BIN_URL "https://raw.githubusercontent.com/LArkema/dctransistor-project/main/dctransistor.bin.gz"
 #define UPDATE_HOST "raw.githubusercontent.com"
 #define GITHUB_HOST "github.com"
-#define DATA_SOURCE_ENDPOINT "https://gisservices.wmata.com/gisservices/rest/services/Public/TRAIN_LOC_WMS_PUB/MapServer/2/query?f=json&where=TRACKLINE%20%3C%3E%20%27Non-revenue%27%20and%20TRACKLINE%20is%20not%20null&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*"
+
+#define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
 #define GIS_CONFIG_ENDPOINT "https://gis.wmata.com/live/appconfig.json"
 #define GIS_SPECIAL_TRAIN_ENDPOINT "https://gis.wmata.com/proxy/proxy.ashx?https://gispro.wmata.com/RpmSpecialTrains/api/SpcialTrain"
 #define GIS_TRAIN_LOC_ENDPOINT "https://gisservices.wmata.com/gisservices/rest/services/Public/TRAIN_LOC_WMS_PUB/MapServer/2/query?f=json&where=TRACKLINE%20%3C%3E%20%27Non-revenue%27%20and%20TRACKLINE%20is%20not%20null&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*"
 #define HTTPS_PORT 443
 
+/*
+* REQUIRED TO SET TO CHOOSE BETWEEN DATA SOURCES
+*/
+
+#define DATA_SOURCE_ENDPOINT GIS_TRAIN_LOC_ENDPOINT
+#define DATA_SOURCE_FINGERPRINT GISSERVICES_WMATA_COM_FINGERPRINT
 
 //Frequency for sending debug messages from ESP8266 chip to computer
 #define BAUD_RATE 9600

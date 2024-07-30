@@ -462,7 +462,7 @@ void loop() {
   #endif
     
   // Wait set number of seconds (default 15) until next loop and API call. If strobing, waiting done already.
-  delay(WAIT_SEC * 1000);
+  //delay(WAIT_SEC * 1000);
 
 
 }//END LOOP()
