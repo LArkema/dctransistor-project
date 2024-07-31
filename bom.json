@@ -52,7 +52,7 @@
       "bom-ref": "pkg:github/tzapu/WiFiManager@2.0.17",
       "type": "library",
       "name": "WiFiManager",
-      "version":  "2.0.27",
+      "version":  "2.0.17",
       "url": "https://github.com/tzapu/WiFiManager/releases/tag/0.16.0",
       "license": {
         "id": "MIT",
