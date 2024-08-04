@@ -120,7 +120,7 @@ const int github_num_headers = 1;
 #define UPDATE_HOST "raw.githubusercontent.com"
 #define GITHUB_HOST "github.com"
 
-#define WMATA_ENDPOINT 
+#define WMATA_ENDPOINT "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json"
 #define GIS_CONFIG_ENDPOINT "https://gis.wmata.com/live/appconfig.json"
 #define GIS_SPECIAL_TRAIN_ENDPOINT "https://gis.wmata.com/proxy/proxy.ashx?https://gispro.wmata.com/RpmSpecialTrains/api/SpcialTrain"
 #define GIS_TRAIN_LOC_ENDPOINT "https://gisservices.wmata.com/gisservices/rest/services/Public/TRAIN_LOC_WMS_PUB/MapServer/2/query?f=json&where=TRACKLINE%20%3C%3E%20%27Non-revenue%27%20and%20TRACKLINE%20is%20not%20null&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=*"
