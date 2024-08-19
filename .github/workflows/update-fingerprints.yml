@@ -28,18 +28,19 @@ jobs:
         echo | openssl s_client -showcerts -servername $1-connect $1:443 2>/dev/null | openssl x509 -inform pem -fingerprint -sha1 | head -n 1 | cut -d '=' -f 2 | sed "s/:/ /g";
         }
       
-        WMATA_SERVER=$(grep WMATA_ENDPOINT $CONFIG_FILE | cut -d '/' -f 3)
-        UPDATE_SERVER=$(grep UPDATE_HOST $CONFIG_FILE | cut -d '"' -f 2)
-        GITHUB_SERVER=$(grep LATEST_VERSION_URL $CONFIG_FILE | cut -d '/' -f 3)
-        GIS_SERVER=$(grep GIS_CONFIG_ENDPOING $CONFIG_FILE | cut -d '/' -f 3)
-        GIS_SERVICES_SERVER=$(grep GIS_TRAIN_LOC_ENDPOINT $CONFIG_FILE | cut -d '/' -f 3)
-        
-        server_array=($DATA_SERVER $UPDATE_SERVER $GITHUB_SERVER $GIS_SERVER $GIS_SERVICES_SERVER)
-        
+        WMATA_SERVER=$(grep WMATA_ENDPOINT $CONFIG_FILE | head -n 1 | cut -d '/' -f 3)
+        UPDATE_SERVER=$(grep UPDATE_HOST $CONFIG_FILE | head -n 1 | cut -d '"' -f 2)
+        GITHUB_SERVER=$(grep LATEST_VERSION_URL $CONFIG_FILE | head -n 1 | cut -d '/' -f 3)
+        GIS_SERVER=$(grep GIS_CONFIG_ENDPOINT $CONFIG_FILE | head -n 1 | cut -d '/' -f 3)
+        GIS_SERVICES_SERVER=$(grep GIS_TRAIN_LOC_ENDPOINT $CONFIG_FILE | head -n 1 | cut -d '/' -f 3)
+
+        server_array=( $WMATA_SERVER $UPDATE_SERVER $GITHUB_SERVER $GIS_SERVER $GIS_SERVICES_SERVER )
+
         for server in ${server_array[@]}; do
+
           fingerprint_var=$(echo ${server}_fingerprint | sed 's/\./_/g' )
           fingerprint_var=${fingerprint_var^^}
-          conf_string=$(grep $fingerprint_var $CONFIG_FILE | cut -d '#' -f 2)
+          conf_string=$(grep $fingerprint_var $CONFIG_FILE | head -n 1 | cut -d '#' -f 2)
           
           cur_fingerprint=$(get_current_fingerprint $server)
           new_conf_string=$(echo -n "define ${fingerprint_var} \""${cur_fingerprint}"\"")
