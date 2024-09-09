@@ -164,7 +164,7 @@ See misc_commands.sh for how each array was created from WMATA's information
 #define NUM_LINES 6
 
 // Set number of stations per line
-#define NUM_RD_STATIONS 23 //27 - STATION CLOSURES
+#define NUM_RD_STATIONS 27
 #define NUM_BL_STATIONS 28
 #define NUM_OR_STATIONS 26
 #define NUM_SV_STATIONS 34
@@ -174,8 +174,8 @@ See misc_commands.sh for how each array was created from WMATA's information
 // Station Codes for each station on each line. Code is prefixed in "TRKID" response from GIS Server.
 
 //Exceptions: "B99" - Map to NoMa (B35)
-const char* rstation_codes[NUM_RD_STATIONS] = {"A15", "A14", "A13", "A12", "A11", "A10", "A09", "A08", "A07", "A06", "A05", "A04", "A03", "A02", "A01", "B01", "B02", "B03", "B35", "B04", "B05", "B06", "B07"}; //, "B08", "B09", "B10", "B11"};
-#define RD_END_TRK_0 382
+const char* rstation_codes[NUM_RD_STATIONS] = {"A15", "A14", "A13", "A12", "A11", "A10", "A09", "A08", "A07", "A06", "A05", "A04", "A03", "A02", "A01", "B01", "B02", "B03", "B35", "B04", "B05", "B06", "B07", "B08", "B09", "B10", "B11"};
+#define RD_END_TRK_0 719
 #define RD_END_TRK_1 942
 
 //Exceptions: "J01 & C98 - Van Dorn (J02), C97 - King St. (C13), D98 - Benning Road (G01)"
@@ -237,7 +237,7 @@ const char* gstation_codes[NUM_GN_STATIONS] = {"F11", "F10", "F09", "F08", "F07"
 
 //LED arrays map each line's stations, in the same order as stations_0, to the index of that station in the continuous "string" of LEDs.
 //See dctransistor.com/documentation for a reference diagram
-const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}; //, 23, 24, 25, 26};
+const uint8_t rd_led_array[NUM_RD_STATIONS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
 const uint8_t bl_led_array[NUM_BL_STATIONS] = {101, 100, 97, 96, 95, 94, 93, 92, 91, 90, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
 const uint8_t or_led_array[NUM_OR_STATIONS] = {87, 88, 89, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53};
 const uint8_t sv_led_array[NUM_SV_STATIONS] = {86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 52, 51, 50, 49, 48};
