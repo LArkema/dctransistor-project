@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "2.0.5"
+#define VERSION "2.0.6"
 
 /*
 *   USER CONFIGURATION VALUES
