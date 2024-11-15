@@ -38,11 +38,11 @@
        ]
     },
     {
-      "bom-ref": "pkg:github/bblanchon/ArduinoJson@7.2.0",
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@7.2.1",
       "type": "library",
       "name": "ArduinoJson",
-      "version":  "7.2.0",
-      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v7.2.0",
+      "version":  "7.2.1",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v7.2.1",
       "license": {
         "id": "MIT",
         "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
@@ -76,7 +76,7 @@
       "ref": "dctransistor-2.0.6",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.2",
-        "pkg:github/bblanchon/ArduinoJson@7.2.0",
+        "pkg:github/bblanchon/ArduinoJson@7.2.1",
         "pkg:github/adafruit/Adafruit_NeoPixel@1.12.3",
         "pkg:github/tzapu/WifiManager@2.0.17"
         ]
