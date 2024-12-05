@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "2.0.7"
+#define VERSION "2.0.8"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -62,9 +62,13 @@
 
 // Led Configuration for special promotional trains. Will only show up if campaign is active
 
+// Holidays Special Trains
+#define SPECIAL_TRAIN_HEX_COUNT 2
+const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, GN_HEX_COLOR};
+
 // 4th of July Special Trains
-#define SPECIAL_TRAIN_HEX_COUNT 3
-const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HEX_COLOR, BL_HEX_COLOR};
+// #define SPECIAL_TRAIN_HEX_COUNT 3
+// const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HEX_COLOR, BL_HEX_COLOR};
 
 // Pride Special Train
 // #define SPECIAL_TRAIN_HEX_COUNT 8
