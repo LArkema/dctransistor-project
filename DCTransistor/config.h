@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "2.0.14"
+#define VERSION "2.0.15"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -63,8 +63,8 @@
 // Led Configuration for special promotional trains. Will only show up if campaign is active
 
 // Holidays Special Trains
-#define SPECIAL_TRAIN_HEX_COUNT 2
-const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, GN_HEX_COLOR};
+// #define SPECIAL_TRAIN_HEX_COUNT 2
+// const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, GN_HEX_COLOR};
 
 // 4th of July Special Trains
 // #define SPECIAL_TRAIN_HEX_COUNT 3
@@ -75,8 +75,8 @@ const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, GN_HE
 // const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, OR_HEX_COLOR, YL_HEX_COLOR, GN_HEX_COLOR, BL_HEX_COLOR, PURPLE_HEX_COLOR, TEAL_HEX_COLOR, PINK_HEX_COLOR}; //Pride
 
 // Cherry Blossom Special Train
-// #define SPECIAL_TRAIN_HEX_COUNT 1
-// const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {CH_BLOSSOM_HEX_COLOR};
+#define SPECIAL_TRAIN_HEX_COUNT 1
+const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {CH_BLOSSOM_HEX_COLOR};
 
 
 
