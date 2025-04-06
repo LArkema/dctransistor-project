@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "2.0.15"
+#define VERSION "2.0.16"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -30,7 +30,7 @@
 #define AUTOUPDATE true
 
 //Uncomment below line to print program text output to Serial output (requires attaching board to computer via USB cable)
-//#define PRINT
+//#define PRINT true
 
 //Set wait times for different (roughly) time-based events
 #define WAIT_SEC 1 //Number of seconds to wait between requests to WMATA server (WMATA updates every ~20, per documentation)

@@ -236,7 +236,12 @@ int16_t get_special_train_id(WiFiClientSecure &client, uint16_t* special_cars, u
 
     else{
 
-      uint16_t train_id = atoi(doc["LinkTti"].as<const char*>()); /*FlawFinder: Ignore */
+      // Only process LinkTti if train value is not null.
+      const char* train_id_str = doc["LinkTti"].as<const char*>(); /*FlawFinder: Ignore */
+      int16_t train_id = -1;
+      if (train_id_str) {
+        train_id = atoi(train_id_str); /*FlawFinder: Ignore */
+      }
       const char* cars = doc["Cars"].as<const char*>();
 
       uint8_t car_match_count = 0;
