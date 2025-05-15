@@ -4,10 +4,10 @@
   "version": 1,
   "metadata": {
     "component": {
-      "bom-ref": "dctransistor-2.0.51",
+      "bom-ref": "dctransistor-2.0.17",
       "type": "device",
       "name": "DCTransistor",
-      "version": "2.0.51"
+      "version": "2.0.17"
     }
   },
   "components": [
@@ -52,7 +52,7 @@
       "bom-ref": "pkg:github/tzapu/WiFiManager@2.0.17",
       "type": "library",
       "name": "WiFiManager",
-      "version":  "2.0.51",
+      "version":  "2.0.17",
       "url": "https://github.com/tzapu/WiFiManager/releases/tag/0.16.0",
       "license": {
         "id": "MIT",
@@ -73,7 +73,7 @@
     ],
   "dependencies": [
     {
-      "ref": "dctransistor-2.0.51",
+      "ref": "dctransistor-2.0.17",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.2",
         "pkg:github/bblanchon/ArduinoJson@7.4.1",
