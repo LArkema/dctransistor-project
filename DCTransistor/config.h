@@ -6,7 +6,7 @@
 *   Followed by values that may occasionally change, but are still required
 *   Followed by required values
 *
-*   (c) Logan Arkema 2024
+*   (c) Logan Arkema 2025
 */
 
 //Include Standard and Custom libraries and classes
@@ -20,7 +20,7 @@
 #include <time.h>
 
 //Version string. Changes with every software version
-#define VERSION "2.0.62"
+#define VERSION "2.0.63"
 
 /*
 *   USER CONFIGURATION VALUES
@@ -71,12 +71,12 @@
 // const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, SV_HEX_COLOR, BL_HEX_COLOR};
 
 // Pride Special Train
-// #define SPECIAL_TRAIN_HEX_COUNT 8
-// const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, OR_HEX_COLOR, YL_HEX_COLOR, GN_HEX_COLOR, BL_HEX_COLOR, PURPLE_HEX_COLOR, TEAL_HEX_COLOR, PINK_HEX_COLOR}; //Pride
+#define SPECIAL_TRAIN_HEX_COUNT 8
+const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {RD_HEX_COLOR, OR_HEX_COLOR, YL_HEX_COLOR, GN_HEX_COLOR, BL_HEX_COLOR, PURPLE_HEX_COLOR, TEAL_HEX_COLOR, PINK_HEX_COLOR}; //Pride
 
 // Cherry Blossom Special Train
-#define SPECIAL_TRAIN_HEX_COUNT 1
-const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {CH_BLOSSOM_HEX_COLOR};
+//#define SPECIAL_TRAIN_HEX_COUNT 1
+//const uint32_t SPECIAL_TRAIN_HEX[SPECIAL_TRAIN_HEX_COUNT] = {CH_BLOSSOM_HEX_COLOR};
 
 
 
