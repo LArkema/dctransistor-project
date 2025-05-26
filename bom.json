@@ -52,8 +52,8 @@
       "bom-ref": "pkg:github/tzapu/WiFiManager@2.0.17",
       "type": "library",
       "name": "WiFiManager",
-      "version":  "2.0.62",
-      "url": "https://github.com/tzapu/WiFiManager/releases/tag/0.16.0",
+      "version":  "2.0.17",
+      "url": "https://github.com/tzapu/WiFiManager/releases/tag/2.0.17",
       "license": {
         "id": "MIT",
         "url": "https://github.com/tzapu/WiFiManager/blob/master/LICENSE"
