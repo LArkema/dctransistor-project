@@ -60,11 +60,11 @@
       }
     },
     {
-      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.14.0",
+      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.15.1",
       "type": "library",
       "name": "Adafruit NeoPixel",
-      "version":  "1.14.0",
-      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.14.0",
+      "version":  "1.15.1",
+      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.15.1",
       "license": {
         "id": "LGPL-3.0",
         "url": "https://github.com/adafruit/Adafruit_NeoPixel/blob/master/COPYING"
@@ -77,7 +77,7 @@
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.2",
         "pkg:github/bblanchon/ArduinoJson@7.4.1",
-        "pkg:github/adafruit/Adafruit_NeoPixel@1.14.0",
+        "pkg:github/adafruit/Adafruit_NeoPixel@1.15.1",
         "pkg:github/tzapu/WifiManager@2.0.17"
         ]
     },
