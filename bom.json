@@ -38,11 +38,11 @@
        ]
     },
     {
-      "bom-ref": "pkg:github/bblanchon/ArduinoJson@7.4.2",
+      "bom-ref": "pkg:github/bblanchon/ArduinoJson@7.4.3",
       "type": "library",
       "name": "ArduinoJson",
-      "version":  "7.4.2",
-      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v7.4.2",
+      "version":  "7.4.3",
+      "url": "https://github.com/bblanchon/ArduinoJson/releases/tag/v7.4.3",
       "license": {
         "id": "MIT",
         "url": "https://github.com/bblanchon/ArduinoJson/blob/6.x/LICENSE.md"
@@ -60,11 +60,11 @@
       }
     },
     {
-      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.15.2",
+      "bom-ref": "pkg:github/adafruit/Adafruit_NeoPixel@1.15.4",
       "type": "library",
       "name": "Adafruit NeoPixel",
-      "version":  "1.15.2",
-      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.15.2",
+      "version":  "1.15.4",
+      "url": "https://github.com/adafruit/Adafruit_NeoPixel/releases/tag/1.15.4",
       "license": {
         "id": "LGPL-3.0",
         "url": "https://github.com/adafruit/Adafruit_NeoPixel/blob/master/COPYING"
@@ -76,8 +76,8 @@
       "ref": "dctransistor-2.0.70",
       "dependsOn": [
         "pkg:github/esp8266/Arduino@3.1.2",
-        "pkg:github/bblanchon/ArduinoJson@7.4.2",
-        "pkg:github/adafruit/Adafruit_NeoPixel@1.15.2",
+        "pkg:github/bblanchon/ArduinoJson@7.4.3",
+        "pkg:github/adafruit/Adafruit_NeoPixel@1.15.4",
         "pkg:github/tzapu/WifiManager@2.0.17"
         ]
     },
